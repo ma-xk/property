@@ -1,103 +1,233 @@
-import Image from "next/image";
+"use client"
 
-export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
+import { useSession, signOut } from "next-auth/react"
+import { motion } from "framer-motion"
+import Link from "next/link"
+import { 
+  Home, 
+  Database, 
+  Palette, 
+  Code, 
+  Zap, 
+  User, 
+  LogOut, 
+  UserPlus,
+  LogIn
+} from "lucide-react"
+
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Dashboard } from "@/components/dashboard"
+
+const technologies = [
+  { name: "Next.js", icon: Zap, description: "React framework for production" },
+  { name: "TypeScript", icon: Code, description: "Type-safe JavaScript" },
+  { name: "Tailwind CSS", icon: Palette, description: "Utility-first CSS framework" },
+  { name: "Prisma", icon: Database, description: "Modern database toolkit" },
+  { name: "SQLite", icon: Database, description: "Lightweight database" },
+  { name: "shadcn/ui", icon: Palette, description: "Beautiful UI components" },
+  { name: "Lucide", icon: Home, description: "Beautiful icons" },
+  { name: "Framer Motion", icon: Zap, description: "Animation library" },
+]
+
+export default function HomePage() {
+  const { data: session, status } = useSession()
+
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          className="w-8 h-8 border-2 border-white border-t-transparent rounded-full"
         />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+      </div>
+    )
+  }
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  // If user is authenticated, show the dashboard
+  if (session) {
+    return (
+      <div>
+        {/* Header for authenticated users */}
+        <header className="bg-gradient-to-r from-slate-900 to-purple-900 p-6 flex justify-between items-center">
+          <motion.h1 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="text-2xl font-bold text-white"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            Property App
+          </motion.h1>
+          
+          <motion.div 
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex items-center gap-4"
           >
-            Read our docs
-          </a>
+            <div className="flex items-center gap-2 text-white">
+              <User className="h-5 w-5" />
+              <span>Welcome, {session.user?.name}</span>
+            </div>
+            <Button 
+              onClick={() => signOut()} 
+              variant="outline" 
+              className="bg-transparent border-white text-white hover:bg-white hover:text-slate-900"
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Sign Out
+            </Button>
+          </motion.div>
+        </header>
+        
+        {/* Dashboard */}
+        <Dashboard />
+      </div>
+    )
+  }
+
+  // If user is not authenticated, show the landing page
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      {/* Header */}
+      <header className="p-6 flex justify-between items-center">
+        <motion.h1 
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="text-2xl font-bold text-white"
+        >
+          Property App
+        </motion.h1>
+        
+        <motion.div 
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="flex gap-2"
+        >
+          <Link href="/auth/signin">
+            <Button variant="outline" className="bg-transparent border-white text-white hover:bg-white hover:text-slate-900">
+              <LogIn className="h-4 w-4 mr-2" />
+              Sign In
+            </Button>
+          </Link>
+          <Link href="/auth/signup">
+            <Button className="bg-white text-slate-900 hover:bg-slate-200">
+              <UserPlus className="h-4 w-4 mr-2" />
+              Sign Up
+            </Button>
+          </Link>
+        </motion.div>
+      </header>
+
+      {/* Main Content */}
+      <main className="px-6 pb-12">
+        <div className="max-w-6xl mx-auto">
+          {/* Hero Section */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-12"
+          >
+            <h2 className="text-5xl font-bold text-white mb-6">
+              Welcome to Your Property App
+            </h2>
+            <p className="text-xl text-slate-300 max-w-3xl mx-auto">
+              A modern, full-stack application built with the latest technologies. 
+              Sign up or sign in to access your property management dashboard!
+            </p>
+          </motion.div>
+
+          {/* Technology Stack */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="mb-12"
+          >
+            <h3 className="text-3xl font-bold text-white text-center mb-8">
+              Built with Modern Technologies
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {technologies.map((tech, index) => {
+                const Icon = tech.icon
+                return (
+                  <motion.div
+                    key={tech.name}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.1 * index }}
+                    whileHover={{ scale: 1.05 }}
+                    className="group"
+                  >
+                    <Card className="h-full bg-white/10 border-white/20 backdrop-blur-sm hover:bg-white/20 transition-colors">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-center gap-3">
+                          <Icon className="h-6 w-6 text-white group-hover:text-purple-300 transition-colors" />
+                          <CardTitle className="text-white">{tech.name}</CardTitle>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <CardDescription className="text-slate-300">
+                          {tech.description}
+                        </CardDescription>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                )
+              })}
+            </div>
+          </motion.div>
+
+          {/* Features Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="text-center"
+          >
+            <h3 className="text-3xl font-bold text-white mb-6">
+              What's Included
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+              <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+                <CardHeader>
+                  <Database className="h-8 w-8 text-white mx-auto mb-2" />
+                  <CardTitle className="text-white">Database Ready</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription className="text-slate-300">
+                    SQLite database with Prisma ORM for type-safe data access
+                  </CardDescription>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+                <CardHeader>
+                  <User className="h-8 w-8 text-white mx-auto mb-2" />
+                  <CardTitle className="text-white">Authentication</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription className="text-slate-300">
+                    Complete auth system with NextAuth.js for secure user management
+                  </CardDescription>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+                <CardHeader>
+                  <Palette className="h-8 w-8 text-white mx-auto mb-2" />
+                  <CardTitle className="text-white">Beautiful UI</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription className="text-slate-300">
+                    Stunning interface with shadcn/ui, Tailwind CSS, and Framer Motion
+                  </CardDescription>
+                </CardContent>
+              </Card>
+            </div>
+          </motion.div>
         </div>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
     </div>
-  );
+  )
 }
