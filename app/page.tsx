@@ -24,7 +24,7 @@ const technologies = [
   { name: "TypeScript", icon: Code, description: "Type-safe JavaScript" },
   { name: "Tailwind CSS", icon: Palette, description: "Utility-first CSS framework" },
   { name: "Prisma", icon: Database, description: "Modern database toolkit" },
-  { name: "SQLite", icon: Database, description: "Lightweight database" },
+  { name: "PostgreSQL", icon: Database, description: "Powerful relational database" },
   { name: "shadcn/ui", icon: Palette, description: "Beautiful UI components" },
   { name: "Lucide", icon: Home, description: "Beautiful icons" },
   { name: "Framer Motion", icon: Zap, description: "Animation library" },
@@ -186,7 +186,7 @@ export default function HomePage() {
             className="text-center"
           >
             <h3 className="text-3xl font-bold text-white mb-6">
-              What's Included
+              What&apos;s Included
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
               <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
@@ -196,7 +196,7 @@ export default function HomePage() {
                 </CardHeader>
                 <CardContent>
                   <CardDescription className="text-slate-300">
-                    SQLite database with Prisma ORM for type-safe data access
+                    PostgreSQL database with Prisma ORM for type-safe data access
                   </CardDescription>
                 </CardContent>
               </Card>
