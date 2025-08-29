@@ -1,510 +1,628 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { motion } from "framer-motion"
 import { 
-  ArrowLeft,
+  ChevronRight,
   MapPin,
   DollarSign,
   Calendar,
-  FileText,
   Building,
-  Users,
-  AlertTriangle,
-  Calculator,
+  Square,
+  CheckCircle,
+  XCircle,
+  Settings,
+  Trash2,
+  Edit,
   Home,
+  Users,
+  FileText,
   Landmark,
-  PiggyBank,
-  CreditCard,
-  Receipt,
-  User,
-  LogOut
+  CreditCard
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
-// This would normally come from a database
-const mockLandProperties = [
-  {
-    id: "1",
-    address: "126 5th Avenue, Madawaska, ME",
-    purchasePrice: 5000,
-    acres: 0.1,
-    zoning: "High Density Residential",
-    description: "Driveway, utilities, foundation (unknown state)",
-    financingType: "Cash",
-    financingTerms: "n/a",
-    balloonDueDate: null,
-    earnestMoney: 500,
-    titleSettlementFee: 325,
-    titleExamination: 275,
-    ownersPolicy: 100,
-    recordingFees: 24,
-    stateTax: 11,
-    eRecordingFee: 2.5,
-    propertyTaxProration: 32.03,
-    realEstateCommission: 0,
-    seller: "Mindy Braley",
-    sellerAgent: "Mindy Braley",
-    buyerAgent: "Mindy Braley",
-    titleCompany: "Gateway Title of Maine",
-    closingDate: "3/31/2025",
-    estimatedTaxes: 151.8,
-    status: "Pending",
-    image: "🏠"
-  },
-  {
-    id: "2",
-    address: "840 North Perley Brook Road, Fort Kent, ME",
-    purchasePrice: 13500,
-    acres: 11,
-    zoning: "Rural",
-    description: "Internal N Perley Brook frontage and direct ITS85 access",
-    financingType: "Cash",
-    financingTerms: "n/a",
-    balloonDueDate: null,
-    earnestMoney: 1000,
-    titleSettlementFee: 325,
-    titleExamination: 275,
-    ownersPolicy: 100,
-    recordingFees: 24,
-    stateTax: 11,
-    eRecordingFee: 2.5,
-    propertyTaxProration: 0,
-    realEstateCommission: 0,
-    seller: "Sydney Dummond",
-    sellerAgent: "Sydney Dummond",
-    buyerAgent: "Sydney Dummond",
-    titleCompany: "Gateway Title of Maine",
-    closingDate: "8/18/2025",
-    estimatedTaxes: 444,
-    status: "Pending",
-    image: "🌲"
-  },
-  {
-    id: "3",
-    address: "Lot 94 Winter Street, Madawaska, ME",
-    purchasePrice: 12500,
-    acres: 0.5,
-    zoning: "High Density Residential",
-    description: "2fr variance, dual road frontage, directly across from four seasons trail association",
-    financingType: "Cash",
-    financingTerms: "n/a",
-    balloonDueDate: null,
-    earnestMoney: 1000,
-    titleSettlementFee: 325,
-    titleExamination: 275,
-    ownersPolicy: 100,
-    recordingFees: 24,
-    stateTax: 11,
-    eRecordingFee: 2.5,
-    propertyTaxProration: 0,
-    realEstateCommission: 0,
-    seller: "Robert Kieffer",
-    sellerAgent: "Robert Kieffer",
-    buyerAgent: "Mindy Braley",
-    titleCompany: "Gateway Title of Maine",
-    closingDate: "8/20/2025",
-    estimatedTaxes: 379.5,
-    status: "Pending",
-    image: "🏘️"
-  },
-  {
-    id: "4",
-    address: "Lot 45 Winter Street, Madawaska, ME",
-    purchasePrice: 30000,
-    acres: 2,
-    zoning: "High Density Residential", 
-    description: "End of winter street across from 94, whole culdesac control",
-    financingType: "Seller Financing",
-    financingTerms: "$10K down, $20K financed at 6% interest, $250/month (P+I), 18-month term, ~$17.2K balloon at maturity",
-    balloonDueDate: "February 21, 2027",
-    earnestMoney: 0,
-    titleSettlementFee: 325,
-    titleExamination: 275,
-    ownersPolicy: 100,
-    recordingFees: 24,
-    stateTax: 11,
-    eRecordingFee: 2.5,
-    propertyTaxProration: 0,
-    realEstateCommission: 900,
-    seller: "FSBO (Joseph James Pelletier)",
-    sellerAgent: "FSBO (Joseph James Pelletier)",
-    buyerAgent: "Mindy Braley",
-    titleCompany: "Gateway Title of Maine",
-    closingDate: "8/21/2025",
-    estimatedTaxes: 391,
-    status: "Pending",
-    image: "🏞️"
-  }
-]
+interface Property {
+  id: string
+  address: string
+  name?: string
+  description?: string
+  acres?: number
+  zoning?: string
+  
+  // Purchase Information
+  purchasePrice?: number
+  earnestMoney?: number
+  closingDate?: string
+  estimatedTaxes?: number
+  
+  // Financing Details
+  financingType?: string
+  financingTerms?: string
+  balloonDueDate?: string
+  
+  // Closing Costs
+  titleSettlementFee?: number
+  titleExamination?: number
+  ownersPolicyPremium?: number
+  recordingFeesDeed?: number
+  stateTaxStamps?: number
+  eRecordingFee?: number
+  propertyTaxProration?: number
+  realEstateCommission?: number
+  
+  // People/Companies
+  seller?: string
+  sellerAgent?: string
+  buyerAgent?: string
+  titleCompany?: string
+  
+  // Legacy fields
+  type?: string
+  bedrooms?: number
+  bathrooms?: number
+  squareFeet?: number
+  rent?: number
+  deposit?: number
+  available: boolean
+  createdAt: string
+  updatedAt: string
+}
 
-export default function PropertyDetailPage() {
-  const params = useParams()
-  const router = useRouter()
+export default function PropertyDetailsPage() {
   const { data: session, status } = useSession()
-  const [property, setProperty] = useState<any>(null)
+  const router = useRouter()
+  const params = useParams()
+  const propertyId = params.id as string
+
+  const [property, setProperty] = useState<Property | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
+
+  const fetchProperty = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/properties/${propertyId}`)
+      
+      if (!response.ok) {
+        if (response.status === 404) {
+          setError("Property not found")
+        } else if (response.status === 401) {
+          router.push("/auth/signin")
+          return
+        } else {
+          throw new Error("Failed to fetch property")
+        }
+        return
+      }
+
+      const data = await response.json()
+      setProperty(data)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred")
+    } finally {
+      setLoading(false)
+    }
+  }, [propertyId, router])
 
   useEffect(() => {
-    if (params.id) {
-      const found = mockLandProperties.find(p => p.id === params.id)
-      setProperty(found)
-    }
-  }, [params.id])
+    if (status === "loading") return
 
-  if (status === "loading") {
+    if (!session) {
+      router.push("/auth/signin")
+      return
+    }
+
+    fetchProperty()
+  }, [session, status, propertyId, fetchProperty, router])
+
+  const formatCurrency = (amount?: number | null) => {
+    if (!amount) return "Not set"
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      maximumFractionDigits: 2,
+    }).format(amount)
+  }
+
+  const calculateTotal = (values: (number | null | undefined)[]): number => {
+    return values.reduce<number>((sum, val) => sum + (val || 0), 0)
+  }
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
+  }
+
+  const formatShortDate = (dateString?: string) => {
+    if (!dateString) return "Not set"
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    })
+  }
+
+  if (status === "loading" || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="w-8 h-8 border-2 border-white border-t-transparent rounded-full"
-        />
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+        <div className="text-white text-xl">Loading property details...</div>
       </div>
     )
   }
 
-  if (!session) {
-    router.push("/auth/signin")
-    return null
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <div className="max-w-7xl mx-auto p-6">
+          {/* Breadcrumbs */}
+          <nav className="flex items-center space-x-2 text-sm mb-8">
+            <button
+              onClick={() => router.push("/")}
+              className="flex items-center text-slate-300 hover:text-white transition-colors"
+            >
+              <Home className="h-4 w-4 mr-1" />
+              Dashboard
+            </button>
+            <ChevronRight className="h-4 w-4 text-slate-500" />
+            <span className="text-slate-400">Property Details</span>
+          </nav>
+          
+          <div className="flex items-center justify-center min-h-[50vh]">
+            <div className="text-center">
+              <div className="text-red-400 text-xl mb-4">{error}</div>
+              <button 
+                onClick={() => router.push("/")}
+                className="text-blue-400 hover:text-blue-300 transition-colors"
+              >
+                Return to Dashboard
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   if (!property) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
-        <div className="max-w-4xl mx-auto">
-          <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
-            <CardContent className="p-8 text-center">
-              <h1 className="text-2xl font-bold text-white mb-4">Property Not Found</h1>
-              <p className="text-slate-300 mb-6">The property you're looking for doesn't exist.</p>
-              <Button onClick={() => router.push("/")} className="bg-white text-slate-900 hover:bg-slate-200">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Dashboard
-              </Button>
-            </CardContent>
-          </Card>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <div className="max-w-7xl mx-auto p-6">
+          {/* Breadcrumbs */}
+          <nav className="flex items-center space-x-2 text-sm mb-8">
+            <button
+              onClick={() => router.push("/")}
+              className="flex items-center text-slate-300 hover:text-white transition-colors"
+            >
+              <Home className="h-4 w-4 mr-1" />
+              Dashboard
+            </button>
+            <ChevronRight className="h-4 w-4 text-slate-500" />
+            <span className="text-slate-400">Property Details</span>
+          </nav>
+          
+          <div className="flex items-center justify-center min-h-[50vh]">
+            <div className="text-center">
+              <div className="text-white text-xl mb-4">Property not found</div>
+              <button 
+                onClick={() => router.push("/")}
+                className="text-blue-400 hover:text-blue-300 transition-colors"
+              >
+                Return to Dashboard
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     )
   }
 
-  const totalClosingCosts = property.titleSettlementFee + property.titleExamination + property.ownersPolicy + 
-                           property.recordingFees + property.stateTax + property.eRecordingFee + 
-                           property.propertyTaxProration + property.realEstateCommission + property.earnestMoney
-
-  const pricePerAcre = property.acres > 0 ? Math.round(property.purchasePrice / property.acres) : 0
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      {/* Header */}
-      <header className="bg-gradient-to-r from-slate-900 to-purple-900 p-6 flex justify-between items-center">
-        <motion.h1 
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="text-2xl font-bold text-white"
+      <div className="max-w-7xl mx-auto p-6 space-y-8">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-4"
         >
-          Property App
-        </motion.h1>
-        
-        <motion.div 
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="flex items-center gap-4"
-        >
-          <div className="flex items-center gap-2 text-white">
-            <User className="h-5 w-5" />
-            <span>Welcome, {session.user?.name}</span>
-          </div>
-          <Button 
-            onClick={() => router.push("/auth/signin")} 
-            variant="outline" 
-            className="bg-transparent border-white text-white hover:bg-white hover:text-slate-900"
-          >
-            <LogOut className="h-4 w-4 mr-2" />
-            Sign Out
-          </Button>
-        </motion.div>
-      </header>
-
-      <div className="p-6">
-        <div className="max-w-6xl mx-auto">
           {/* Breadcrumbs */}
-          <motion.nav
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-6"
-          >
-            <ol className="flex items-center space-x-2 text-sm">
-              <li>
-                <button
-                  onClick={() => router.push("/")}
-                  className="text-slate-300 hover:text-white transition-colors flex items-center gap-1"
-                >
-                  <Home className="h-4 w-4" />
-                  Dashboard
-                </button>
-              </li>
-              <li className="text-slate-500">
-                <ArrowLeft className="h-4 w-4 rotate-180" />
-              </li>
-              <li className="text-white font-medium">
-                Property Details
-              </li>
-            </ol>
-          </motion.nav>
+          <nav className="flex items-center space-x-2 text-sm bg-white/5 backdrop-blur-sm rounded-lg px-4 py-2 border border-white/10">
+            <button
+              onClick={() => router.push("/")}
+              className="flex items-center text-slate-300 hover:text-white transition-colors hover:bg-white/10 rounded px-2 py-1"
+            >
+              <Home className="h-4 w-4 mr-1" />
+              Dashboard
+            </button>
+            <ChevronRight className="h-4 w-4 text-slate-500" />
+            <span className="text-white font-medium px-2 py-1">Property Details</span>
+            <ChevronRight className="h-4 w-4 text-slate-500" />
+            <span className="text-slate-300 truncate max-w-xs px-2 py-1 bg-white/5 rounded" title={property.name || property.address}>
+              {property.name || property.address}
+            </span>
+          </nav>
 
-          {/* Property Header */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-8"
-          >
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-bold text-white">
+                {property.name || "Property Details"}
+              </h1>
+              <div className="flex items-center text-slate-300 mt-2">
+                <MapPin className="h-5 w-5 mr-2" />
+                <span>{property.address}</span>
+              </div>
+            </div>
+            
+            <div className="flex gap-2">
+              <Button variant="outline" className="border-blue-400 text-blue-400 hover:bg-blue-600 hover:text-white bg-white/10 backdrop-blur-sm">
+                <Edit className="h-4 w-4 mr-2" />
+                Edit
+              </Button>
+              <Button variant="destructive">
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete
+              </Button>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Property Overview */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+        >
+          {/* Main Details */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Basic Property Information */}
             <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
               <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="text-4xl">{property.image}</div>
-                    <div>
-                      <div className="flex items-center gap-2 text-white mb-2">
-                        <MapPin className="h-5 w-5" />
-                        <h1 className="text-2xl font-bold">{property.address}</h1>
-                      </div>
-                      <p className="text-slate-300">{property.description}</p>
-                      <div className="flex items-center gap-4 mt-2">
-                        <span className="text-sm text-slate-400">Zoning:</span>
-                        <span className="text-white font-medium">{property.zoning}</span>
-                      </div>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Building className="h-5 w-5" />
+                  Property Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {property.description && (
+                  <div>
+                    <h4 className="text-white font-medium mb-2">Description</h4>
+                    <p className="text-slate-300">{property.description}</p>
+                  </div>
+                )}
+                
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="text-center">
+                    <div className="flex items-center justify-center mb-2">
+                      <Square className="h-6 w-6 text-blue-400" />
+                    </div>
+                    <div className="text-white font-semibold">
+                      {property.acres ? `${Number(property.acres)} acres` : "N/A"}
+                    </div>
+                    <div className="text-slate-400 text-sm">Size</div>
+                  </div>
+                  
+                  <div className="text-center">
+                    <div className="flex items-center justify-center mb-2">
+                      <Landmark className="h-6 w-6 text-blue-400" />
+                    </div>
+                    <div className="text-white font-semibold">
+                      {property.zoning || "N/A"}
+                    </div>
+                    <div className="text-slate-400 text-sm">Zoning</div>
+                  </div>
+                  
+                  <div className="text-center">
+                    <div className="flex items-center justify-center mb-2">
+                      <Home className="h-6 w-6 text-blue-400" />
+                    </div>
+                    <div className="text-white font-semibold">
+                      {property.type ? property.type.charAt(0).toUpperCase() + property.type.slice(1) : "Land"}
+                    </div>
+                    <div className="text-slate-400 text-sm">Type</div>
+                  </div>
+                  
+                  <div className="text-center">
+                    <div className="flex items-center justify-center mb-2">
+                      <CreditCard className="h-6 w-6 text-blue-400" />
+                    </div>
+                    <div className="text-white font-semibold">
+                      {property.financingType || "N/A"}
+                    </div>
+                    <div className="text-slate-400 text-sm">Financing</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Purchase & Financial Information */}
+            <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <DollarSign className="h-5 w-5" />
+                  Purchase Details
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <div className="text-slate-300 text-sm mb-1">Purchase Price</div>
+                    <div className="text-2xl font-bold text-white">
+                      {formatCurrency(property.purchasePrice)}
                     </div>
                   </div>
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                    property.status === "Pending" 
-                      ? "bg-yellow-500/20 text-yellow-300" 
-                      : property.status === "Closed"
-                      ? "bg-green-500/20 text-green-300"
-                      : "bg-gray-500/20 text-gray-300"
-                  }`}>
-                    {property.status}
+                  
+                  <div>
+                    <div className="text-slate-300 text-sm mb-1">Earnest Money</div>
+                    <div className="text-xl font-semibold text-white">
+                      {formatCurrency(property.earnestMoney)}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <div className="text-slate-300 text-sm mb-1">Closing Date</div>
+                    <div className="text-lg font-semibold text-slate-200">
+                      {formatShortDate(property.closingDate)}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <div className="text-slate-300 text-sm mb-1">Annual Taxes</div>
+                    <div className="text-lg font-semibold text-slate-200">
+                      {formatCurrency(property.estimatedTaxes)}
+                    </div>
+                  </div>
+                </div>
+                
+                {property.financingTerms && (
+                  <div>
+                    <div className="text-slate-300 text-sm mb-1">Financing Terms</div>
+                    <div className="text-slate-200 bg-slate-800/50 p-3 rounded-lg">
+                      {property.financingTerms}
+                    </div>
+                  </div>
+                )}
+                
+                {property.balloonDueDate && (
+                  <div>
+                    <div className="text-slate-300 text-sm mb-1">Balloon Payment Due</div>
+                    <div className="text-lg font-semibold text-orange-300">
+                      {formatShortDate(property.balloonDueDate)}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Closing Costs */}
+            <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <FileText className="h-5 w-5" />
+                  Closing Costs
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                  {[
+                    { label: "Title Settlement", value: property.titleSettlementFee },
+                    { label: "Title Examination", value: property.titleExamination },
+                    { label: "Owner's Policy", value: property.ownersPolicyPremium },
+                    { label: "Recording Fees", value: property.recordingFeesDeed },
+                    { label: "State Tax/Stamps", value: property.stateTaxStamps },
+                    { label: "E-Recording", value: property.eRecordingFee },
+                    { label: "Tax Proration", value: property.propertyTaxProration },
+                    { label: "RE Commission", value: property.realEstateCommission },
+                  ].map((item, index) => (
+                    <div key={index} className="flex justify-between items-center p-2 bg-slate-800/30 rounded">
+                      <span className="text-slate-300">{item.label}</span>
+                      <span className="text-white font-medium">{formatCurrency(item.value)}</span>
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="mt-4 pt-4 border-t border-slate-600">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-300 font-medium">Total Closing Costs</span>
+                    <span className="text-white font-bold text-lg">
+                      {formatCurrency(calculateTotal([
+                        property.titleSettlementFee,
+                        property.titleExamination,
+                        property.ownersPolicyPremium,
+                        property.recordingFeesDeed,
+                        property.stateTaxStamps,
+                        property.eRecordingFee,
+                        property.propertyTaxProration,
+                        property.realEstateCommission
+                      ]))}
+                    </span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* People & Companies */}
+            <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  People & Companies
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {[
+                    { label: "Seller", value: property.seller },
+                    { label: "Seller Agent", value: property.sellerAgent },
+                    { label: "Buyer Agent", value: property.buyerAgent },
+                    { label: "Title Company", value: property.titleCompany },
+                  ].map((item, index) => (
+                    <div key={index} className="space-y-1">
+                      <div className="text-slate-300 text-sm">{item.label}</div>
+                      <div className="text-white">{item.value || "Not specified"}</div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Availability Status */}
+            <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="text-white text-lg">Status</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className={`flex items-center gap-2 p-3 rounded-lg ${
+                  property.available 
+                    ? 'bg-green-500/20 text-green-300' 
+                    : 'bg-red-500/20 text-red-300'
+                }`}>
+                  {property.available ? (
+                    <CheckCircle className="h-5 w-5" />
+                  ) : (
+                    <XCircle className="h-5 w-5" />
+                  )}
+                  <span className="font-medium">
+                    {property.available ? 'Available for Rent' : 'Currently Occupied'}
                   </span>
                 </div>
-              </CardHeader>
-            </Card>
-          </motion.div>
-
-          {/* Key Metrics */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
-          >
-            <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-white text-sm font-medium">Purchase Price</CardTitle>
-                  <DollarSign className="h-4 w-4 text-white" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-white">${property.purchasePrice.toLocaleString()}</div>
-                <p className="text-slate-300 text-sm">${pricePerAcre.toLocaleString()}/acre</p>
               </CardContent>
             </Card>
 
+            {/* Property Timeline */}
             <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-white text-sm font-medium">Acreage</CardTitle>
-                  <Landmark className="h-4 w-4 text-white" />
-                </div>
+              <CardHeader>
+                <CardTitle className="text-white text-lg flex items-center gap-2">
+                  <Calendar className="h-5 w-5" />
+                  Timeline
+                </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-white">{property.acres}</div>
-                <p className="text-slate-300 text-sm">Total acres</p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-white text-sm font-medium">Closing Date</CardTitle>
-                  <Calendar className="h-4 w-4 text-white" />
+              <CardContent className="space-y-3">
+                <div>
+                  <div className="text-slate-300 text-sm">Added to portfolio</div>
+                  <div className="text-white font-medium">
+                    {formatDate(property.createdAt)}
+                  </div>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-white">{property.closingDate}</div>
-                <p className="text-slate-300 text-sm">Scheduled closing</p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-white text-sm font-medium">Annual Taxes</CardTitle>
-                  <Receipt className="h-4 w-4 text-white" />
+                
+                <div>
+                  <div className="text-slate-300 text-sm">Last updated</div>
+                  <div className="text-white font-medium">
+                    {formatDate(property.updatedAt)}
+                  </div>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-white">${property.estimatedTaxes}</div>
-                <p className="text-slate-300 text-sm">Estimated yearly</p>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Financial Details */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-            >
-              <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle className="text-white flex items-center gap-2">
-                    <Calculator className="h-5 w-5" />
-                    Financial Breakdown
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-slate-300">Purchase Price</span>
-                      <span className="text-white font-semibold">${property.purchasePrice.toLocaleString()}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-300">Earnest Money</span>
-                      <span className="text-white">${property.earnestMoney.toLocaleString()}</span>
-                    </div>
-                    <div className="border-t border-white/10 pt-3">
-                      <h4 className="text-white font-medium mb-2">Closing Costs</h4>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span className="text-slate-300">Title Settlement Fee</span>
-                          <span className="text-white">${property.titleSettlementFee}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-slate-300">Title Examination</span>
-                          <span className="text-white">${property.titleExamination}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-slate-300">Owner's Policy Premium</span>
-                          <span className="text-white">${property.ownersPolicy}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-slate-300">Recording Fees</span>
-                          <span className="text-white">${property.recordingFees}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-slate-300">State Tax/Stamps</span>
-                          <span className="text-white">${property.stateTax}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-slate-300">E-Recording Fee</span>
-                          <span className="text-white">${property.eRecordingFee}</span>
-                        </div>
-                        {property.propertyTaxProration > 0 && (
-                          <div className="flex justify-between">
-                            <span className="text-slate-300">Property Tax Proration</span>
-                            <span className="text-white">${property.propertyTaxProration}</span>
-                          </div>
-                        )}
-                        {property.realEstateCommission > 0 && (
-                          <div className="flex justify-between">
-                            <span className="text-slate-300">Real Estate Commission</span>
-                            <span className="text-white">${property.realEstateCommission}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    <div className="border-t border-white/10 pt-3">
-                      <div className="flex justify-between text-lg">
-                        <span className="text-white font-medium">Total Closing Costs</span>
-                        <span className="text-white font-bold">${totalClosingCosts.toLocaleString()}</span>
-                      </div>
-                    </div>
-                    <div className="border-t border-white/10 pt-3">
-                      <div className="flex justify-between text-xl">
-                        <span className="text-white font-bold">Total Investment</span>
-                        <span className="text-white font-bold">${(property.purchasePrice + totalClosingCosts).toLocaleString()}</span>
-                      </div>
+                
+                {property.closingDate && (
+                  <div>
+                    <div className="text-slate-300 text-sm">Closing date</div>
+                    <div className="text-white font-medium">
+                      {formatDate(property.closingDate)}
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            </motion.div>
+                )}
+              </CardContent>
+            </Card>
 
-            {/* Financing & People */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="space-y-6"
-            >
-              {/* Financing Details */}
-              <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle className="text-white flex items-center gap-2">
-                    <CreditCard className="h-5 w-5" />
-                    Financing Details
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-3">
+            {/* Investment Summary */}
+            <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="text-white text-lg">Investment Summary</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-slate-300 text-sm">Purchase Price</span>
+                    <span className="text-white font-medium">{formatCurrency(property.purchasePrice)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-300 text-sm">Closing Costs</span>
+                    <span className="text-white font-medium">
+                      {formatCurrency(calculateTotal([
+                        property.titleSettlementFee,
+                        property.titleExamination,
+                        property.ownersPolicyPremium,
+                        property.recordingFeesDeed,
+                        property.stateTaxStamps,
+                        property.eRecordingFee,
+                        property.propertyTaxProration,
+                        property.realEstateCommission
+                      ]))}
+                    </span>
+                  </div>
+                  <div className="border-t border-slate-600 pt-2">
                     <div className="flex justify-between">
-                      <span className="text-slate-300">Financing Type</span>
-                      <span className="text-white font-semibold">{property.financingType}</span>
+                      <span className="text-white font-medium">Total Investment</span>
+                      <span className="text-white font-bold">
+                        {formatCurrency((property.purchasePrice || 0) + calculateTotal([
+                          property.titleSettlementFee,
+                          property.titleExamination,
+                          property.ownersPolicyPremium,
+                          property.recordingFeesDeed,
+                          property.stateTaxStamps,
+                          property.eRecordingFee,
+                          property.propertyTaxProration,
+                          property.realEstateCommission
+                        ]))}
+                      </span>
                     </div>
-                    <div>
-                      <span className="text-slate-300">Terms</span>
-                      <p className="text-white mt-1">{property.financingTerms}</p>
-                    </div>
-                    {property.balloonDueDate && (
-                      <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3">
-                        <div className="flex items-center gap-2 text-yellow-300">
-                          <AlertTriangle className="h-4 w-4" />
-                          <span className="font-medium">Balloon Payment Due</span>
-                        </div>
-                        <p className="text-yellow-200 mt-1">{property.balloonDueDate}</p>
-                      </div>
-                    )}
                   </div>
-                </CardContent>
-              </Card>
+                  
+                  {property.acres && property.purchasePrice && (
+                    <div className="flex justify-between">
+                      <span className="text-slate-300 text-sm">Price per Acre</span>
+                      <span className="text-white font-medium">
+                        {formatCurrency(Number(property.purchasePrice) / Number(property.acres))}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
 
-              {/* People & Companies */}
-              <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle className="text-white flex items-center gap-2">
-                    <Users className="h-5 w-5" />
-                    People & Companies
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-3">
-                    <div>
-                      <span className="text-slate-300">Seller</span>
-                      <p className="text-white">{property.seller}</p>
-                    </div>
-                    <div>
-                      <span className="text-slate-300">Seller Agent</span>
-                      <p className="text-white">{property.sellerAgent}</p>
-                    </div>
-                    <div>
-                      <span className="text-slate-300">Buyer Agent</span>
-                      <p className="text-white">{property.buyerAgent}</p>
-                    </div>
-                    <div>
-                      <span className="text-slate-300">Title Company</span>
-                      <p className="text-white">{property.titleCompany}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
+            {/* Quick Actions */}
+            <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="text-white text-lg">Quick Actions</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Button 
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                  onClick={() => {
+                    // TODO: Implement edit functionality
+                    console.log("Edit property")
+                  }}
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit Property
+                </Button>
+                
+                <Button 
+                  variant="outline"
+                  className="w-full border-gray-400 text-gray-700 hover:bg-gray-100 bg-white/90 backdrop-blur-sm"
+                  onClick={() => {
+                    // TODO: Toggle availability
+                    console.log("Toggle availability")
+                  }}
+                >
+                  <Settings className="h-4 w-4 mr-2" />
+                  {property.available ? 'Mark as Occupied' : 'Mark as Available'}
+                </Button>
+              </CardContent>
+            </Card>
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   )

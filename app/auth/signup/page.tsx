@@ -67,7 +67,7 @@ export default function SignUpPage() {
         const data = await response.json()
         setError(data.error || "Registration failed")
       }
-    } catch (error) {
+    } catch {
       setError("An error occurred. Please try again.")
     } finally {
       setIsLoading(false)
@@ -174,7 +174,7 @@ export default function SignUpPage() {
                   {error}
                 </motion.div>
               )}
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button type="submit" className="w-full bg-blue-600 text-white hover:bg-blue-700" disabled={isLoading}>
                 {isLoading ? "Creating account..." : "Create account"}
               </Button>
             </form>

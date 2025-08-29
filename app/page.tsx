@@ -17,7 +17,7 @@ import {
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Dashboard } from "@/components/dashboard"
+import { PropertiesDashboard } from "@/components/properties-dashboard"
 
 const technologies = [
   { name: "Next.js", icon: Zap, description: "React framework for production" },
@@ -80,7 +80,7 @@ export default function HomePage() {
         </header>
         
         {/* Dashboard */}
-        <Dashboard />
+        <PropertiesDashboard />
       </div>
     )
   }

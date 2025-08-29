@@ -3,23 +3,18 @@
 import { motion } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { 
-  Home, 
   Plus, 
   TrendingUp, 
   DollarSign, 
-  Users, 
-  Calendar,
   Settings,
   Bell,
   Search,
   MapPin,
-  Bed,
-  Bath,
   Square
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 
 const mockLandProperties = [
@@ -145,8 +140,8 @@ export function Dashboard() {
   const totalAcreage = mockLandProperties.reduce((sum, p) => sum + p.acres, 0)
   const totalInvestment = mockLandProperties.reduce((sum, p) => sum + p.purchasePrice, 0)
   const averagePricePerAcre = totalAcreage > 0 ? Math.round(totalInvestment / totalAcreage) : 0
-  const pendingClosings = mockLandProperties.filter(p => p.status === "Pending").length
-  const financed = mockLandProperties.filter(p => p.financingType === "Seller Financing").length
+  // const pendingClosings = mockLandProperties.filter(p => p.status === "Pending").length
+  // const financed = mockLandProperties.filter(p => p.financingType === "Seller Financing").length
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
@@ -304,7 +299,7 @@ export function Dashboard() {
                         </div>
                         <div>
                           <span className="text-slate-400">Acreage:</span>
-                          <div className="text-white font-semibold">{property.acres} acres</div>
+                          <div className="text-white font-semibold">{Number(property.acres)} acres</div>
                         </div>
                       </div>
                       

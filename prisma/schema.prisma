@@ -38,16 +38,17 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String     @id @default(cuid())
   name          String?
-  email         String    @unique
+  email         String     @unique
   emailVerified DateTime?
   image         String?
   password      String?
   accounts      Account[]
   sessions      Session[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  properties    Property[]
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 }
 
 model VerificationToken {
@@ -56,4 +57,59 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model Property {
+  id          String   @id @default(cuid())
+  address     String   // Required field
+  
+  // Basic Property Info
+  name        String?  // Optional: Property name/title
+  description String?  // Optional: Property description
+  acres       Decimal? // Property size in acres
+  zoning      String?  // Zoning classification
+  
+  // Purchase Information
+  purchasePrice      Decimal? // Purchase price
+  earnestMoney       Decimal? // Earnest money deposit
+  closingDate        DateTime? // Actual closing date
+  estimatedTaxes     Decimal? // Annual estimated taxes
+  
+  // Financing Details
+  financingType      String?  // Cash, Seller Financing, etc.
+  financingTerms     String?  // Detailed financing terms
+  balloonDueDate     DateTime? // Balloon payment due date
+  
+  // Closing Costs
+  titleSettlementFee    Decimal? // Title settlement fee
+  titleExamination      Decimal? // Title examination cost
+  ownersPolicyPremium   Decimal? // Owner's policy premium
+  recordingFeesDeed     Decimal? // Recording fees for deed
+  stateTaxStamps        Decimal? // State tax/stamps
+  eRecordingFee         Decimal? // E-recording fee
+  propertyTaxProration  Decimal? // Property tax proration
+  realEstateCommission  Decimal? // Real estate commission
+  
+  // People/Companies Involved
+  seller          String?  // Seller name
+  sellerAgent     String?  // Seller's agent
+  buyerAgent      String?  // Buyer's agent
+  titleCompany    String?  // Title company
+  
+  // Legacy fields (keeping for backward compatibility)
+  type        String?  // Property type
+  bedrooms    Int?     // Number of bedrooms
+  bathrooms   Decimal? // Number of bathrooms
+  squareFeet  Int?     // Square footage
+  rent        Decimal? // Monthly rent amount
+  deposit     Decimal? // Security deposit
+  available   Boolean  @default(true) // Whether property is available
+  
+  // System fields
+  userId      String   // Foreign key to User
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId]) // Index for efficient user property queries
 }
