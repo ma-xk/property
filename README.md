@@ -24,14 +24,14 @@ npm install
 
 #### Install PostgreSQL (macOS)
 ```bash
-# Install PostgreSQL 15
-brew install postgresql@15
+# Install PostgreSQL 16
+brew install postgresql@16
 
 # Start PostgreSQL service
-brew services start postgresql@15
+brew services start postgresql@16
 
 # Add PostgreSQL to your PATH
-echo 'export PATH="/opt/homebrew/opt/postgresql@15/bin:$PATH"' >> ~/.zshrc
+echo 'export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"' >> ~/.zshrc
 source ~/.zshrc
 
 # Create development database
@@ -44,7 +44,7 @@ createdb property_dev
 
 ### 3. Environment Variables
 
-Create a `.env.local` file in the project root:
+Create a `.env` file in the project root:
 
 ```bash
 # Database
@@ -230,7 +230,7 @@ npx prisma migrate deploy
 
 ```bash
 # Start PostgreSQL (if not auto-starting)
-brew services start postgresql@15
+brew services start postgresql@16
 
 # Start development server
 npm run dev
