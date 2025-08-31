@@ -24,6 +24,13 @@ export async function GET(
         id,
         // Ensure user can only access their own properties
         userId: session.user.id
+      },
+      include: {
+        sellerPerson: true,
+        sellerAgentPerson: true,
+        buyerAgentPerson: true,
+        titleCompanyPerson: true,
+        place: true,
       }
     })
 
@@ -86,6 +93,13 @@ export async function PUT(
         ...body,
         // Ensure userId cannot be changed
         userId: session.user.id
+      },
+      include: {
+        sellerPerson: true,
+        sellerAgentPerson: true,
+        buyerAgentPerson: true,
+        titleCompanyPerson: true,
+        place: true,
       }
     })
 

@@ -21,7 +21,13 @@ export function ComprehensivePropertyForm({ onSuccess, onCancel }: Comprehensive
 
   const [formData, setFormData] = useState({
     // Required
-    address: "",
+    address: "", // Legacy field - will be auto-populated from separate fields
+    
+    // New separate address fields
+    streetAddress: "",
+    city: "",
+    state: "",
+    zipCode: "",
     
     // Basic Property Info
     name: "",
@@ -89,9 +95,21 @@ export function ComprehensivePropertyForm({ onSuccess, onCancel }: Comprehensive
     setError("")
 
     try {
+      // Auto-populate legacy address field from separate components
+      const fullAddress = [
+        formData.streetAddress,
+        formData.city,
+        formData.state,
+        formData.zipCode
+      ].filter(Boolean).join(', ')
+
       // Prepare data for submission, converting strings to appropriate types
       const submitData = {
-        address: formData.address,
+        address: fullAddress || formData.address, // Use constructed address or fallback
+        streetAddress: formData.streetAddress || undefined,
+        city: formData.city || undefined,
+        state: formData.state || undefined,
+        zipCode: formData.zipCode || undefined,
         name: formData.name || undefined,
         description: formData.description || undefined,
         acres: formData.acres ? parseFloat(formData.acres) : undefined,
@@ -161,16 +179,105 @@ export function ComprehensivePropertyForm({ onSuccess, onCancel }: Comprehensive
       case 0: // Basic Information
         return (
           <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="address">Property Address *</Label>
-              <Input
-                id="address"
-                name="address"
-                value={formData.address}
-                onChange={handleInputChange}
-                placeholder="123 Main St, City, State, ZIP"
-                required
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="streetAddress">Street Address *</Label>
+                <Input
+                  id="streetAddress"
+                  name="streetAddress"
+                  value={formData.streetAddress}
+                  onChange={handleInputChange}
+                  placeholder="123 Main Street"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="city">City/Town *</Label>
+                <Input
+                  id="city"
+                  name="city"
+                  value={formData.city}
+                  onChange={handleInputChange}
+                  placeholder="Stamford"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="state">State *</Label>
+                <select
+                  id="state"
+                  name="state"
+                  value={formData.state}
+                  onChange={handleInputChange}
+                  required
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <option value="">Select state</option>
+                  <option value="AL">Alabama</option>
+                  <option value="AK">Alaska</option>
+                  <option value="AZ">Arizona</option>
+                  <option value="AR">Arkansas</option>
+                  <option value="CA">California</option>
+                  <option value="CO">Colorado</option>
+                  <option value="CT">Connecticut</option>
+                  <option value="DE">Delaware</option>
+                  <option value="FL">Florida</option>
+                  <option value="GA">Georgia</option>
+                  <option value="HI">Hawaii</option>
+                  <option value="ID">Idaho</option>
+                  <option value="IL">Illinois</option>
+                  <option value="IN">Indiana</option>
+                  <option value="IA">Iowa</option>
+                  <option value="KS">Kansas</option>
+                  <option value="KY">Kentucky</option>
+                  <option value="LA">Louisiana</option>
+                  <option value="ME">Maine</option>
+                  <option value="MD">Maryland</option>
+                  <option value="MA">Massachusetts</option>
+                  <option value="MI">Michigan</option>
+                  <option value="MN">Minnesota</option>
+                  <option value="MS">Mississippi</option>
+                  <option value="MO">Missouri</option>
+                  <option value="MT">Montana</option>
+                  <option value="NE">Nebraska</option>
+                  <option value="NV">Nevada</option>
+                  <option value="NH">New Hampshire</option>
+                  <option value="NJ">New Jersey</option>
+                  <option value="NM">New Mexico</option>
+                  <option value="NY">New York</option>
+                  <option value="NC">North Carolina</option>
+                  <option value="ND">North Dakota</option>
+                  <option value="OH">Ohio</option>
+                  <option value="OK">Oklahoma</option>
+                  <option value="OR">Oregon</option>
+                  <option value="PA">Pennsylvania</option>
+                  <option value="RI">Rhode Island</option>
+                  <option value="SC">South Carolina</option>
+                  <option value="SD">South Dakota</option>
+                  <option value="TN">Tennessee</option>
+                  <option value="TX">Texas</option>
+                  <option value="UT">Utah</option>
+                  <option value="VT">Vermont</option>
+                  <option value="VA">Virginia</option>
+                  <option value="WA">Washington</option>
+                  <option value="WV">West Virginia</option>
+                  <option value="WI">Wisconsin</option>
+                  <option value="WY">Wyoming</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="zipCode">ZIP Code</Label>
+                <Input
+                  id="zipCode"
+                  name="zipCode"
+                  value={formData.zipCode}
+                  onChange={handleInputChange}
+                  placeholder="06901"
+                />
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -697,13 +804,13 @@ export function ComprehensivePropertyForm({ onSuccess, onCancel }: Comprehensive
                 <Button
                   type="button"
                   onClick={() => setActiveSection(activeSection + 1)}
-                  disabled={activeSection === 0 && !formData.address.trim()}
+                  disabled={activeSection === 0 && (!formData.streetAddress.trim() || !formData.city.trim() || !formData.state.trim())}
                   className="bg-blue-600 text-white hover:bg-blue-700"
                 >
                   Next
                 </Button>
               ) : (
-                <Button type="submit" disabled={isLoading || !formData.address.trim()} className="bg-blue-600 text-white hover:bg-blue-700">
+                <Button type="submit" disabled={isLoading || !formData.streetAddress.trim() || !formData.city.trim() || !formData.state.trim()} className="bg-blue-600 text-white hover:bg-blue-700">
                   {isLoading ? "Creating..." : "Create Property"}
                 </Button>
               )}

@@ -1,6 +1,6 @@
 "use client"
 
-import { useSession, signOut } from "next-auth/react"
+import { useSession } from "next-auth/react"
 import { motion } from "framer-motion"
 import Link from "next/link"
 import { 
@@ -9,8 +9,6 @@ import {
   Palette, 
   Code, 
   Zap, 
-  User, 
-  LogOut, 
   UserPlus,
   LogIn
 } from "lucide-react"
@@ -47,42 +45,7 @@ export default function HomePage() {
 
   // If user is authenticated, show the dashboard
   if (session) {
-    return (
-      <div>
-        {/* Header for authenticated users */}
-        <header className="bg-gradient-to-r from-slate-900 to-purple-900 p-6 flex justify-between items-center">
-          <motion.h1 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="text-2xl font-bold text-white"
-          >
-            Property App
-          </motion.h1>
-          
-          <motion.div 
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-4"
-          >
-            <div className="flex items-center gap-2 text-white">
-              <User className="h-5 w-5" />
-              <span>Welcome, {session.user?.name}</span>
-            </div>
-            <Button 
-              onClick={() => signOut()} 
-              variant="outline" 
-              className="bg-transparent border-white text-white hover:bg-white hover:text-slate-900"
-            >
-              <LogOut className="h-4 w-4 mr-2" />
-              Sign Out
-            </Button>
-          </motion.div>
-        </header>
-        
-        {/* Dashboard */}
-        <PropertiesDashboard />
-      </div>
-    )
+    return <PropertiesDashboard />
   }
 
   // If user is not authenticated, show the landing page

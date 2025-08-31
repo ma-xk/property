@@ -171,8 +171,6 @@ export default function PropertyDetailsPage() {
               <Home className="h-4 w-4 mr-1" />
               Dashboard
             </button>
-            <ChevronRight className="h-4 w-4 text-slate-500" />
-            <span className="text-slate-400">Property Details</span>
           </nav>
           
           <div className="flex items-center justify-center min-h-[50vh]">
@@ -204,8 +202,6 @@ export default function PropertyDetailsPage() {
               <Home className="h-4 w-4 mr-1" />
               Dashboard
             </button>
-            <ChevronRight className="h-4 w-4 text-slate-500" />
-            <span className="text-slate-400">Property Details</span>
           </nav>
           
           <div className="flex items-center justify-center min-h-[50vh]">
@@ -243,9 +239,7 @@ export default function PropertyDetailsPage() {
               Dashboard
             </button>
             <ChevronRight className="h-4 w-4 text-slate-500" />
-            <span className="text-white font-medium px-2 py-1">Property Details</span>
-            <ChevronRight className="h-4 w-4 text-slate-500" />
-            <span className="text-slate-300 truncate max-w-xs px-2 py-1 bg-white/5 rounded" title={property.name || property.address}>
+            <span className="text-white font-medium px-2 py-1 bg-white/5 rounded truncate max-w-xs" title={property.name || property.address}>
               {property.name || property.address}
             </span>
           </nav>

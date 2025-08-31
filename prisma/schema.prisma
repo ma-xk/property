@@ -47,6 +47,8 @@ model User {
   accounts      Account[]
   sessions      Session[]
   properties    Property[]
+  people        Person[]
+  places        Place[]
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
 }
@@ -59,9 +61,60 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+model Place {
+  id          String   @id @default(cuid())
+  name        String   // City, town, or area name
+  state       String?  // State or province
+  country     String   @default("United States")
+  description String?  // Description of the place
+  
+  // System fields
+  userId      String   // Foreign key to User (who manages this place data)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relationships
+  properties  Property[]
+  
+  @@unique([name, state, userId]) // Unique place per user
+  @@index([userId])
+}
+
+model Person {
+  id          String   @id @default(cuid())
+  name        String   // Full name
+  email       String?  // Email address
+  phone       String?  // Phone number
+  company     String?  // Company/organization
+  role        String?  // Role (e.g., "Real Estate Agent", "Seller", "Title Company")
+  notes       String?  // Additional notes
+  
+  // System fields
+  userId      String   // Foreign key to User (who manages this person data)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relationships - properties where this person is involved
+  propertiesAsSeller      Property[] @relation("PropertySeller")
+  propertiesAsSellerAgent Property[] @relation("PropertySellerAgent")
+  propertiesAsBuyerAgent  Property[] @relation("PropertyBuyerAgent")
+  propertiesAsTitleCompany Property[] @relation("PropertyTitleCompany")
+  
+  @@unique([name, userId]) // Unique person per user
+  @@index([userId])
+}
+
 model Property {
   id          String   @id @default(cuid())
-  address     String   // Required field
+  address     String   // Legacy full address field (keeping for backward compatibility)
+  
+  // Separate address components
+  streetAddress String? // Street number and name (e.g., "123 Main Street")
+  city         String?  // City/Town name (e.g., "Stamford", "Madawaska")
+  state        String?  // State abbreviation (e.g., "CT", "ME")
+  zipCode      String?  // ZIP code (e.g., "06901")
   
   // Basic Property Info
   name        String?  // Optional: Property name/title
@@ -90,11 +143,25 @@ model Property {
   propertyTaxProration  Decimal? // Property tax proration
   realEstateCommission  Decimal? // Real estate commission
   
-  // People/Companies Involved
+  // Legacy string fields (keeping for backward compatibility)
   seller          String?  // Seller name
   sellerAgent     String?  // Seller's agent
   buyerAgent      String?  // Buyer's agent
   titleCompany    String?  // Title company
+  
+  // New relationship fields (optional - can be used instead of strings)
+  sellerId        String?
+  sellerAgentId   String?
+  buyerAgentId    String?
+  titleCompanyId  String?
+  placeId         String?
+  
+  // Relationships
+  sellerPerson     Person? @relation("PropertySeller", fields: [sellerId], references: [id])
+  sellerAgentPerson Person? @relation("PropertySellerAgent", fields: [sellerAgentId], references: [id])
+  buyerAgentPerson  Person? @relation("PropertyBuyerAgent", fields: [buyerAgentId], references: [id])
+  titleCompanyPerson Person? @relation("PropertyTitleCompany", fields: [titleCompanyId], references: [id])
+  place            Place?  @relation(fields: [placeId], references: [id])
   
   // Legacy fields (keeping for backward compatibility)
   type        String?  // Property type
@@ -112,4 +179,9 @@ model Property {
   updatedAt   DateTime @updatedAt
 
   @@index([userId]) // Index for efficient user property queries
+  @@index([placeId]) // Index for place-based queries
+  @@index([sellerId]) // Index for seller-based queries
+  @@index([sellerAgentId]) // Index for agent-based queries
+  @@index([buyerAgentId]) // Index for agent-based queries
+  @@index([titleCompanyId]) // Index for title company-based queries
 }
