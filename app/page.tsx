@@ -9,6 +9,7 @@ import {
   Palette, 
   Code, 
   Zap, 
+  User,
   UserPlus,
   LogIn
 } from "lucide-react"
