@@ -152,37 +152,24 @@ export default function PropertyDetailsPage() {
 
   if (status === "loading" || loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-        <div className="text-white text-xl">Loading property details...</div>
+      <div className="flex items-center justify-center py-12">
+        <div className="text-xl">Loading property details...</div>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        <div className="max-w-7xl mx-auto p-6">
-          {/* Breadcrumbs */}
-          <nav className="flex items-center space-x-2 text-sm mb-8">
-            <button
+      <div className="space-y-8">
+        <div className="flex items-center justify-center min-h-[50vh]">
+          <div className="text-center">
+            <div className="text-destructive text-xl mb-4">{error}</div>
+            <button 
               onClick={() => router.push("/")}
-              className="flex items-center text-slate-300 hover:text-white transition-colors"
+              className="text-primary hover:text-primary/80 transition-colors"
             >
-              <Home className="h-4 w-4 mr-1" />
-              Dashboard
+              Return to Dashboard
             </button>
-          </nav>
-          
-          <div className="flex items-center justify-center min-h-[50vh]">
-            <div className="text-center">
-              <div className="text-red-400 text-xl mb-4">{error}</div>
-              <button 
-                onClick={() => router.push("/")}
-                className="text-blue-400 hover:text-blue-300 transition-colors"
-              >
-                Return to Dashboard
-              </button>
-            </div>
           </div>
         </div>
       </div>
@@ -191,29 +178,16 @@ export default function PropertyDetailsPage() {
 
   if (!property) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        <div className="max-w-7xl mx-auto p-6">
-          {/* Breadcrumbs */}
-          <nav className="flex items-center space-x-2 text-sm mb-8">
-            <button
+      <div className="space-y-8">
+        <div className="flex items-center justify-center min-h-[50vh]">
+          <div className="text-center">
+            <div className="text-xl mb-4">Property not found</div>
+            <button 
               onClick={() => router.push("/")}
-              className="flex items-center text-slate-300 hover:text-white transition-colors"
+              className="text-primary hover:text-primary/80 transition-colors"
             >
-              <Home className="h-4 w-4 mr-1" />
-              Dashboard
+              Return to Dashboard
             </button>
-          </nav>
-          
-          <div className="flex items-center justify-center min-h-[50vh]">
-            <div className="text-center">
-              <div className="text-white text-xl mb-4">Property not found</div>
-              <button 
-                onClick={() => router.push("/")}
-                className="text-blue-400 hover:text-blue-300 transition-colors"
-              >
-                Return to Dashboard
-              </button>
-            </div>
           </div>
         </div>
       </div>
@@ -221,43 +195,27 @@ export default function PropertyDetailsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      <div className="max-w-7xl mx-auto p-6 space-y-8">
+    <div className="space-y-8">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="space-y-4"
         >
-          {/* Breadcrumbs */}
-          <nav className="flex items-center space-x-2 text-sm bg-white/5 backdrop-blur-sm rounded-lg px-4 py-2 border border-white/10">
-            <button
-              onClick={() => router.push("/")}
-              className="flex items-center text-slate-300 hover:text-white transition-colors hover:bg-white/10 rounded px-2 py-1"
-            >
-              <Home className="h-4 w-4 mr-1" />
-              Dashboard
-            </button>
-            <ChevronRight className="h-4 w-4 text-slate-500" />
-            <span className="text-white font-medium px-2 py-1 bg-white/5 rounded truncate max-w-xs" title={property.name || property.address}>
-              {property.name || property.address}
-            </span>
-          </nav>
-
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-4xl font-bold text-white">
+              <h1 className="text-4xl font-bold">
                 {property.name || "Property Details"}
               </h1>
-              <div className="flex items-center text-slate-300 mt-2">
+              <div className="flex items-center text-muted-foreground mt-2">
                 <MapPin className="h-5 w-5 mr-2" />
                 <span>{property.address}</span>
               </div>
             </div>
             
             <div className="flex gap-2">
-              <Button variant="outline" className="border-blue-400 text-blue-400 hover:bg-blue-600 hover:text-white bg-white/10 backdrop-blur-sm">
+              <Button variant="outline">
                 <Edit className="h-4 w-4 mr-2" />
                 Edit
               </Button>
@@ -279,9 +237,9 @@ export default function PropertyDetailsPage() {
           {/* Main Details */}
           <div className="lg:col-span-2 space-y-6">
             {/* Basic Property Information */}
-            <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+            <Card>
               <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2">
                   <Building className="h-5 w-5" />
                   Property Information
                 </CardTitle>
@@ -289,59 +247,59 @@ export default function PropertyDetailsPage() {
               <CardContent className="space-y-4">
                 {property.description && (
                   <div>
-                    <h4 className="text-white font-medium mb-2">Description</h4>
-                    <p className="text-slate-300">{property.description}</p>
+                    <h4 className="font-medium mb-2">Description</h4>
+                    <p className="text-muted-foreground">{property.description}</p>
                   </div>
                 )}
                 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="text-center">
                     <div className="flex items-center justify-center mb-2">
-                      <Square className="h-6 w-6 text-blue-400" />
+                      <Square className="h-6 w-6 text-primary" />
                     </div>
-                    <div className="text-white font-semibold">
+                    <div className="font-semibold">
                       {property.acres ? `${Number(property.acres)} acres` : "N/A"}
                     </div>
-                    <div className="text-slate-400 text-sm">Size</div>
+                    <div className="text-muted-foreground text-sm">Size</div>
                   </div>
                   
                   <div className="text-center">
                     <div className="flex items-center justify-center mb-2">
-                      <Landmark className="h-6 w-6 text-blue-400" />
+                      <Landmark className="h-6 w-6 text-primary" />
                     </div>
-                    <div className="text-white font-semibold">
+                    <div className="font-semibold">
                       {property.zoning || "N/A"}
                     </div>
-                    <div className="text-slate-400 text-sm">Zoning</div>
+                    <div className="text-muted-foreground text-sm">Zoning</div>
                   </div>
                   
                   <div className="text-center">
                     <div className="flex items-center justify-center mb-2">
-                      <Home className="h-6 w-6 text-blue-400" />
+                      <Home className="h-6 w-6 text-primary" />
                     </div>
-                    <div className="text-white font-semibold">
+                    <div className="font-semibold">
                       {property.type ? property.type.charAt(0).toUpperCase() + property.type.slice(1) : "Land"}
                     </div>
-                    <div className="text-slate-400 text-sm">Type</div>
+                    <div className="text-muted-foreground text-sm">Type</div>
                   </div>
                   
                   <div className="text-center">
                     <div className="flex items-center justify-center mb-2">
-                      <CreditCard className="h-6 w-6 text-blue-400" />
+                      <CreditCard className="h-6 w-6 text-primary" />
                     </div>
-                    <div className="text-white font-semibold">
+                    <div className="font-semibold">
                       {property.financingType || "N/A"}
                     </div>
-                    <div className="text-slate-400 text-sm">Financing</div>
+                    <div className="text-muted-foreground text-sm">Financing</div>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             {/* Purchase & Financial Information */}
-            <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+            <Card className="">
               <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
+                <CardTitle className=" flex items-center gap-2">
                   <DollarSign className="h-5 w-5" />
                   Purchase Details
                 </CardTitle>
@@ -349,29 +307,29 @@ export default function PropertyDetailsPage() {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <div className="text-slate-300 text-sm mb-1">Purchase Price</div>
-                    <div className="text-2xl font-bold text-white">
+                    <div className="text-muted-foreground text-sm mb-1">Purchase Price</div>
+                    <div className="text-2xl font-bold ">
                       {formatCurrency(property.purchasePrice)}
                     </div>
                   </div>
                   
                   <div>
-                    <div className="text-slate-300 text-sm mb-1">Earnest Money</div>
-                    <div className="text-xl font-semibold text-white">
+                    <div className="text-muted-foreground text-sm mb-1">Earnest Money</div>
+                    <div className="text-xl font-semibold ">
                       {formatCurrency(property.earnestMoney)}
                     </div>
                   </div>
                   
                   <div>
-                    <div className="text-slate-300 text-sm mb-1">Closing Date</div>
-                    <div className="text-lg font-semibold text-slate-200">
+                    <div className="text-muted-foreground text-sm mb-1">Closing Date</div>
+                    <div className="text-lg font-semibold ">
                       {formatShortDate(property.closingDate)}
                     </div>
                   </div>
                   
                   <div>
-                    <div className="text-slate-300 text-sm mb-1">Annual Taxes</div>
-                    <div className="text-lg font-semibold text-slate-200">
+                    <div className="text-muted-foreground text-sm mb-1">Annual Taxes</div>
+                    <div className="text-lg font-semibold ">
                       {formatCurrency(property.estimatedTaxes)}
                     </div>
                   </div>
@@ -379,8 +337,8 @@ export default function PropertyDetailsPage() {
                 
                 {property.financingTerms && (
                   <div>
-                    <div className="text-slate-300 text-sm mb-1">Financing Terms</div>
-                    <div className="text-slate-200 bg-slate-800/50 p-3 rounded-lg">
+                    <div className="text-muted-foreground text-sm mb-1">Financing Terms</div>
+                    <div className="bg-muted p-3 rounded-lg">
                       {property.financingTerms}
                     </div>
                   </div>
@@ -388,8 +346,8 @@ export default function PropertyDetailsPage() {
                 
                 {property.balloonDueDate && (
                   <div>
-                    <div className="text-slate-300 text-sm mb-1">Balloon Payment Due</div>
-                    <div className="text-lg font-semibold text-orange-300">
+                    <div className="text-muted-foreground text-sm mb-1">Balloon Payment Due</div>
+                    <div className="text-lg font-semibold text-orange-600">
                       {formatShortDate(property.balloonDueDate)}
                     </div>
                   </div>
@@ -398,9 +356,9 @@ export default function PropertyDetailsPage() {
             </Card>
 
             {/* Closing Costs */}
-            <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+            <Card className="">
               <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
+                <CardTitle className=" flex items-center gap-2">
                   <FileText className="h-5 w-5" />
                   Closing Costs
                 </CardTitle>
@@ -417,17 +375,17 @@ export default function PropertyDetailsPage() {
                     { label: "Tax Proration", value: property.propertyTaxProration },
                     { label: "RE Commission", value: property.realEstateCommission },
                   ].map((item, index) => (
-                    <div key={index} className="flex justify-between items-center p-2 bg-slate-800/30 rounded">
-                      <span className="text-slate-300">{item.label}</span>
-                      <span className="text-white font-medium">{formatCurrency(item.value)}</span>
+                    <div key={index} className="flex justify-between items-center p-2 bg-muted/50 rounded">
+                      <span className="text-muted-foreground">{item.label}</span>
+                      <span className=" font-medium">{formatCurrency(item.value)}</span>
                     </div>
                   ))}
                 </div>
                 
-                <div className="mt-4 pt-4 border-t border-slate-600">
+                <div className="mt-4 pt-4 border-t border-border">
                   <div className="flex justify-between items-center">
-                    <span className="text-slate-300 font-medium">Total Closing Costs</span>
-                    <span className="text-white font-bold text-lg">
+                    <span className="text-muted-foreground font-medium">Total Closing Costs</span>
+                    <span className=" font-bold text-lg">
                       {formatCurrency(calculateTotal([
                         property.titleSettlementFee,
                         property.titleExamination,
@@ -445,9 +403,9 @@ export default function PropertyDetailsPage() {
             </Card>
 
             {/* People & Companies */}
-            <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+            <Card className="">
               <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
+                <CardTitle className=" flex items-center gap-2">
                   <Users className="h-5 w-5" />
                   People & Companies
                 </CardTitle>
@@ -461,8 +419,8 @@ export default function PropertyDetailsPage() {
                     { label: "Title Company", value: property.titleCompany },
                   ].map((item, index) => (
                     <div key={index} className="space-y-1">
-                      <div className="text-slate-300 text-sm">{item.label}</div>
-                      <div className="text-white">{item.value || "Not specified"}</div>
+                      <div className="text-muted-foreground text-sm">{item.label}</div>
+                      <div className="">{item.value || "Not specified"}</div>
                     </div>
                   ))}
                 </div>
@@ -473,9 +431,9 @@ export default function PropertyDetailsPage() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Availability Status */}
-            <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+            <Card className="">
               <CardHeader>
-                <CardTitle className="text-white text-lg">Status</CardTitle>
+                <CardTitle className=" text-lg">Status</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className={`flex items-center gap-2 p-3 rounded-lg ${
@@ -496,32 +454,32 @@ export default function PropertyDetailsPage() {
             </Card>
 
             {/* Property Timeline */}
-            <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+            <Card className="">
               <CardHeader>
-                <CardTitle className="text-white text-lg flex items-center gap-2">
+                <CardTitle className=" text-lg flex items-center gap-2">
                   <Calendar className="h-5 w-5" />
                   Timeline
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div>
-                  <div className="text-slate-300 text-sm">Added to portfolio</div>
-                  <div className="text-white font-medium">
+                  <div className="text-muted-foreground text-sm">Added to portfolio</div>
+                  <div className=" font-medium">
                     {formatDate(property.createdAt)}
                   </div>
                 </div>
                 
                 <div>
-                  <div className="text-slate-300 text-sm">Last updated</div>
-                  <div className="text-white font-medium">
+                  <div className="text-muted-foreground text-sm">Last updated</div>
+                  <div className=" font-medium">
                     {formatDate(property.updatedAt)}
                   </div>
                 </div>
                 
                 {property.closingDate && (
                   <div>
-                    <div className="text-slate-300 text-sm">Closing date</div>
-                    <div className="text-white font-medium">
+                    <div className="text-muted-foreground text-sm">Closing date</div>
+                    <div className=" font-medium">
                       {formatDate(property.closingDate)}
                     </div>
                   </div>
@@ -530,19 +488,19 @@ export default function PropertyDetailsPage() {
             </Card>
 
             {/* Investment Summary */}
-            <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+            <Card className="">
               <CardHeader>
-                <CardTitle className="text-white text-lg">Investment Summary</CardTitle>
+                <CardTitle className=" text-lg">Investment Summary</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-slate-300 text-sm">Purchase Price</span>
-                    <span className="text-white font-medium">{formatCurrency(property.purchasePrice)}</span>
+                    <span className="text-muted-foreground text-sm">Purchase Price</span>
+                    <span className=" font-medium">{formatCurrency(property.purchasePrice)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-300 text-sm">Closing Costs</span>
-                    <span className="text-white font-medium">
+                    <span className="text-muted-foreground text-sm">Closing Costs</span>
+                    <span className=" font-medium">
                       {formatCurrency(calculateTotal([
                         property.titleSettlementFee,
                         property.titleExamination,
@@ -555,10 +513,10 @@ export default function PropertyDetailsPage() {
                       ]))}
                     </span>
                   </div>
-                  <div className="border-t border-slate-600 pt-2">
+                  <div className="border-t border-border pt-2">
                     <div className="flex justify-between">
-                      <span className="text-white font-medium">Total Investment</span>
-                      <span className="text-white font-bold">
+                      <span className=" font-medium">Total Investment</span>
+                      <span className=" font-bold">
                         {formatCurrency((property.purchasePrice || 0) + calculateTotal([
                           property.titleSettlementFee,
                           property.titleExamination,
@@ -575,8 +533,8 @@ export default function PropertyDetailsPage() {
                   
                   {property.acres && property.purchasePrice && (
                     <div className="flex justify-between">
-                      <span className="text-slate-300 text-sm">Price per Acre</span>
-                      <span className="text-white font-medium">
+                      <span className="text-muted-foreground text-sm">Price per Acre</span>
+                      <span className=" font-medium">
                         {formatCurrency(Number(property.purchasePrice) / Number(property.acres))}
                       </span>
                     </div>
@@ -586,13 +544,13 @@ export default function PropertyDetailsPage() {
             </Card>
 
             {/* Quick Actions */}
-            <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+            <Card className="">
               <CardHeader>
-                <CardTitle className="text-white text-lg">Quick Actions</CardTitle>
+                <CardTitle className=" text-lg">Quick Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <Button 
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                  className="w-full bg-blue-600 hover:bg-blue-700 "
                   onClick={() => {
                     // TODO: Implement edit functionality
                     console.log("Edit property")
@@ -604,7 +562,7 @@ export default function PropertyDetailsPage() {
                 
                 <Button 
                   variant="outline"
-                  className="w-full border-gray-400 text-gray-700 hover:bg-gray-100 bg-white/90 backdrop-blur-sm"
+                  className="w-full"
                   onClick={() => {
                     // TODO: Toggle availability
                     console.log("Toggle availability")
@@ -617,7 +575,6 @@ export default function PropertyDetailsPage() {
             </Card>
           </div>
         </motion.div>
-      </div>
     </div>
   )
 }

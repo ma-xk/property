@@ -12,15 +12,15 @@ import {
   Search,
   Landmark,
   User,
-  Building2
+  Building2,
+  Home,
+  ChevronRight
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { ComprehensivePropertyForm } from "@/components/comprehensive-property-form"
-import { PeopleDashboard } from "@/components/people-dashboard"
-import { PlacesDashboard } from "@/components/places-dashboard"
 
 interface Person {
   id: string
@@ -100,7 +100,7 @@ export function PropertiesDashboard() {
   const [error, setError] = useState("")
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
-  const [activeTab, setActiveTab] = useState<'properties' | 'people' | 'places'>('properties')
+
 
   const fetchProperties = async () => {
     try {
@@ -151,109 +151,28 @@ export function PropertiesDashboard() {
 
   if (showCreateForm) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
-        <div className="max-w-7xl mx-auto">
-          <ComprehensivePropertyForm
-            onSuccess={handlePropertyCreated}
-            onCancel={() => setShowCreateForm(false)}
-          />
-        </div>
-      </div>
+      <ComprehensivePropertyForm
+        onSuccess={handlePropertyCreated}
+        onCancel={() => setShowCreateForm(false)}
+      />
     )
   }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
-      <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col md:flex-row md:items-center md:justify-between gap-4"
-        >
-          <div>
-            <h1 className="text-4xl font-bold text-white mb-2">
-              Portfolio Dashboard
-            </h1>
-            <p className="text-slate-300">
-              Manage your properties, people, and locations
-            </p>
-          </div>
-          <Button
-            onClick={() => {
-              if (activeTab === 'properties') {
-                setShowCreateForm(true)
-              } else if (activeTab === 'people') {
-                router.push('/people/new')
-              } else if (activeTab === 'places') {
-                router.push('/places/new')
-              }
-            }}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3"
-          >
-            <Plus className="h-5 w-5 mr-2" />
-            Add {activeTab === 'properties' ? 'Property' : activeTab === 'people' ? 'Person' : 'Place'}
-          </Button>
-        </motion.div>
-
-        {/* Tab Navigation */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="flex space-x-1 bg-white/10 backdrop-blur-sm rounded-lg p-1"
-        >
-          <button
-            onClick={() => setActiveTab('properties')}
-            className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-md transition-colors ${
-              activeTab === 'properties'
-                ? 'bg-blue-600 text-white shadow-sm'
-                : 'text-slate-300 hover:text-white hover:bg-white/10'
-            }`}
-          >
-            <Building2 className="h-5 w-5" />
-            Properties
-          </button>
-          <button
-            onClick={() => setActiveTab('people')}
-            className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-md transition-colors ${
-              activeTab === 'people'
-                ? 'bg-blue-600 text-white shadow-sm'
-                : 'text-slate-300 hover:text-white hover:bg-white/10'
-            }`}
-          >
-            <User className="h-5 w-5" />
-            People
-          </button>
-          <button
-            onClick={() => setActiveTab('places')}
-            className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-md transition-colors ${
-              activeTab === 'places'
-                ? 'bg-blue-600 text-white shadow-sm'
-                : 'text-slate-300 hover:text-white hover:bg-white/10'
-            }`}
-          >
-            <MapPin className="h-5 w-5" />
-            Places
-          </button>
-        </motion.div>
-
-        {/* Tab Content */}
-        {activeTab === 'properties' && (
-          <>
-            {/* Search */}
+    return (
+    <div className="space-y-8">
+      {/* Search */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
               className="relative"
             >
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-5 w-5" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
               <Input
                 placeholder="Search properties by address, name, or type..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-slate-400"
+                className="pl-10"
               />
             </motion.div>
 
@@ -264,43 +183,43 @@ export function PropertiesDashboard() {
               transition={{ delay: 0.3 }}
               className="grid grid-cols-1 md:grid-cols-4 gap-6"
             >
-              <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+              <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-white text-sm font-medium">Total Properties</CardTitle>
+                  <CardTitle className="text-sm font-medium">Total Properties</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-white">{properties.length}</div>
+                  <div className="text-2xl font-bold">{properties.length}</div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+              <Card className="">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-white text-sm font-medium">Available Properties</CardTitle>
+                  <CardTitle className="text-sm font-medium">Available Properties</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-white">
+                  <div className="text-2xl font-bold">
                     {properties.filter(p => p.available).length}
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+              <Card className="">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-white text-sm font-medium">Total Investment</CardTitle>
+                  <CardTitle className="text-sm font-medium">Total Investment</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-white">
+                  <div className="text-2xl font-bold">
                     {formatCurrency(properties.reduce((total, p) => total + (Number(p.purchasePrice) || 0), 0))}
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+              <Card className="">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-white text-sm font-medium">Total Acres</CardTitle>
+                  <CardTitle className="text-sm font-medium">Total Acres</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-white">
+                  <div className="text-2xl font-bold">
                     {properties.reduce((total, p) => total + (Number(p.acres) || 0), 0).toFixed(1)}
                   </div>
                 </CardContent>
@@ -315,16 +234,16 @@ export function PropertiesDashboard() {
             >
               {loading ? (
                 <div className="text-center py-12">
-                  <div className="text-white">Loading properties...</div>
+                  <div className="text-muted-foreground">Loading properties...</div>
                 </div>
               ) : error ? (
                 <div className="text-center py-12">
-                  <div className="text-red-400">Error: {error}</div>
+                  <div className="text-destructive">Error: {error}</div>
                 </div>
               ) : filteredProperties.length === 0 ? (
-                <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+                <Card className="">
                   <CardContent className="text-center py-12">
-                    <div className="text-white mb-4">
+                    <div className="mb-4">
                       {properties.length === 0 
                         ? "No properties yet. Create your first property to get started!"
                         : "No properties match your search."
@@ -351,17 +270,17 @@ export function PropertiesDashboard() {
                       transition={{ delay: 0.1 * index }}
                     >
                       <Card 
-                        className="bg-white/10 border-white/20 backdrop-blur-sm hover:bg-white/15 transition-colors cursor-pointer group"
+                        className=" hover:shadow-md transition-shadow cursor-pointer group"
                         onClick={() => router.push(`/property/${property.id}`)}
                       >
                         <CardHeader>
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
-                              <CardTitle className="text-white text-lg leading-tight mb-2">
+                              <CardTitle className=" text-lg leading-tight mb-2">
                                 {property.name || "Untitled Property"}
                               </CardTitle>
-                                                      <div className="space-y-1">
-                            <div className="flex items-start text-slate-300 text-sm">
+                              <div className="space-y-1">
+                            <div className="flex items-start text-muted-foreground text-sm">
                               <MapPin className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
                               <span className="leading-tight">
                                 {property.streetAddress ? 
@@ -371,7 +290,7 @@ export function PropertiesDashboard() {
                               </span>
                             </div>
                             {property.place && (
-                              <div className="text-blue-300 text-xs flex items-center gap-1 cursor-pointer hover:text-blue-200"
+                              <div className="text-blue-600 text-xs flex items-center gap-1 cursor-pointer hover:text-blue-800"
                                    onClick={(e) => {
                                      e.stopPropagation()
                                      router.push(`/places/${property.place!.id}`)
@@ -393,11 +312,11 @@ export function PropertiesDashboard() {
                         <CardContent className="space-y-4">
                           {/* Property Details */}
                           <div className="grid grid-cols-2 gap-4 text-sm">
-                            <div className="flex items-center text-slate-300">
+                            <div className="flex items-center text-muted-foreground">
                               <Square className="h-4 w-4 mr-1" />
                               <span>{property.acres ? `${Number(property.acres)} acres` : 'Size N/A'}</span>
                             </div>
-                            <div className="flex items-center text-slate-300">
+                            <div className="flex items-center text-muted-foreground">
                               <Landmark className="h-4 w-4 mr-1" />
                               <span>{property.zoning || 'Zoning N/A'}</span>
                             </div>
@@ -406,23 +325,23 @@ export function PropertiesDashboard() {
                           {/* Financial Info */}
                           <div className="space-y-2">
                             <div className="flex items-center justify-between">
-                              <span className="text-slate-300 text-sm">Purchase Price</span>
-                              <span className="text-white font-semibold">
+                              <span className="text-muted-foreground text-sm">Purchase Price</span>
+                              <span className=" font-semibold">
                                 {formatCurrency(property.purchasePrice)}
                               </span>
                             </div>
                             {property.financingType && (
                               <div className="flex items-center justify-between">
-                                <span className="text-slate-300 text-sm">Financing</span>
-                                <span className="text-slate-300 text-sm">
+                                <span className="text-muted-foreground text-sm">Financing</span>
+                                <span className="text-muted-foreground text-sm">
                                   {property.financingType}
                                 </span>
                               </div>
                             )}
                             {property.estimatedTaxes && (
                               <div className="flex items-center justify-between">
-                                <span className="text-slate-300 text-sm">Annual Taxes</span>
-                                <span className="text-slate-300 text-sm">
+                                <span className="text-muted-foreground text-sm">Annual Taxes</span>
+                                <span className="text-muted-foreground text-sm">
                                   {formatCurrency(property.estimatedTaxes)}
                                 </span>
                               </div>
@@ -432,25 +351,25 @@ export function PropertiesDashboard() {
                           {/* Connected People */}
                           {(property.sellerPerson || property.sellerAgentPerson || property.buyerAgentPerson || property.titleCompanyPerson) && (
                             <div className="space-y-1">
-                              <div className="text-slate-400 text-xs">Connected People</div>
+                              <div className="text-muted-foreground text-xs">Connected People</div>
                               <div className="flex flex-wrap gap-1">
                                 {property.sellerPerson && (
-                                  <span className="px-2 py-1 bg-green-500/20 text-green-300 text-xs rounded-full">
+                                  <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
                                     Seller: {property.sellerPerson.name}
                                   </span>
                                 )}
                                 {property.sellerAgentPerson && (
-                                  <span className="px-2 py-1 bg-blue-500/20 text-blue-300 text-xs rounded-full">
+                                  <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
                                     S.Agent: {property.sellerAgentPerson.name}
                                   </span>
                                 )}
                                 {property.buyerAgentPerson && (
-                                  <span className="px-2 py-1 bg-purple-500/20 text-purple-300 text-xs rounded-full">
+                                  <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full">
                                     B.Agent: {property.buyerAgentPerson.name}
                                   </span>
                                 )}
                                 {property.titleCompanyPerson && (
-                                  <span className="px-2 py-1 bg-orange-500/20 text-orange-300 text-xs rounded-full">
+                                  <span className="px-2 py-1 bg-orange-100 text-orange-700 text-xs rounded-full">
                                     Title: {property.titleCompanyPerson.name}
                                   </span>
                                 )}
@@ -459,7 +378,7 @@ export function PropertiesDashboard() {
                           )}
 
                           {/* Type and Date */}
-                          <div className="flex items-center justify-between text-xs text-slate-400">
+                          <div className="flex items-center justify-between text-xs text-muted-foreground">
                             <span>{property.type ? property.type.charAt(0).toUpperCase() + property.type.slice(1) : 'Property'}</span>
                             <span>Added {formatDate(property.createdAt)}</span>
                           </div>
@@ -469,7 +388,7 @@ export function PropertiesDashboard() {
                             <Button 
                               size="sm" 
                               variant="outline" 
-                              className="flex-1 border-blue-400 text-blue-400 hover:bg-blue-400 hover:text-white bg-white/10 backdrop-blur-sm"
+                              className="flex-1 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white bg-white"
                               onClick={(e) => {
                                 e.stopPropagation()
                                 router.push(`/property/${property.id}`)
@@ -481,7 +400,7 @@ export function PropertiesDashboard() {
                             <Button 
                               size="sm" 
                               variant="outline"
-                              className="border-gray-400 text-gray-700 hover:bg-gray-100 bg-white/90 backdrop-blur-sm"
+                              className="border-gray-300 text-muted-foreground hover:bg-gray-50 bg-white"
                               onClick={(e) => e.stopPropagation()}
                             >
                               <Settings className="h-4 w-4" />
@@ -494,31 +413,7 @@ export function PropertiesDashboard() {
                 </div>
               )}
             </motion.div>
-          </>
-        )}
 
-        {/* People Tab */}
-        {activeTab === 'people' && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <PeopleDashboard />
-          </motion.div>
-        )}
-
-        {/* Places Tab */}
-        {activeTab === 'places' && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <PlacesDashboard />
-          </motion.div>
-        )}
-      </div>
     </div>
   )
 }

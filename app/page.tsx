@@ -16,7 +16,7 @@ import {
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { PropertiesDashboard } from "@/components/properties-dashboard"
+import { OverviewDashboard } from "@/components/overview-dashboard"
 
 const technologies = [
   { name: "Next.js", icon: Zap, description: "React framework for production" },
@@ -46,7 +46,7 @@ export default function HomePage() {
 
   // If user is authenticated, show the dashboard
   if (session) {
-    return <PropertiesDashboard />
+    return <OverviewDashboard />
   }
 
   // If user is not authenticated, show the landing page

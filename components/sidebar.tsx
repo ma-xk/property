@@ -1,7 +1,8 @@
 "use client"
 
+import { useState } from "react"
 import { useSession, signOut } from "next-auth/react"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import Link from "next/link"
 import { 
   Home,
@@ -16,6 +17,12 @@ import {
 
 import { Button } from "@/components/ui/button"
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
@@ -23,6 +30,7 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
+  SidebarInset,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -35,6 +43,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { CreatePropertyForm } from "@/components/create-property-form"
+import { CreatePersonForm } from "@/components/create-person-form"
+import { CreatePlaceForm } from "@/components/create-place-form"
+import { Breadcrumb } from "@/components/breadcrumb"
 
 // Menu items for the main navigation
 const items = [
@@ -64,17 +76,17 @@ const items = [
 const quickActions = [
   {
     title: "Add Property",
-    url: "/properties/new",
+    action: "property",
     icon: Plus,
   },
   {
     title: "Add Person",
-    url: "/people/new", 
+    action: "person",
     icon: User,
   },
   {
     title: "Add Place",
-    url: "/places/new",
+    action: "place",
     icon: MapPin,
   },
 ]
@@ -82,6 +94,21 @@ const quickActions = [
 function AppSidebar() {
   const { data: session } = useSession()
   const pathname = usePathname()
+  const router = useRouter()
+  const [openModal, setOpenModal] = useState<string | null>(null)
+
+  const handleQuickAction = (action: string) => {
+    setOpenModal(action)
+  }
+
+  const handleModalClose = () => {
+    setOpenModal(null)
+  }
+
+  const handleFormSuccess = () => {
+    setOpenModal(null)
+    router.refresh() // Refresh to show new data
+  }
 
   return (
     <Sidebar variant="inset">
@@ -122,11 +149,12 @@ function AppSidebar() {
             <SidebarMenu>
               {quickActions.map((action) => (
                 <SidebarMenuItem key={action.title}>
-                  <SidebarMenuButton asChild>
-                    <Link href={action.url}>
-                      <action.icon />
-                      <span>{action.title}</span>
-                    </Link>
+                  <SidebarMenuButton 
+                    onClick={() => handleQuickAction(action.action)}
+                    className="cursor-pointer"
+                  >
+                    <action.icon />
+                    <span>{action.title}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -177,6 +205,34 @@ function AppSidebar() {
           </SidebarMenu>
         )}
       </SidebarFooter>
+
+      {/* Modals */}
+      <Dialog open={openModal === "property"} onOpenChange={(open) => !open && handleModalClose()}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Add New Property</DialogTitle>
+          </DialogHeader>
+          <CreatePropertyForm onSuccess={handleFormSuccess} onCancel={handleModalClose} showCard={false} />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={openModal === "person"} onOpenChange={(open) => !open && handleModalClose()}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Add New Person</DialogTitle>
+          </DialogHeader>
+          <CreatePersonForm onSuccess={handleFormSuccess} onCancel={handleModalClose} showCard={false} />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={openModal === "place"} onOpenChange={(open) => !open && handleModalClose()}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Add New Place</DialogTitle>
+          </DialogHeader>
+          <CreatePlaceForm onSuccess={handleFormSuccess} onCancel={handleModalClose} showCard={false} />
+        </DialogContent>
+      </Dialog>
     </Sidebar>
   )
 }
@@ -192,16 +248,17 @@ export function AppSidebarProvider({ children }: { children: React.ReactNode }) 
   return (
     <SidebarProvider>
       <AppSidebar />
-      <main className="flex flex-1 flex-col overflow-hidden">
+      <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 px-4">
           <SidebarTrigger className="-ml-1" />
           <div className="h-4 w-px bg-sidebar-border" />
+          <Breadcrumb />
           <div className="flex-1" />
         </header>
-        <div className="flex-1 overflow-auto">
+        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
           {children}
         </div>
-      </main>
+      </SidebarInset>
     </SidebarProvider>
   )
 }

@@ -11,7 +11,9 @@ import {
   Search,
   Flag,
   Globe,
-  Building2
+  Building2,
+  Home,
+  ChevronRight
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -108,29 +110,6 @@ export function PlacesDashboard() {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col md:flex-row md:items-center md:justify-between gap-4"
-      >
-        <div>
-          <h2 className="text-3xl font-bold text-white mb-2">
-            Places
-          </h2>
-          <p className="text-slate-300">
-            Manage locations and view properties by area
-          </p>
-        </div>
-        <Button
-          onClick={() => router.push("/places/new")}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3"
-        >
-          <Plus className="h-5 w-5 mr-2" />
-          Add Place
-        </Button>
-      </motion.div>
-
       {/* Search */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -138,12 +117,12 @@ export function PlacesDashboard() {
         transition={{ delay: 0.1 }}
         className="relative"
       >
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-5 w-5" />
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground400 h-5 w-5" />
         <Input
           placeholder="Search places by name, state, country, or description..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-slate-400"
+          className="pl-10 bg-white/10 border-white/20  placeholder:text-muted-foreground400"
         />
       </motion.div>
 
@@ -154,43 +133,43 @@ export function PlacesDashboard() {
         transition={{ delay: 0.2 }}
         className="grid grid-cols-1 md:grid-cols-4 gap-6"
       >
-        <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+        <Card className="">
           <CardHeader className="pb-2">
-            <CardTitle className="text-white text-sm font-medium">Total Places</CardTitle>
+            <CardTitle className=" text-sm font-medium">Total Places</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">{places.length}</div>
+            <div className="text-2xl font-bold ">{places.length}</div>
           </CardContent>
         </Card>
 
-        <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+        <Card className="">
           <CardHeader className="pb-2">
-            <CardTitle className="text-white text-sm font-medium">Total Properties</CardTitle>
+            <CardTitle className=" text-sm font-medium">Total Properties</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">
+            <div className="text-2xl font-bold ">
               {places.reduce((total, place) => total + place._count.properties, 0)}
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+        <Card className="">
           <CardHeader className="pb-2">
-            <CardTitle className="text-white text-sm font-medium">States</CardTitle>
+            <CardTitle className=" text-sm font-medium">States</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">
+            <div className="text-2xl font-bold ">
               {new Set(places.filter(p => p.state).map(p => p.state)).size}
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+        <Card className="">
           <CardHeader className="pb-2">
-            <CardTitle className="text-white text-sm font-medium">Countries</CardTitle>
+            <CardTitle className=" text-sm font-medium">Countries</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">
+            <div className="text-2xl font-bold ">
               {new Set(places.map(p => p.country)).size}
             </div>
           </CardContent>
@@ -205,16 +184,16 @@ export function PlacesDashboard() {
       >
         {loading ? (
           <div className="text-center py-12">
-            <div className="text-white">Loading places...</div>
+            <div className="">Loading places...</div>
           </div>
         ) : error ? (
           <div className="text-center py-12">
             <div className="text-red-400">Error: {error}</div>
           </div>
         ) : filteredPlaces.length === 0 ? (
-          <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+          <Card className="">
             <CardContent className="text-center py-12">
-              <div className="text-white mb-4">
+              <div className=" mb-4">
                 {places.length === 0 
                   ? "No places yet. Add your first location to get started!"
                   : "No places match your search."
@@ -223,7 +202,7 @@ export function PlacesDashboard() {
               {places.length === 0 && (
                 <Button
                   onClick={() => router.push("/places/new")}
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  className="bg-blue-600 hover:bg-blue-700 "
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Add Your First Place
@@ -241,17 +220,17 @@ export function PlacesDashboard() {
                 transition={{ delay: 0.1 * index }}
               >
                 <Card 
-                  className="bg-white/10 border-white/20 backdrop-blur-sm hover:bg-white/15 transition-colors cursor-pointer group"
+                  className=" hover:bg-white/15 transition-colors cursor-pointer group"
                   onClick={() => router.push(`/places/${place.id}`)}
                 >
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <CardTitle className="text-white text-lg leading-tight mb-2 flex items-center gap-2">
+                        <CardTitle className=" text-lg leading-tight mb-2 flex items-center gap-2">
                           <MapPin className="h-5 w-5" />
                           {place.name}
                         </CardTitle>
-                        <div className="flex items-center gap-2 text-slate-300 text-sm">
+                        <div className="flex items-center gap-2 text-muted-foreground300 text-sm">
                           {place.state && (
                             <div className="flex items-center gap-1">
                               <Flag className="h-3 w-3" />
@@ -264,7 +243,7 @@ export function PlacesDashboard() {
                           </div>
                         </div>
                       </div>
-                      <div className="text-xs text-slate-400">
+                      <div className="text-xs text-muted-foreground400">
                         {place._count.properties} properties
                       </div>
                     </div>
@@ -272,7 +251,7 @@ export function PlacesDashboard() {
                   <CardContent className="space-y-4">
                     {/* Description */}
                     {place.description && (
-                      <div className="text-sm text-slate-300">
+                      <div className="text-sm text-muted-foreground300">
                         {place.description.length > 100 
                           ? `${place.description.substring(0, 100)}...`
                           : place.description
@@ -284,14 +263,14 @@ export function PlacesDashboard() {
                     {place.properties.length > 0 && (
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div className="space-y-1">
-                          <div className="text-slate-400">Total Investment</div>
-                          <div className="text-white font-semibold">
+                          <div className="text-muted-foreground400">Total Investment</div>
+                          <div className=" font-semibold">
                             {formatCurrency(getTotalInvestment(place))}
                           </div>
                         </div>
                         <div className="space-y-1">
-                          <div className="text-slate-400">Total Acres</div>
-                          <div className="text-white font-semibold">
+                          <div className="text-muted-foreground400">Total Acres</div>
+                          <div className=" font-semibold">
                             {getTotalAcres(place).toFixed(1)}
                           </div>
                         </div>
@@ -301,7 +280,7 @@ export function PlacesDashboard() {
                     {/* Property Types */}
                     {place.properties.length > 0 && (
                       <div className="space-y-1">
-                        <div className="text-slate-400 text-xs">Property Types</div>
+                        <div className="text-muted-foreground400 text-xs">Property Types</div>
                         <div className="flex flex-wrap gap-1">
                           {Array.from(new Set(place.properties.map(p => p.type).filter(Boolean))).map(type => (
                             <span 
@@ -321,7 +300,7 @@ export function PlacesDashboard() {
                     )}
 
                     {/* Date */}
-                    <div className="flex items-center justify-between text-xs text-slate-400">
+                    <div className="flex items-center justify-between text-xs text-muted-foreground400">
                       <span>Added {formatDate(place.createdAt)}</span>
                     </div>
 
@@ -330,7 +309,7 @@ export function PlacesDashboard() {
                       <Button 
                         size="sm" 
                         variant="outline" 
-                        className="flex-1 border-blue-400 text-blue-400 hover:bg-blue-400 hover:text-white bg-white/10 backdrop-blur-sm"
+                        className="flex-1 border-blue-400 text-blue-400 hover:bg-blue-400 hover: bg-white/10 backdrop-blur-sm"
                         onClick={(e) => {
                           e.stopPropagation()
                           router.push(`/places/${place.id}`)

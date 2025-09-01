@@ -140,45 +140,10 @@ export function Dashboard() {
   const totalAcreage = mockLandProperties.reduce((sum, p) => sum + p.acres, 0)
   const totalInvestment = mockLandProperties.reduce((sum, p) => sum + p.purchasePrice, 0)
   const averagePricePerAcre = totalAcreage > 0 ? Math.round(totalInvestment / totalAcreage) : 0
-  // const pendingClosings = mockLandProperties.filter(p => p.status === "Pending").length
-  // const financed = mockLandProperties.filter(p => p.financingType === "Seller Financing").length
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <h1 className="text-3xl font-bold text-white mb-2">Land Investment Dashboard</h1>
-              <p className="text-slate-300">Track your land acquisitions and development opportunities</p>
-            </div>
-            <div className="flex items-center gap-4">
-              <Button variant="outline" className="bg-transparent border-white text-white hover:bg-white hover:text-slate-900">
-                <Bell className="h-4 w-4 mr-2" />
-                Notifications
-              </Button>
-              <Button variant="outline" className="bg-transparent border-white text-white hover:bg-white hover:text-slate-900">
-                <Settings className="h-4 w-4 mr-2" />
-                Settings
-              </Button>
-            </div>
-          </div>
-
-          {/* Search Bar */}
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-            <Input 
-              placeholder="Search land parcels..." 
-              className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-slate-400"
-            />
-          </div>
-        </motion.div>
-
         {/* Stats Overview */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -238,8 +203,6 @@ export function Dashboard() {
             </CardContent>
           </Card>
         </motion.div>
-
-
 
         {/* Land Parcels Grid */}
         <motion.div

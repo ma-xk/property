@@ -12,7 +12,9 @@ import {
   Mail,
   Phone,
   Building,
-  Briefcase
+  Briefcase,
+  Home,
+  ChevronRight
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -107,29 +109,6 @@ export function PeopleDashboard() {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col md:flex-row md:items-center md:justify-between gap-4"
-      >
-        <div>
-          <h2 className="text-3xl font-bold text-white mb-2">
-            People
-          </h2>
-          <p className="text-slate-300">
-            Manage contacts, agents, and business relationships
-          </p>
-        </div>
-        <Button
-          onClick={() => router.push("/people/new")}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3"
-        >
-          <Plus className="h-5 w-5 mr-2" />
-          Add Person
-        </Button>
-      </motion.div>
-
       {/* Search */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -137,12 +116,12 @@ export function PeopleDashboard() {
         transition={{ delay: 0.1 }}
         className="relative"
       >
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-5 w-5" />
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
         <Input
           placeholder="Search people by name, company, role, or email..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-slate-400"
+          className="pl-10 bg-white border-gray-200  placeholder:text-muted-foreground"
         />
       </motion.div>
 
@@ -153,21 +132,21 @@ export function PeopleDashboard() {
         transition={{ delay: 0.2 }}
         className="grid grid-cols-1 md:grid-cols-4 gap-6"
       >
-        <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+        <Card className="">
           <CardHeader className="pb-2">
-            <CardTitle className="text-white text-sm font-medium">Total People</CardTitle>
+            <CardTitle className=" text-sm font-medium">Total People</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">{people.length}</div>
+            <div className="text-2xl font-bold ">{people.length}</div>
           </CardContent>
         </Card>
 
-        <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+        <Card className="">
           <CardHeader className="pb-2">
-            <CardTitle className="text-white text-sm font-medium">Agents</CardTitle>
+            <CardTitle className=" text-sm font-medium">Agents</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">
+            <div className="text-2xl font-bold ">
               {people.filter(p => p.role?.toLowerCase().includes('agent') || 
                 p.propertiesAsSellerAgent.length > 0 || 
                 p.propertiesAsBuyerAgent.length > 0).length}
@@ -175,23 +154,23 @@ export function PeopleDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+        <Card className="">
           <CardHeader className="pb-2">
-            <CardTitle className="text-white text-sm font-medium">Sellers</CardTitle>
+            <CardTitle className=" text-sm font-medium">Sellers</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">
+            <div className="text-2xl font-bold ">
               {people.filter(p => p.propertiesAsSeller.length > 0).length}
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+        <Card className="">
           <CardHeader className="pb-2">
-            <CardTitle className="text-white text-sm font-medium">Companies</CardTitle>
+            <CardTitle className=" text-sm font-medium">Companies</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">
+            <div className="text-2xl font-bold ">
               {people.filter(p => p.company).length}
             </div>
           </CardContent>
@@ -206,16 +185,16 @@ export function PeopleDashboard() {
       >
         {loading ? (
           <div className="text-center py-12">
-            <div className="text-white">Loading people...</div>
+            <div className="text-muted-foreground">Loading people...</div>
           </div>
         ) : error ? (
           <div className="text-center py-12">
-            <div className="text-red-400">Error: {error}</div>
+            <div className="text-red-600">Error: {error}</div>
           </div>
         ) : filteredPeople.length === 0 ? (
-          <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+          <Card className="">
             <CardContent className="text-center py-12">
-              <div className="text-white mb-4">
+              <div className=" mb-4">
                 {people.length === 0 
                   ? "No people yet. Add your first contact to get started!"
                   : "No people match your search."
@@ -242,21 +221,21 @@ export function PeopleDashboard() {
                 transition={{ delay: 0.1 * index }}
               >
                 <Card 
-                  className="bg-white/10 border-white/20 backdrop-blur-sm hover:bg-white/15 transition-colors cursor-pointer group"
+                  className=" hover:shadow-md transition-shadow cursor-pointer group"
                   onClick={() => router.push(`/people/${person.id}`)}
                 >
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <CardTitle className="text-white text-lg leading-tight mb-2 flex items-center gap-2">
+                        <CardTitle className=" text-lg leading-tight mb-2 flex items-center gap-2">
                           <User className="h-5 w-5" />
                           {person.name}
                         </CardTitle>
-                        <div className="text-blue-300 text-sm font-medium">
+                        <div className="text-blue-600 text-sm font-medium">
                           {getPrimaryRole(person)}
                         </div>
                       </div>
-                      <div className="text-xs text-slate-400">
+                      <div className="text-xs text-muted-foreground">
                         {getTotalPropertiesCount(person)} properties
                       </div>
                     </div>
@@ -265,19 +244,19 @@ export function PeopleDashboard() {
                     {/* Contact Info */}
                     <div className="space-y-2 text-sm">
                       {person.email && (
-                        <div className="flex items-center text-slate-300">
+                        <div className="flex items-center text-muted-foreground">
                           <Mail className="h-4 w-4 mr-2 flex-shrink-0" />
                           <span className="truncate">{person.email}</span>
                         </div>
                       )}
                       {person.phone && (
-                        <div className="flex items-center text-slate-300">
+                        <div className="flex items-center text-muted-foreground">
                           <Phone className="h-4 w-4 mr-2 flex-shrink-0" />
                           <span>{person.phone}</span>
                         </div>
                       )}
                       {person.company && (
-                        <div className="flex items-center text-slate-300">
+                        <div className="flex items-center text-muted-foreground">
                           <Building className="h-4 w-4 mr-2 flex-shrink-0" />
                           <span className="truncate">{person.company}</span>
                         </div>
@@ -287,22 +266,22 @@ export function PeopleDashboard() {
                     {/* Property Involvement Summary */}
                     <div className="space-y-1 text-xs">
                       {person.propertiesAsSeller.length > 0 && (
-                        <div className="text-slate-400">
+                        <div className="text-muted-foreground">
                           Seller in {person.propertiesAsSeller.length} transaction{person.propertiesAsSeller.length !== 1 ? 's' : ''}
                         </div>
                       )}
                       {person.propertiesAsSellerAgent.length > 0 && (
-                        <div className="text-slate-400">
+                        <div className="text-muted-foreground">
                           Seller agent for {person.propertiesAsSellerAgent.length} property{person.propertiesAsSellerAgent.length !== 1 ? 'ies' : 'y'}
                         </div>
                       )}
                       {person.propertiesAsBuyerAgent.length > 0 && (
-                        <div className="text-slate-400">
+                        <div className="text-muted-foreground">
                           Buyer agent for {person.propertiesAsBuyerAgent.length} property{person.propertiesAsBuyerAgent.length !== 1 ? 'ies' : 'y'}
                         </div>
                       )}
                       {person.propertiesAsTitleCompany.length > 0 && (
-                        <div className="text-slate-400">
+                        <div className="text-muted-foreground">
                           Title company for {person.propertiesAsTitleCompany.length} property{person.propertiesAsTitleCompany.length !== 1 ? 'ies' : 'y'}
                         </div>
                       )}

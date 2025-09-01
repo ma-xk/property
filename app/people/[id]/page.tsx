@@ -111,40 +111,24 @@ export default function PersonDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center py-12">
-            <div className="text-white">Loading person details...</div>
-          </div>
-        </div>
+      <div className="flex items-center justify-center py-12">
+        <div className="text-xl">Loading person details...</div>
       </div>
     )
   }
 
   if (error || !person) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
-        <div className="max-w-7xl mx-auto">
-          {/* Breadcrumbs */}
-          <nav className="flex items-center space-x-2 text-sm mb-8">
-            <button
+      <div className="space-y-8">
+        <div className="flex items-center justify-center min-h-[50vh]">
+          <div className="text-center">
+            <div className="text-destructive text-xl mb-4">{error || "Person not found"}</div>
+            <button 
               onClick={() => router.push("/")}
-              className="flex items-center text-slate-300 hover:text-white transition-colors"
+              className="text-primary hover:text-primary/80 transition-colors"
             >
-              <Home className="h-4 w-4 mr-1" />
-              Dashboard
+              Return to Dashboard
             </button>
-          </nav>
-          
-          <div className="text-center py-12">
-            <div className="text-red-400">Error: {error || "Person not found"}</div>
-            <Button 
-              onClick={() => router.push('/')} 
-              className="mt-4 bg-blue-600 hover:bg-blue-700"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Dashboard
-            </Button>
           </div>
         </div>
       </div>
@@ -154,43 +138,27 @@ export default function PersonDetailPage() {
   const allProperties = getAllProperties()
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <div className="space-y-8">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="space-y-4"
         >
-          {/* Breadcrumbs */}
-          <nav className="flex items-center space-x-2 text-sm bg-white/5 backdrop-blur-sm rounded-lg px-4 py-2 border border-white/10">
-            <button
-              onClick={() => router.push("/")}
-              className="flex items-center text-slate-300 hover:text-white transition-colors hover:bg-white/10 rounded px-2 py-1"
-            >
-              <Home className="h-4 w-4 mr-1" />
-              Dashboard
-            </button>
-            <ChevronRight className="h-4 w-4 text-slate-500" />
-            <span className="text-white font-medium px-2 py-1 bg-white/5 rounded truncate max-w-xs" title={person.name}>
-              {person.name}
-            </span>
-          </nav>
-
                     {/* Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-4xl font-bold text-white">
+              <h1 className="text-4xl font-bold ">
                 {person.name}
               </h1>
-              <div className="flex items-center text-slate-300 mt-2">
+              <div className="flex items-center text-muted-foreground mt-2">
                 <User className="h-5 w-5 mr-2" />
                 <span>{person.role || 'Contact'} • {allProperties.length} property relationship{allProperties.length !== 1 ? 's' : ''}</span>
               </div>
             </div>
             
             <div className="flex gap-2">
-              <Button variant="outline" className="border-blue-400 text-blue-400 hover:bg-blue-600 hover:text-white bg-white/10 backdrop-blur-sm">
+              <Button variant="outline">
                 <Edit className="h-4 w-4 mr-2" />
                 Edit
               </Button>
@@ -208,61 +176,61 @@ export default function PersonDetailPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+          <Card className="">
             <CardHeader>
-              <CardTitle className="text-white">Contact Information</CardTitle>
+              <CardTitle className="">Contact Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {person.email && (
                   <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-slate-400 text-sm">
+                    <div className="flex items-center gap-2 text-muted-foreground text-sm">
                       <Mail className="h-4 w-4" />
                       Email
                     </div>
-                    <div className="text-white font-medium">{person.email}</div>
+                    <div className=" font-medium">{person.email}</div>
                   </div>
                 )}
                 
                 {person.phone && (
                   <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-slate-400 text-sm">
+                    <div className="flex items-center gap-2 text-muted-foreground text-sm">
                       <Phone className="h-4 w-4" />
                       Phone
                     </div>
-                    <div className="text-white font-medium">{person.phone}</div>
+                    <div className=" font-medium">{person.phone}</div>
                   </div>
                 )}
                 
                 {person.company && (
                   <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-slate-400 text-sm">
+                    <div className="flex items-center gap-2 text-muted-foreground text-sm">
                       <Building className="h-4 w-4" />
                       Company
                     </div>
-                    <div className="text-white font-medium">{person.company}</div>
+                    <div className=" font-medium">{person.company}</div>
                   </div>
                 )}
                 
                 {person.role && (
                   <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-slate-400 text-sm">
+                    <div className="flex items-center gap-2 text-muted-foreground text-sm">
                       <Briefcase className="h-4 w-4" />
                       Role
                     </div>
-                    <div className="text-white font-medium">{person.role}</div>
+                    <div className=" font-medium">{person.role}</div>
                   </div>
                 )}
               </div>
 
               {person.notes && (
                 <div className="space-y-2">
-                  <div className="text-slate-400 text-sm">Notes</div>
-                  <div className="text-white bg-white/5 rounded-lg p-4">{person.notes}</div>
+                  <div className="text-muted-foreground text-sm">Notes</div>
+                  <div className=" bg-muted rounded-lg p-4">{person.notes}</div>
                 </div>
               )}
 
-              <div className="flex items-center gap-6 text-sm text-slate-400">
+              <div className="flex items-center gap-6 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
                   Added {formatDate(person.createdAt)}
@@ -285,41 +253,41 @@ export default function PersonDetailPage() {
           transition={{ delay: 0.2 }}
           className="grid grid-cols-1 md:grid-cols-4 gap-6"
         >
-          <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+          <Card className="">
             <CardHeader className="pb-2">
-              <CardTitle className="text-white text-sm font-medium">Total Properties</CardTitle>
+              <CardTitle className=" text-sm font-medium">Total Properties</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">{allProperties.length}</div>
+              <div className="text-2xl font-bold ">{allProperties.length}</div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+          <Card className="">
             <CardHeader className="pb-2">
-              <CardTitle className="text-white text-sm font-medium">As Seller</CardTitle>
+              <CardTitle className=" text-sm font-medium">As Seller</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">{person.propertiesAsSeller.length}</div>
+              <div className="text-2xl font-bold ">{person.propertiesAsSeller.length}</div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+          <Card className="">
             <CardHeader className="pb-2">
-              <CardTitle className="text-white text-sm font-medium">As Agent</CardTitle>
+              <CardTitle className=" text-sm font-medium">As Agent</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">
+              <div className="text-2xl font-bold ">
                 {person.propertiesAsSellerAgent.length + person.propertiesAsBuyerAgent.length}
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+          <Card className="">
             <CardHeader className="pb-2">
-              <CardTitle className="text-white text-sm font-medium">Total Value</CardTitle>
+              <CardTitle className=" text-sm font-medium">Total Value</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">{formatCurrency(getTotalInvestment())}</div>
+              <div className="text-2xl font-bold ">{formatCurrency(getTotalInvestment())}</div>
             </CardContent>
           </Card>
         </motion.div>
@@ -330,13 +298,13 @@ export default function PersonDetailPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
+          <Card className="">
             <CardHeader>
-              <CardTitle className="text-white">Related Properties</CardTitle>
+              <CardTitle className="">Related Properties</CardTitle>
             </CardHeader>
             <CardContent>
               {allProperties.length === 0 ? (
-                <div className="text-center py-12 text-slate-400">
+                <div className="text-center py-12 text-muted-foreground">
                   This person is not associated with any properties yet.
                 </div>
               ) : (
@@ -344,19 +312,19 @@ export default function PersonDetailPage() {
                   {allProperties.map((property) => (
                     <div
                       key={`${property.id}-${property.role}`}
-                      className="flex items-center justify-between p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-colors group cursor-pointer"
+                      className="flex items-center justify-between p-4 bg-muted rounded-lg hover:bg-accent transition-colors group cursor-pointer"
                       onClick={() => router.push(`/property/${property.id}`)}
                     >
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
-                          <h3 className="text-white font-semibold">
+                          <h3 className=" font-semibold">
                             {property.name || property.address}
                           </h3>
                           <span className="px-2 py-1 bg-blue-500/20 text-blue-300 text-xs rounded-full">
                             {property.role}
                           </span>
                         </div>
-                        <div className="flex items-center gap-4 text-sm text-slate-300">
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
                           <div className="flex items-center gap-1">
                             <MapPin className="h-3 w-3" />
                             {property.address}
@@ -371,17 +339,17 @@ export default function PersonDetailPage() {
                       </div>
                       <div className="flex items-center gap-4 text-right">
                         <div>
-                          <div className="text-white font-semibold">
+                          <div className=" font-semibold">
                             {formatCurrency(property.purchasePrice)}
                           </div>
-                          <div className="text-xs text-slate-400">
+                          <div className="text-xs text-muted-foreground">
                             {formatDate(property.createdAt)}
                           </div>
                         </div>
                         <Button
                           size="sm"
                           variant="outline"
-                          className="opacity-0 group-hover:opacity-100 transition-opacity border-blue-400 text-blue-400 hover:bg-blue-400 hover:text-white"
+                          className="opacity-0 group-hover:opacity-100 transition-opacity border-blue-400 text-blue-400 hover:bg-blue-400 hover:"
                           onClick={(e) => {
                             e.stopPropagation()
                             router.push(`/property/${property.id}`)
@@ -397,7 +365,6 @@ export default function PersonDetailPage() {
             </CardContent>
           </Card>
         </motion.div>
-      </div>
     </div>
   )
 }
