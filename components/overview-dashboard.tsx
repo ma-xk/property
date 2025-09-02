@@ -59,9 +59,10 @@ export function OverviewDashboard() {
           placesRes.json()
         ])
 
-        setProperties(propertiesData)
-        setPeople(peopleData)
-        setPlaces(placesData)
+        // Ensure we set arrays even if API returns error objects
+        setProperties(Array.isArray(propertiesData) ? propertiesData : [])
+        setPeople(Array.isArray(peopleData) ? peopleData : [])
+        setPlaces(Array.isArray(placesData) ? placesData : [])
       } catch (error) {
         console.error('Error fetching data:', error)
       } finally {
@@ -82,11 +83,6 @@ export function OverviewDashboard() {
     }).format(amount)
   }
 
-  const totalInvestment = properties.reduce((total, p) => total + (Number(p.purchasePrice) || 0), 0)
-  const availableProperties = properties.filter(p => p.available).length
-  const recentProperties = properties.slice(0, 3)
-  const recentPeople = people.slice(0, 3)
-
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -98,6 +94,16 @@ export function OverviewDashboard() {
       </div>
     )
   }
+
+  // Ensure data is arrays and calculate derived values
+  const propertiesArray = Array.isArray(properties) ? properties : []
+  const peopleArray = Array.isArray(people) ? people : []
+  const placesArray = Array.isArray(places) ? places : []
+  
+  const totalInvestment = propertiesArray.reduce((total, p) => total + (Number(p.purchasePrice) || 0), 0)
+  const availableProperties = propertiesArray.filter(p => p.available).length
+  const recentProperties = propertiesArray.slice(0, 3)
+  const recentPeople = peopleArray.slice(0, 3)
 
   return (
     <div className="space-y-8">
@@ -119,7 +125,7 @@ export function OverviewDashboard() {
             <Building2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{properties.length}</div>
+            <div className="text-2xl font-bold">{propertiesArray.length}</div>
             <p className="text-xs text-muted-foreground">
               {availableProperties} available
             </p>
@@ -145,7 +151,7 @@ export function OverviewDashboard() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{people.length}</div>
+            <div className="text-2xl font-bold">{peopleArray.length}</div>
             <p className="text-xs text-muted-foreground">
               Contacts & agents
             </p>
@@ -158,7 +164,7 @@ export function OverviewDashboard() {
             <MapPin className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{places.length}</div>
+            <div className="text-2xl font-bold">{placesArray.length}</div>
             <p className="text-xs text-muted-foreground">
               Locations tracked
             </p>
