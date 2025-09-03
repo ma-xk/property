@@ -280,15 +280,19 @@ This project is licensed under the MIT License.
 ---
 
 **🌟 App Features:**
-- ✅ **Property Management System** - Comprehensive real estate property tracking with detailed purchase information, financing details, and closing costs
-- ✅ **Contact Management** - Track people (agents, sellers, buyers, title companies) with roles, contact info, and property relationships
-- ✅ **Location Tracking** - Manage places (cities, states, countries) and associate properties with specific locations
-- ✅ **Financial Tracking** - Monitor purchase prices, earnest money, taxes, and all closing costs with currency formatting
-- ✅ **Advanced Search** - Global search across properties, people, and places with real-time filtering
-- ✅ **Dashboard Analytics** - Overview dashboard with property counts, total investment, and recent activity
-- ✅ **User Authentication** - Secure login/registration system with NextAuth.js
-- ✅ **Responsive Design** - Modern UI built with shadcn/ui, Tailwind CSS, and Framer Motion animations
-- ✅ **Database Integration** - PostgreSQL database with Prisma ORM for type-safe data access
-- ✅ **Production Ready** - Deployed and optimized for production use
+- ✅ **Comprehensive Property Management** - Complete real estate tracking with detailed purchase info, financing terms, closing costs, property specifications (acres, zoning), and legacy rental management features
+- ✅ **Advanced Contact Management** - Track people (agents, sellers, buyers, title companies) with roles, contact info, companies, and automatic property relationship linking
+- ✅ **Municipal Location Management** - Manage places with comprehensive municipal information including tax office details, zoning office contacts, code enforcement officers, and plumbing inspector information
+- ✅ **Tax Management System** - Dedicated tax dashboard with consolidated tax analytics, state-by-state breakdowns, annual tax estimates, state tax stamps tracking, and property tax proration analysis
+- ✅ **Municipal Tax Information** - Track tax payment addresses, websites, office phone numbers, due dates, late interest rates, assessment schedules, and custom tax notes per location
+- ✅ **Zoning & Code Enforcement** - Store zoning office addresses, phone numbers, website URLs, plus contact details for Code Enforcement Officers and Plumbing Inspectors
+- ✅ **Financial Analytics** - Monitor purchase prices, earnest money, comprehensive closing costs breakdown, and investment totals with professional currency formatting
+- ✅ **Global Search & Navigation** - Real-time search across all properties, people, and places with intelligent filtering and quick navigation
+- ✅ **Multi-Dashboard Analytics** - Overview dashboard plus specialized dashboards for properties, people, places, and taxes with detailed statistics and visual summaries
+- ✅ **Relationship Management** - Advanced linking system connecting properties to people (sellers, agents, title companies) and places with referential integrity
+- ✅ **Secure Authentication** - Complete user authentication system with NextAuth.js, registration, and session management
+- ✅ **Modern Responsive UI** - Beautiful interface built with shadcn/ui components, Tailwind CSS styling, and smooth Framer Motion animations
+- ✅ **Type-Safe Database** - PostgreSQL database with Prisma ORM providing full type safety, migrations, and optimized queries
+- ✅ **Production Deployment** - Fully deployed and optimized for production use with proper error handling and loading states
 
 Need help? Check the issues tab or create a new issue for support.

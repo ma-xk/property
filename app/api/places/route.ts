@@ -10,6 +10,32 @@ const createPlaceSchema = z.object({
   state: z.string().optional(),
   country: z.string().optional().default("United States"),
   description: z.string().optional(),
+  
+  // Tax Information Fields
+  taxPaymentAddress: z.string().nullable().optional(),
+  taxPaymentWebsite: z.union([z.string().url(), z.literal(""), z.null()]).optional(),
+  taxOfficePhone: z.string().nullable().optional(),
+  taxDueMonth: z.number().int().min(1).max(12).optional(),
+  taxDueDay: z.number().int().min(1).max(31).optional(),
+  lateInterestRate: z.union([z.number().min(0).max(100), z.string().transform((val) => parseFloat(val)), z.null()]).optional(),
+  assessmentMonth: z.number().int().min(1).max(12).optional(),
+  assessmentDay: z.number().int().min(1).max(31).optional(),
+  taxNotes: z.string().nullable().optional(),
+  
+  // Zoning Information Fields
+  zoningOfficeAddress: z.string().optional(),
+  zoningOfficePhone: z.string().optional(),
+  zoningOfficeWebsiteUrl: z.union([z.string().url(), z.literal("")]).optional(),
+  
+  // Code Enforcement Officer (CEO) Information
+  ceoName: z.string().optional(),
+  ceoEmail: z.union([z.string().email(), z.literal("")]).optional(),
+  ceoPhone: z.string().optional(),
+  
+  // Plumbing Inspector Information
+  plumbingInspectorName: z.string().optional(),
+  plumbingInspectorEmail: z.union([z.string().email(), z.literal("")]).optional(),
+  plumbingInspectorPhone: z.string().optional(),
 })
 
 const updatePlaceSchema = createPlaceSchema.partial().extend({

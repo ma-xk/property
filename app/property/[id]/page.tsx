@@ -25,6 +25,7 @@ import {
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { PropertyTaxInfo } from "@/components/property-tax-info"
 
 interface Property {
   id: string
@@ -71,6 +72,23 @@ interface Property {
   available: boolean
   createdAt: string
   updatedAt: string
+  
+  // Relationships
+  place?: {
+    id: string
+    name: string
+    state?: string
+    country: string
+    taxPaymentAddress?: string
+    taxPaymentWebsite?: string
+    taxOfficePhone?: string
+    taxDueMonth?: number
+    taxDueDay?: number
+    lateInterestRate?: number
+    assessmentMonth?: number
+    assessmentDay?: number
+    taxNotes?: string
+  } | null
 }
 
 export default function PropertyDetailsPage() {
@@ -119,17 +137,25 @@ export default function PropertyDetailsPage() {
     fetchProperty()
   }, [session, status, propertyId, fetchProperty, router])
 
-  const formatCurrency = (amount?: number | null) => {
-    if (!amount) return "Not set"
+  const formatCurrency = (amount?: number | null | string | any) => {
+    if (amount === null || amount === undefined) return "Not set"
+    // Convert to number, handling both string and Decimal types
+    const numAmount = typeof amount === 'string' ? parseFloat(amount) : Number(amount)
+    if (isNaN(numAmount)) return "Not set"
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
       maximumFractionDigits: 2,
-    }).format(amount)
+    }).format(numAmount)
   }
 
-  const calculateTotal = (values: (number | null | undefined)[]): number => {
-    return values.reduce<number>((sum, val) => sum + (val || 0), 0)
+  const calculateTotal = (values: (number | null | undefined | string | any)[]): number => {
+    return values.reduce<number>((sum, val) => {
+      if (val === null || val === undefined) return sum
+      // Convert to number, handling both string and Decimal types
+      const numVal = typeof val === 'string' ? parseFloat(val) : Number(val)
+      return sum + (isNaN(numVal) ? 0 : numVal)
+    }, 0)
   }
 
   const formatDate = (dateString: string) => {
@@ -517,7 +543,8 @@ export default function PropertyDetailsPage() {
                     <div className="flex justify-between">
                       <span className=" font-medium">Total Investment</span>
                       <span className=" font-bold">
-                        {formatCurrency((property.purchasePrice || 0) + calculateTotal([
+                        {formatCurrency(calculateTotal([
+                          property.purchasePrice,
                           property.titleSettlementFee,
                           property.titleExamination,
                           property.ownersPolicyPremium,
@@ -535,7 +562,7 @@ export default function PropertyDetailsPage() {
                     <div className="flex justify-between">
                       <span className="text-muted-foreground text-sm">Price per Acre</span>
                       <span className=" font-medium">
-                        {formatCurrency(Number(property.purchasePrice) / Number(property.acres))}
+                        {formatCurrency(calculateTotal([property.purchasePrice]) / calculateTotal([property.acres]))}
                       </span>
                     </div>
                   )}
@@ -573,6 +600,12 @@ export default function PropertyDetailsPage() {
                 </Button>
               </CardContent>
             </Card>
+
+            {/* Municipal Tax Information */}
+            <PropertyTaxInfo 
+              place={property.place} 
+              propertyName={property.name || property.address}
+            />
           </div>
         </motion.div>
     </div>

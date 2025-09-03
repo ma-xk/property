@@ -68,6 +68,32 @@ model Place {
   country     String   @default("United States")
   description String?  // Description of the place
   
+  // Tax Information Fields
+  taxPaymentAddress String?  // Mailing address for tax payments
+  taxPaymentWebsite String?  // Website URL for online tax payments
+  taxOfficePhone    String?  // Phone number for tax office
+  taxDueMonth       Int?     // Month when taxes are due (1-12)
+  taxDueDay         Int?     // Day of month when taxes are due (1-31)
+  lateInterestRate  Decimal? // Late payment interest rate percentage
+  assessmentMonth   Int?     // Month when property assessments occur (1-12)
+  assessmentDay     Int?     // Day of month when assessments occur (1-31)
+  taxNotes          String?  // Additional notes about tax information
+  
+  // Zoning Information Fields
+  zoningOfficeAddress    String? // Zoning office address
+  zoningOfficePhone      String? // Zoning office phone number
+  zoningOfficeWebsiteUrl String? // Zoning office website URL
+  
+  // Code Enforcement Officer (CEO) Information
+  ceoName  String? // Code Enforcement Officer name
+  ceoEmail String? // Code Enforcement Officer email
+  ceoPhone String? // Code Enforcement Officer phone
+  
+  // Plumbing Inspector Information
+  plumbingInspectorName  String? // Plumbing Inspector name
+  plumbingInspectorEmail String? // Plumbing Inspector email
+  plumbingInspectorPhone String? // Plumbing Inspector phone
+  
   // System fields
   userId      String   // Foreign key to User (who manages this place data)
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
