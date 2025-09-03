@@ -354,22 +354,46 @@ export function PropertiesDashboard() {
                               <div className="text-muted-foreground text-xs">Connected People</div>
                               <div className="flex flex-wrap gap-1">
                                 {property.sellerPerson && (
-                                  <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
+                                  <span 
+                                    className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full cursor-pointer hover:bg-green-200 transition-colors"
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      router.push(`/people/${property.sellerPerson!.id}`)
+                                    }}
+                                  >
                                     Seller: {property.sellerPerson.name}
                                   </span>
                                 )}
                                 {property.sellerAgentPerson && (
-                                  <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
+                                  <span 
+                                    className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full cursor-pointer hover:bg-blue-200 transition-colors"
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      router.push(`/people/${property.sellerAgentPerson!.id}`)
+                                    }}
+                                  >
                                     S.Agent: {property.sellerAgentPerson.name}
                                   </span>
                                 )}
                                 {property.buyerAgentPerson && (
-                                  <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full">
+                                  <span 
+                                    className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full cursor-pointer hover:bg-purple-200 transition-colors"
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      router.push(`/people/${property.buyerAgentPerson!.id}`)
+                                    }}
+                                  >
                                     B.Agent: {property.buyerAgentPerson.name}
                                   </span>
                                 )}
                                 {property.titleCompanyPerson && (
-                                  <span className="px-2 py-1 bg-orange-100 text-orange-700 text-xs rounded-full">
+                                  <span 
+                                    className="px-2 py-1 bg-orange-100 text-orange-700 text-xs rounded-full cursor-pointer hover:bg-orange-200 transition-colors"
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      router.push(`/people/${property.titleCompanyPerson!.id}`)
+                                    }}
+                                  >
                                     Title: {property.titleCompanyPerson.name}
                                   </span>
                                 )}

@@ -12,13 +12,57 @@ const places = [
     name: "Madawaska",
     state: "ME",
     country: "United States",
-    description: "Aroostook County town in northern Maine"
+    description: "Aroostook County town in northern Maine",
+    // Tax Information Fields
+    taxPaymentAddress: "328 St. Thomas Street, Madawaska, ME 04756",
+    taxPaymentWebsite: "https://www.madawaska-me.org/tax-collector",
+    taxOfficePhone: "(207) 728-6356",
+    taxDueMonth: 9, // September
+    taxDueDay: 15, // 15th of the month
+    lateInterestRate: 7.0, // 7% late payment interest
+    assessmentMonth: 4, // April
+    assessmentDay: 1, // 1st of the month
+    taxNotes: "Tax bills mailed in August, due September 15th. Late payments accrue 7% interest.",
+    // Zoning Information Fields
+    zoningOfficeAddress: "328 St. Thomas Street, Madawaska, ME 04756",
+    zoningOfficePhone: "(207) 728-6356",
+    zoningOfficeWebsiteUrl: "https://www.madawaska-me.org/planning-zoning",
+    // Code Enforcement Officer (CEO) Information
+    ceoName: "John Smith",
+    ceoEmail: "ceo@madawaska-me.org",
+    ceoPhone: "(207) 728-6356",
+    // Plumbing Inspector Information
+    plumbingInspectorName: "Mike Johnson",
+    plumbingInspectorEmail: "plumbing@madawaska-me.org",
+    plumbingInspectorPhone: "(207) 728-6356"
   },
   {
     name: "Fort Kent",
     state: "ME", 
     country: "United States",
-    description: "Northernmost town in Maine, near the Canadian border"
+    description: "Northernmost town in Maine, near the Canadian border",
+    // Tax Information Fields
+    taxPaymentAddress: "416 West Main Street, Fort Kent, ME 04743",
+    taxPaymentWebsite: "https://www.fortkent.org/tax-collector",
+    taxOfficePhone: "(207) 834-3105",
+    taxDueMonth: 10, // October
+    taxDueDay: 31, // 31st of the month
+    lateInterestRate: 8.0, // 8% late payment interest
+    assessmentMonth: 3, // March
+    assessmentDay: 1, // 1st of the month
+    taxNotes: "Tax bills mailed in September, due October 31st. Late payments accrue 8% interest.",
+    // Zoning Information Fields
+    zoningOfficeAddress: "416 West Main Street, Fort Kent, ME 04743",
+    zoningOfficePhone: "(207) 834-3105",
+    zoningOfficeWebsiteUrl: "https://www.fortkent.org/planning-zoning",
+    // Code Enforcement Officer (CEO) Information
+    ceoName: "Sarah Wilson",
+    ceoEmail: "ceo@fortkent.org",
+    ceoPhone: "(207) 834-3105",
+    // Plumbing Inspector Information
+    plumbingInspectorName: "David Brown",
+    plumbingInspectorEmail: "plumbing@fortkent.org",
+    plumbingInspectorPhone: "(207) 834-3105"
   }
 ]
 

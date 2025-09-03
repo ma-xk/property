@@ -17,6 +17,16 @@ import {
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { GlobalSearch } from "@/components/global-search"
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogTrigger 
+} from "@/components/ui/dialog"
+import { CreatePropertyForm } from "@/components/create-property-form"
+import { CreatePersonForm } from "@/components/create-person-form"
+import { CreatePlaceForm } from "@/components/create-place-form"
 
 interface Property {
   id: string
@@ -43,6 +53,9 @@ export function OverviewDashboard() {
   const [people, setPeople] = useState<Person[]>([])
   const [places, setPlaces] = useState<Place[]>([])
   const [loading, setLoading] = useState(true)
+  const [propertyModalOpen, setPropertyModalOpen] = useState(false)
+  const [personModalOpen, setPersonModalOpen] = useState(false)
+  const [placeModalOpen, setPlaceModalOpen] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -81,6 +94,33 @@ export function OverviewDashboard() {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount)
+  }
+
+  const handlePropertyCreated = () => {
+    setPropertyModalOpen(false)
+    // Refresh the properties data
+    fetch('/api/properties')
+      .then(res => res.json())
+      .then(data => setProperties(Array.isArray(data) ? data : []))
+      .catch(error => console.error('Error refreshing properties:', error))
+  }
+
+  const handlePersonCreated = () => {
+    setPersonModalOpen(false)
+    // Refresh the people data
+    fetch('/api/people')
+      .then(res => res.json())
+      .then(data => setPeople(Array.isArray(data) ? data : []))
+      .catch(error => console.error('Error refreshing people:', error))
+  }
+
+  const handlePlaceCreated = () => {
+    setPlaceModalOpen(false)
+    // Refresh the places data
+    fetch('/api/places')
+      .then(res => res.json())
+      .then(data => setPlaces(Array.isArray(data) ? data : []))
+      .catch(error => console.error('Error refreshing places:', error))
   }
 
   if (loading) {
@@ -187,24 +227,62 @@ export function OverviewDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Link href="/properties/new">
-              <Button className="w-full justify-start" variant="outline">
-                <Building2 className="h-4 w-4 mr-2" />
-                Add Property
-              </Button>
-            </Link>
-            <Link href="/people/new">
-              <Button className="w-full justify-start" variant="outline">
-                <Users className="h-4 w-4 mr-2" />
-                Add Person
-              </Button>
-            </Link>
-            <Link href="/places/new">
-              <Button className="w-full justify-start" variant="outline">
-                <MapPin className="h-4 w-4 mr-2" />
-                Add Place
-              </Button>
-            </Link>
+            <Dialog open={propertyModalOpen} onOpenChange={setPropertyModalOpen}>
+              <DialogTrigger asChild>
+                <Button className="w-full justify-start" variant="outline">
+                  <Building2 className="h-4 w-4 mr-2" />
+                  Add Property
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Add New Property</DialogTitle>
+                </DialogHeader>
+                <CreatePropertyForm 
+                  onSuccess={handlePropertyCreated}
+                  onCancel={() => setPropertyModalOpen(false)}
+                  showCard={false}
+                />
+              </DialogContent>
+            </Dialog>
+
+            <Dialog open={personModalOpen} onOpenChange={setPersonModalOpen}>
+              <DialogTrigger asChild>
+                <Button className="w-full justify-start" variant="outline">
+                  <Users className="h-4 w-4 mr-2" />
+                  Add Person
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-lg">
+                <DialogHeader>
+                  <DialogTitle>Add New Person</DialogTitle>
+                </DialogHeader>
+                <CreatePersonForm 
+                  onSuccess={handlePersonCreated}
+                  onCancel={() => setPersonModalOpen(false)}
+                  showCard={false}
+                />
+              </DialogContent>
+            </Dialog>
+
+            <Dialog open={placeModalOpen} onOpenChange={setPlaceModalOpen}>
+              <DialogTrigger asChild>
+                <Button className="w-full justify-start" variant="outline">
+                  <MapPin className="h-4 w-4 mr-2" />
+                  Add Place
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-lg">
+                <DialogHeader>
+                  <DialogTitle>Add New Place</DialogTitle>
+                </DialogHeader>
+                <CreatePlaceForm 
+                  onSuccess={handlePlaceCreated}
+                  onCancel={() => setPlaceModalOpen(false)}
+                  showCard={false}
+                />
+              </DialogContent>
+            </Dialog>
           </CardContent>
         </Card>
 
@@ -226,21 +304,23 @@ export function OverviewDashboard() {
             {recentProperties.length > 0 ? (
               <div className="space-y-3">
                 {recentProperties.map((property) => (
-                  <div key={property.id} className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">{property.name || 'Untitled Property'}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {formatCurrency(property.purchasePrice)}
-                      </p>
+                  <Link key={property.id} href={`/property/${property.id}`} className="block">
+                    <div className="flex items-center justify-between p-2 rounded-md hover:bg-muted/50 transition-colors">
+                      <div>
+                        <p className="font-medium">{property.name || 'Untitled Property'}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {formatCurrency(property.purchasePrice)}
+                        </p>
+                      </div>
+                      <div className={`px-2 py-1 rounded-full text-xs ${
+                        property.available 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {property.available ? 'Available' : 'Occupied'}
+                      </div>
                     </div>
-                    <div className={`px-2 py-1 rounded-full text-xs ${
-                      property.available 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-gray-100 text-gray-800'
-                    }`}>
-                      {property.available ? 'Available' : 'Occupied'}
-                    </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             ) : (
@@ -267,14 +347,16 @@ export function OverviewDashboard() {
             {recentPeople.length > 0 ? (
               <div className="space-y-3">
                 {recentPeople.map((person) => (
-                  <div key={person.id} className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">{person.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        Added {new Date(person.createdAt).toLocaleDateString()}
-                      </p>
+                  <Link key={person.id} href={`/people/${person.id}`} className="block">
+                    <div className="flex items-center justify-between p-2 rounded-md hover:bg-muted/50 transition-colors">
+                      <div>
+                        <p className="font-medium">{person.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          Added {new Date(person.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             ) : (
