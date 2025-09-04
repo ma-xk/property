@@ -43,9 +43,15 @@ interface Property {
   purchasePrice?: number
   acres?: number
   type?: string
-
+  assessedValue?: number
   available: boolean
   createdAt: string
+  place?: {
+    id: string
+    name: string
+    state?: string
+    millRate?: number
+  }
 }
 
 interface Place {
@@ -1229,10 +1235,10 @@ export default function PlaceDetailPage() {
                           <div className=" font-semibold">
                             {formatCurrency(property.purchasePrice)}
                           </div>
-                          {property.estimatedTaxes && (
+                          {property.assessedValue && property.place?.millRate && (
                             <div className="text-xs text-muted-foreground flex items-center gap-1">
                               <DollarSign className="h-3 w-3" />
-                              {formatCurrency(property.estimatedTaxes)} taxes/year
+                              {formatCurrency((Number(property.assessedValue) * Number(property.place.millRate)) / 1000)} taxes/year
                             </div>
                           )}
                           <div className="text-xs text-muted-foreground">

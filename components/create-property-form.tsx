@@ -173,7 +173,6 @@ export function CreatePropertyForm({ onSuccess, onCancel, showCard = true }: Cre
         purchasePrice: "",
         earnestMoney: "",
         closingDate: "",
-        estimatedTaxes: "",
         
         // Financing Details
         financingType: "",

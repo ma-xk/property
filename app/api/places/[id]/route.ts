@@ -69,9 +69,17 @@ export async function GET(
             purchasePrice: true,
             acres: true,
             type: true,
-
+            assessedValue: true,
             available: true,
             createdAt: true,
+            place: {
+              select: {
+                id: true,
+                name: true,
+                state: true,
+                millRate: true,
+              }
+            }
           },
           orderBy: {
             createdAt: 'desc'
@@ -169,9 +177,17 @@ export async function PUT(
             purchasePrice: true,
             acres: true,
             type: true,
-
+            assessedValue: true,
             available: true,
             createdAt: true,
+            place: {
+              select: {
+                id: true,
+                name: true,
+                state: true,
+                millRate: true,
+              }
+            }
           },
           orderBy: {
             createdAt: 'desc'
