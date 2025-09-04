@@ -39,7 +39,6 @@ export function ComprehensivePropertyForm({ onSuccess, onCancel }: Comprehensive
     purchasePrice: "",
     earnestMoney: "",
     closingDate: "",
-    estimatedTaxes: "",
     
     // Financing Details
     financingType: "",
@@ -118,7 +117,6 @@ export function ComprehensivePropertyForm({ onSuccess, onCancel }: Comprehensive
         purchasePrice: formData.purchasePrice ? parseFloat(formData.purchasePrice) : undefined,
         earnestMoney: formData.earnestMoney ? parseFloat(formData.earnestMoney) : undefined,
         closingDate: formData.closingDate ? new Date(formData.closingDate).toISOString() : undefined,
-        estimatedTaxes: formData.estimatedTaxes ? parseFloat(formData.estimatedTaxes) : undefined,
         
         financingType: formData.financingType || undefined,
         financingTerms: formData.financingTerms || undefined,
@@ -385,19 +383,7 @@ export function ComprehensivePropertyForm({ onSuccess, onCancel }: Comprehensive
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="estimatedTaxes">Estimated Annual Taxes ($)</Label>
-                <Input
-                  id="estimatedTaxes"
-                  name="estimatedTaxes"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={formData.estimatedTaxes}
-                  onChange={handleInputChange}
-                  placeholder="350.00"
-                />
-              </div>
+
             </div>
           </div>
         )

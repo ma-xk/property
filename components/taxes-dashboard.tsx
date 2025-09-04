@@ -1,6 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -29,7 +31,14 @@ interface TaxData {
     totalEstimatedTaxes: number
     totalStateTaxStamps: number
     totalPropertyTaxProration: number
-    properties: any[]
+    places: Record<string, {
+      count: number
+      totalEstimatedTaxes: number
+      totalStateTaxStamps: number
+      totalPropertyTaxProration: number
+      millRate?: number
+      properties: any[]
+    }>
   }>
   properties: Array<{
     id: string
@@ -41,12 +50,17 @@ interface TaxData {
     name?: string
     purchasePrice?: number
     closingDate?: string
-    estimatedTaxes?: number
+    assessedValue?: number
+    marketValue?: number
+    lastAssessmentDate?: string
+    estimatedAnnualTaxes?: number
     stateTaxStamps?: number
     propertyTaxProration?: number
     place?: {
+      id: string
       name: string
       state: string
+      millRate?: number
     }
     createdAt: string
     updatedAt: string
@@ -54,6 +68,7 @@ interface TaxData {
 }
 
 export function TaxesDashboard() {
+  const router = useRouter()
   const [taxData, setTaxData] = useState<TaxData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -219,7 +234,8 @@ export function TaxesDashboard() {
             <div className="space-y-4">
               {Object.entries(propertiesByState).map(([state, data]) => (
                 <div key={state} className="border-b pb-4 last:border-b-0">
-                  <div className="flex justify-between items-start mb-2">
+                  {/* State Header */}
+                  <div className="flex justify-between items-start mb-3">
                     <div>
                       <h4 className="font-medium">{state}</h4>
                       <p className="text-sm text-muted-foreground">
@@ -235,8 +251,66 @@ export function TaxesDashboard() {
                       </div>
                     </div>
                   </div>
+                  
+                  {/* Places within State */}
+                  <div className="space-y-2 ml-4">
+                    {Object.entries(data.places).map(([placeName, placeData]) => {
+                      // Find the first property to get the place ID
+                      const firstProperty = placeData.properties[0]
+                      const placeId = firstProperty?.place?.id
+                      
+                      return (
+                        <div key={placeName} className="border-l-2 border-muted pl-3 py-2">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              {placeId ? (
+                                <Link 
+                                  href={`/places/${placeId}`}
+                                  className="text-sm font-medium hover:text-primary transition-colors cursor-pointer underline decoration-dotted"
+                                >
+                                  {placeName}
+                                </Link>
+                              ) : (
+                                <h5 className="text-sm font-medium">{placeName}</h5>
+                              )}
+                              <p className="text-xs text-muted-foreground">
+                                {placeData.count} {placeData.count === 1 ? 'property' : 'properties'}
+                                {placeData.millRate && ` • ${placeData.millRate} mill rate`}
+                              </p>
+                            </div>
+                          <div className="text-right">
+                            <div className="text-sm font-medium">
+                              {formatCurrency(placeData.totalEstimatedTaxes)}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              Annual est.
+                            </div>
+                          </div>
+                        </div>
+                        {(placeData.totalStateTaxStamps > 0 || placeData.totalPropertyTaxProration > 0) && (
+                          <div className="grid grid-cols-2 gap-4 text-xs mt-2">
+                            <div>
+                              <span className="text-muted-foreground">State stamps: </span>
+                              <span className="font-medium">
+                                {formatCurrency(placeData.totalStateTaxStamps)}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="text-muted-foreground">Proration: </span>
+                              <span className="font-medium">
+                                {formatCurrency(placeData.totalPropertyTaxProration)}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )
+                    })}
+                  </div>
+                  
+                  {/* State-level closing costs */}
                   {(data.totalStateTaxStamps > 0 || data.totalPropertyTaxProration > 0) && (
-                    <div className="grid grid-cols-2 gap-4 text-xs">
+                    <div className="grid grid-cols-2 gap-4 text-xs mt-3 pt-2 border-t border-muted">
                       <div>
                         <span className="text-muted-foreground">State stamps: </span>
                         <span className="font-medium">
@@ -268,19 +342,31 @@ export function TaxesDashboard() {
           <CardContent>
             <div className="space-y-4 max-h-96 overflow-y-auto">
               {properties
-                .filter(p => p.estimatedTaxes || p.stateTaxStamps || p.propertyTaxProration)
+                .filter(p => p.estimatedAnnualTaxes || p.stateTaxStamps || p.propertyTaxProration)
                 .map((property) => (
                 <div key={property.id} className="border-b pb-4 last:border-b-0">
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex-1">
-                      <h4 className="font-medium text-sm">
+                      <Link 
+                        href={`/property/${property.id}`}
+                        className="font-medium text-sm hover:text-primary transition-colors cursor-pointer block underline decoration-dotted"
+                      >
                         {property.name || property.address}
-                      </h4>
+                      </Link>
                       <p className="text-xs text-muted-foreground">
                         {property.city && property.state 
                           ? `${property.city}, ${property.state}`
                           : property.place 
-                            ? `${property.place.name}, ${property.place.state}`
+                            ? (property.place.id ? (
+                                <Link 
+                                  href={`/places/${property.place.id}`}
+                                  className="hover:text-primary transition-colors cursor-pointer underline decoration-dotted"
+                                >
+                                  {property.place.name}, {property.place.state}
+                                </Link>
+                              ) : (
+                                `${property.place.name}, ${property.place.state}`
+                              ))
                             : property.address
                         }
                       </p>
@@ -294,11 +380,11 @@ export function TaxesDashboard() {
                   </div>
                   
                   <div className="grid grid-cols-1 gap-2 text-xs">
-                    {property.estimatedTaxes && (
+                    {property.estimatedAnnualTaxes && (
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Annual taxes:</span>
                         <span className="font-medium">
-                          {formatCurrency(Number(property.estimatedTaxes))}
+                          {formatCurrency(Number(property.estimatedAnnualTaxes))}
                         </span>
                       </div>
                     )}
@@ -322,7 +408,7 @@ export function TaxesDashboard() {
                 </div>
               ))}
               
-              {properties.filter(p => p.estimatedTaxes || p.stateTaxStamps || p.propertyTaxProration).length === 0 && (
+              {properties.filter(p => p.estimatedAnnualTaxes || p.stateTaxStamps || p.propertyTaxProration).length === 0 && (
                 <div className="text-center py-8">
                   <Receipt className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                   <h3 className="text-lg font-semibold mb-2">No tax data available</h3>

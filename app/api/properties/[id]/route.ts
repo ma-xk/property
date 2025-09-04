@@ -31,6 +31,11 @@ export async function GET(
         buyerAgentPerson: true,
         titleCompanyPerson: true,
         place: true,
+        taxPayments: {
+          orderBy: {
+            year: 'desc'
+          }
+        },
       }
     })
 
@@ -100,6 +105,11 @@ export async function PUT(
         buyerAgentPerson: true,
         titleCompanyPerson: true,
         place: true,
+        taxPayments: {
+          orderBy: {
+            year: 'desc'
+          }
+        },
       }
     })
 

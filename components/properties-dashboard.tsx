@@ -51,7 +51,6 @@ interface Property {
   purchasePrice?: number
   earnestMoney?: number
   closingDate?: string
-  estimatedTaxes?: number
   
   // Financing Details
   financingType?: string
@@ -338,14 +337,7 @@ export function PropertiesDashboard() {
                                 </span>
                               </div>
                             )}
-                            {property.estimatedTaxes && (
-                              <div className="flex items-center justify-between">
-                                <span className="text-muted-foreground text-sm">Annual Taxes</span>
-                                <span className="text-muted-foreground text-sm">
-                                  {formatCurrency(property.estimatedTaxes)}
-                                </span>
-                              </div>
-                            )}
+
                           </div>
 
                           {/* Connected People */}

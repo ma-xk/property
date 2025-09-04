@@ -283,8 +283,11 @@ This project is licensed under the MIT License.
 - ✅ **Comprehensive Property Management** - Complete real estate tracking with detailed purchase info, financing terms, closing costs, property specifications (acres, zoning), and legacy rental management features
 - ✅ **Advanced Contact Management** - Track people (agents, sellers, buyers, title companies) with roles, contact info, companies, and automatic property relationship linking
 - ✅ **Municipal Location Management** - Manage places with comprehensive municipal information including tax office details, zoning office contacts, code enforcement officers, and plumbing inspector information
-- ✅ **Tax Management System** - Dedicated tax dashboard with consolidated tax analytics, state-by-state breakdowns, annual tax estimates, state tax stamps tracking, and property tax proration analysis
-- ✅ **Municipal Tax Information** - Track tax payment addresses, websites, office phone numbers, due dates, late interest rates, assessment schedules, and custom tax notes per location
+- ✅ **Advanced Tax Management System** - Comprehensive tax dashboard with consolidated analytics, state-by-state breakdowns, annual tax estimates, state tax stamps tracking, property tax proration analysis, and mill rate calculations
+- ✅ **Municipal Tax Information** - Track tax payment addresses, websites, office phone numbers, due dates, late interest rates, assessment schedules, mill rates, and custom tax notes per location
+- ✅ **Property Valuation Tracking** - Monitor assessed values, market values, assessment dates, and assessment notes with automatic tax calculations using mill rates
+- ✅ **Historical Tax Payment Records** - Track actual tax payments by year with payment dates, amounts, and notes for comprehensive tax history
+- ✅ **Tax Calculation Engine** - Automatic calculation of estimated annual taxes using assessed/market values and mill rates with clear breakdowns
 - ✅ **Zoning & Code Enforcement** - Store zoning office addresses, phone numbers, website URLs, plus contact details for Code Enforcement Officers and Plumbing Inspectors
 - ✅ **Financial Analytics** - Monitor purchase prices, earnest money, comprehensive closing costs breakdown, and investment totals with professional currency formatting
 - ✅ **Global Search & Navigation** - Real-time search across all properties, people, and places with intelligent filtering and quick navigation

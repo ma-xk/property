@@ -42,7 +42,6 @@ const mockLandProperties = [
     buyerAgent: "Mindy Braley",
     titleCompany: "Gateway Title of Maine",
     closingDate: "3/31/2025",
-    estimatedTaxes: 151.8,
     status: "Pending",
     image: "🏠"
   },
@@ -70,7 +69,6 @@ const mockLandProperties = [
     buyerAgent: "Sydney Dummond",
     titleCompany: "Gateway Title of Maine",
     closingDate: "8/18/2025",
-    estimatedTaxes: 444,
     status: "Pending",
     image: "🌲"
   },
@@ -98,7 +96,6 @@ const mockLandProperties = [
     buyerAgent: "Mindy Braley",
     titleCompany: "Gateway Title of Maine",
     closingDate: "8/20/2025",
-    estimatedTaxes: 379.5,
     status: "Pending",
     image: "🏘️"
   },
@@ -126,7 +123,6 @@ const mockLandProperties = [
     buyerAgent: "Mindy Braley",
     titleCompany: "Gateway Title of Maine",
     closingDate: "8/21/2025",
-    estimatedTaxes: 391,
     status: "Pending",
     image: "🏞️"
   }
@@ -282,10 +278,7 @@ export function Dashboard() {
                           <span className="text-slate-400">Closing Date:</span>
                           <div className="text-slate-300">{property.closingDate}</div>
                         </div>
-                        <div>
-                          <span className="text-slate-400">Est. Taxes:</span>
-                          <div className="text-slate-300">${property.estimatedTaxes}</div>
-                        </div>
+
                       </div>
 
                       {property.balloonDueDate && (

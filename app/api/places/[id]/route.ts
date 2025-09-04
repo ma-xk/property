@@ -19,6 +19,7 @@ const updatePlaceSchema = z.object({
   lateInterestRate: z.union([z.number().min(0).max(100), z.string().transform((val) => parseFloat(val)), z.null()]).optional(),
   assessmentMonth: z.number().int().min(1).max(12).optional(),
   assessmentDay: z.number().int().min(1).max(31).optional(),
+  millRate: z.union([z.number().min(0), z.string().transform((val) => parseFloat(val)), z.null()]).optional(),
   taxNotes: z.string().nullable().optional(),
   
   // Zoning Information Fields
@@ -68,7 +69,7 @@ export async function GET(
             purchasePrice: true,
             acres: true,
             type: true,
-            estimatedTaxes: true,
+
             available: true,
             createdAt: true,
           },
@@ -168,7 +169,7 @@ export async function PUT(
             purchasePrice: true,
             acres: true,
             type: true,
-            estimatedTaxes: true,
+
             available: true,
             createdAt: true,
           },

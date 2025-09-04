@@ -37,7 +37,6 @@ export function CreatePropertyForm({ onSuccess, onCancel, showCard = true }: Cre
     purchasePrice: "",
     earnestMoney: "",
     closingDate: "",
-    estimatedTaxes: "",
     
     // Financing Details
     financingType: "",
@@ -103,7 +102,6 @@ export function CreatePropertyForm({ onSuccess, onCancel, showCard = true }: Cre
         purchasePrice: formData.purchasePrice ? parseFloat(formData.purchasePrice) : undefined,
         earnestMoney: formData.earnestMoney ? parseFloat(formData.earnestMoney) : undefined,
         closingDate: formData.closingDate || undefined,
-        estimatedTaxes: formData.estimatedTaxes ? parseFloat(formData.estimatedTaxes) : undefined,
         
         // Financing Details
         financingType: formData.financingType || undefined,
@@ -402,19 +400,7 @@ export function CreatePropertyForm({ onSuccess, onCancel, showCard = true }: Cre
                 />
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="estimatedTaxes">Estimated Annual Taxes ($)</Label>
-                <Input
-                  id="estimatedTaxes"
-                  name="estimatedTaxes"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={formData.estimatedTaxes}
-                  onChange={handleInputChange}
-                  placeholder="391.00"
-                />
-              </div>
+
             </div>
           </div>
 

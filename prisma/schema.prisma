@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -23,8 +20,7 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -44,13 +40,14 @@ model User {
   emailVerified DateTime?
   image         String?
   password      String?
-  accounts      Account[]
-  sessions      Session[]
-  properties    Property[]
-  people        Person[]
-  places        Place[]
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
+  accounts      Account[]
+  people        Person[]
+  places        Place[]
+  properties    Property[]
+  sessions      Session[]
+  taxPayments   TaxPayment[]
 }
 
 model VerificationToken {
@@ -62,152 +59,144 @@ model VerificationToken {
 }
 
 model Place {
-  id          String   @id @default(cuid())
-  name        String   // City, town, or area name
-  state       String?  // State or province
-  country     String   @default("United States")
-  description String?  // Description of the place
-  
-  // Tax Information Fields
-  taxPaymentAddress String?  // Mailing address for tax payments
-  taxPaymentWebsite String?  // Website URL for online tax payments
-  taxOfficePhone    String?  // Phone number for tax office
-  taxDueMonth       Int?     // Month when taxes are due (1-12)
-  taxDueDay         Int?     // Day of month when taxes are due (1-31)
-  lateInterestRate  Decimal? // Late payment interest rate percentage
-  assessmentMonth   Int?     // Month when property assessments occur (1-12)
-  assessmentDay     Int?     // Day of month when assessments occur (1-31)
-  taxNotes          String?  // Additional notes about tax information
-  
-  // Zoning Information Fields
-  zoningOfficeAddress    String? // Zoning office address
-  zoningOfficePhone      String? // Zoning office phone number
-  zoningOfficeWebsiteUrl String? // Zoning office website URL
-  
-  // Code Enforcement Officer (CEO) Information
-  ceoName  String? // Code Enforcement Officer name
-  ceoEmail String? // Code Enforcement Officer email
-  ceoPhone String? // Code Enforcement Officer phone
-  
-  // Plumbing Inspector Information
-  plumbingInspectorName  String? // Plumbing Inspector name
-  plumbingInspectorEmail String? // Plumbing Inspector email
-  plumbingInspectorPhone String? // Plumbing Inspector phone
-  
-  // System fields
-  userId      String   // Foreign key to User (who manages this place data)
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  // Relationships
-  properties  Property[]
-  
-  @@unique([name, state, userId]) // Unique place per user
+  id                     String     @id @default(cuid())
+  name                   String
+  state                  String?
+  country                String     @default("United States")
+  description            String?
+  userId                 String
+  createdAt              DateTime   @default(now())
+  updatedAt              DateTime   @updatedAt
+  assessmentDay          Int?
+  assessmentMonth        Int?
+  lateInterestRate       Decimal?
+  taxDueDay              Int?
+  taxDueMonth            Int?
+  taxNotes               String?
+  taxOfficePhone         String?
+  taxPaymentAddress      String?
+  taxPaymentWebsite      String?
+  ceoEmail               String?
+  ceoName                String?
+  ceoPhone               String?
+  plumbingInspectorEmail String?
+  plumbingInspectorName  String?
+  plumbingInspectorPhone String?
+  zoningOfficeAddress    String?
+  zoningOfficePhone      String?
+  zoningOfficeWebsiteUrl String?
+  millRate               Decimal?
+  user                   User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  properties             Property[]
+
+  @@unique([name, state, userId])
   @@index([userId])
 }
 
 model Person {
-  id          String   @id @default(cuid())
-  name        String   // Full name
-  email       String?  // Email address
-  phone       String?  // Phone number
-  company     String?  // Company/organization
-  role        String?  // Role (e.g., "Real Estate Agent", "Seller", "Title Company")
-  notes       String?  // Additional notes
-  
-  // System fields
-  userId      String   // Foreign key to User (who manages this person data)
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  // Relationships - properties where this person is involved
-  propertiesAsSeller      Property[] @relation("PropertySeller")
-  propertiesAsSellerAgent Property[] @relation("PropertySellerAgent")
-  propertiesAsBuyerAgent  Property[] @relation("PropertyBuyerAgent")
+  id                       String     @id @default(cuid())
+  name                     String
+  email                    String?
+  phone                    String?
+  company                  String?
+  role                     String?
+  notes                    String?
+  userId                   String
+  createdAt                DateTime   @default(now())
+  updatedAt                DateTime   @updatedAt
+  user                     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  propertiesAsBuyerAgent   Property[] @relation("PropertyBuyerAgent")
+  propertiesAsSellerAgent  Property[] @relation("PropertySellerAgent")
+  propertiesAsSeller       Property[] @relation("PropertySeller")
   propertiesAsTitleCompany Property[] @relation("PropertyTitleCompany")
-  
-  @@unique([name, userId]) // Unique person per user
+
+  @@unique([name, userId])
   @@index([userId])
 }
 
 model Property {
+  id                   String    @id @default(cuid())
+  address              String
+  name                 String?
+  description          String?
+  type                 String?
+  bedrooms             Int?
+  bathrooms            Decimal?
+  squareFeet           Int?
+  rent                 Decimal?
+  deposit              Decimal?
+  available            Boolean   @default(true)
+  userId               String
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  acres                Decimal?
+  balloonDueDate       DateTime?
+  buyerAgent           String?
+  closingDate          DateTime?
+  eRecordingFee        Decimal?
+  earnestMoney         Decimal?
+
+  financingTerms       String?
+  financingType        String?
+  ownersPolicyPremium  Decimal?
+  propertyTaxProration Decimal?
+  purchasePrice        Decimal?
+  realEstateCommission Decimal?
+  recordingFeesDeed    Decimal?
+  seller               String?
+  sellerAgent          String?
+  stateTaxStamps       Decimal?
+  titleCompany         String?
+  titleExamination     Decimal?
+  titleSettlementFee   Decimal?
+  zoning               String?
+  buyerAgentId         String?
+  placeId              String?
+  sellerAgentId        String?
+  sellerId             String?
+  titleCompanyId       String?
+  city                 String?
+  state                String?
+  streetAddress        String?
+  zipCode              String?
+  assessedValue        Decimal?
+  assessmentNotes      String?
+  lastAssessmentDate   DateTime?
+  marketValue          Decimal?
+  buyerAgentPerson     Person?   @relation("PropertyBuyerAgent", fields: [buyerAgentId], references: [id])
+  place                Place?    @relation(fields: [placeId], references: [id])
+  sellerAgentPerson    Person?   @relation("PropertySellerAgent", fields: [sellerAgentId], references: [id])
+  sellerPerson         Person?   @relation("PropertySeller", fields: [sellerId], references: [id])
+  titleCompanyPerson   Person?   @relation("PropertyTitleCompany", fields: [titleCompanyId], references: [id])
+  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  taxPayments          TaxPayment[]
+
+  @@index([userId])
+  @@index([placeId])
+  @@index([sellerId])
+  @@index([sellerAgentId])
+  @@index([buyerAgentId])
+  @@index([titleCompanyId])
+}
+
+model TaxPayment {
   id          String   @id @default(cuid())
-  address     String   // Legacy full address field (keeping for backward compatibility)
-  
-  // Separate address components
-  streetAddress String? // Street number and name (e.g., "123 Main Street")
-  city         String?  // City/Town name (e.g., "Stamford", "Madawaska")
-  state        String?  // State abbreviation (e.g., "CT", "ME")
-  zipCode      String?  // ZIP code (e.g., "06901")
-  
-  // Basic Property Info
-  name        String?  // Optional: Property name/title
-  description String?  // Optional: Property description
-  acres       Decimal? // Property size in acres
-  zoning      String?  // Zoning classification
-  
-  // Purchase Information
-  purchasePrice      Decimal? // Purchase price
-  earnestMoney       Decimal? // Earnest money deposit
-  closingDate        DateTime? // Actual closing date
-  estimatedTaxes     Decimal? // Annual estimated taxes
-  
-  // Financing Details
-  financingType      String?  // Cash, Seller Financing, etc.
-  financingTerms     String?  // Detailed financing terms
-  balloonDueDate     DateTime? // Balloon payment due date
-  
-  // Closing Costs
-  titleSettlementFee    Decimal? // Title settlement fee
-  titleExamination      Decimal? // Title examination cost
-  ownersPolicyPremium   Decimal? // Owner's policy premium
-  recordingFeesDeed     Decimal? // Recording fees for deed
-  stateTaxStamps        Decimal? // State tax/stamps
-  eRecordingFee         Decimal? // E-recording fee
-  propertyTaxProration  Decimal? // Property tax proration
-  realEstateCommission  Decimal? // Real estate commission
-  
-  // Legacy string fields (keeping for backward compatibility)
-  seller          String?  // Seller name
-  sellerAgent     String?  // Seller's agent
-  buyerAgent      String?  // Buyer's agent
-  titleCompany    String?  // Title company
-  
-  // New relationship fields (optional - can be used instead of strings)
-  sellerId        String?
-  sellerAgentId   String?
-  buyerAgentId    String?
-  titleCompanyId  String?
-  placeId         String?
+  year        Int      // Tax year (e.g., 2024)
+  amount      Decimal  // Payment amount
+  paymentDate DateTime // Date when payment was made
+  notes       String?  // Optional notes about the payment
   
   // Relationships
-  sellerPerson     Person? @relation("PropertySeller", fields: [sellerId], references: [id])
-  sellerAgentPerson Person? @relation("PropertySellerAgent", fields: [sellerAgentId], references: [id])
-  buyerAgentPerson  Person? @relation("PropertyBuyerAgent", fields: [buyerAgentId], references: [id])
-  titleCompanyPerson Person? @relation("PropertyTitleCompany", fields: [titleCompanyId], references: [id])
-  place            Place?  @relation(fields: [placeId], references: [id])
+  propertyId  String
+  property    Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   
-  // Legacy fields (keeping for backward compatibility)
-  type        String?  // Property type
-  bedrooms    Int?     // Number of bedrooms
-  bathrooms   Decimal? // Number of bathrooms
-  squareFeet  Int?     // Square footage
-  rent        Decimal? // Monthly rent amount
-  deposit     Decimal? // Security deposit
-  available   Boolean  @default(true) // Whether property is available
-  
-  // System fields
-  userId      String   // Foreign key to User
+  userId      String   // For security - ensure user can only access their payments
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
-  @@index([userId]) // Index for efficient user property queries
-  @@index([placeId]) // Index for place-based queries
-  @@index([sellerId]) // Index for seller-based queries
-  @@index([sellerAgentId]) // Index for agent-based queries
-  @@index([buyerAgentId]) // Index for agent-based queries
-  @@index([titleCompanyId]) // Index for title company-based queries
+  
+  @@unique([propertyId, year]) // One payment per property per year
+  @@index([propertyId])
+  @@index([userId])
 }

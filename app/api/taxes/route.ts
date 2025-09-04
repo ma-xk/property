@@ -30,13 +30,18 @@ export async function GET() {
         name: true,
         purchasePrice: true,
         closingDate: true,
-        estimatedTaxes: true,
+
         stateTaxStamps: true,
         propertyTaxProration: true,
+        assessedValue: true,
+        marketValue: true,
+        lastAssessmentDate: true,
         place: {
           select: {
+            id: true,
             name: true,
             state: true,
+            millRate: true,
           }
         },
         createdAt: true,
@@ -49,9 +54,22 @@ export async function GET() {
 
     // Calculate summary statistics
     const totalProperties = properties.length
-    const totalEstimatedAnnualTaxes = properties
-      .filter(p => p.estimatedTaxes)
-      .reduce((sum, p) => sum + Number(p.estimatedTaxes || 0), 0)
+    
+    // Calculate estimated annual taxes for each property
+    const propertiesWithEstimatedTaxes = properties.map(property => {
+      const estimatedAnnualTaxes = property.assessedValue && property.place?.millRate 
+        ? (Number(property.assessedValue) * Number(property.place.millRate)) / 1000
+        : null
+      
+      return {
+        ...property,
+        estimatedAnnualTaxes
+      }
+    })
+    
+    const totalEstimatedAnnualTaxes = propertiesWithEstimatedTaxes
+      .filter(p => p.estimatedAnnualTaxes)
+      .reduce((sum, p) => sum + Number(p.estimatedAnnualTaxes || 0), 0)
     
     const totalStateTaxStamps = properties
       .filter(p => p.stateTaxStamps)
@@ -61,27 +79,47 @@ export async function GET() {
       .filter(p => p.propertyTaxProration)
       .reduce((sum, p) => sum + Number(p.propertyTaxProration || 0), 0)
 
-    const propertiesWithTaxData = properties.filter(p => 
-      p.estimatedTaxes || p.stateTaxStamps || p.propertyTaxProration
+    const propertiesWithTaxData = propertiesWithEstimatedTaxes.filter(p => 
+      p.estimatedAnnualTaxes || p.stateTaxStamps || p.propertyTaxProration
     ).length
 
-    // Group properties by state for regional analysis
-    const propertiesByState = properties.reduce((acc, property) => {
+    // Group properties by state and place for regional analysis
+    const propertiesByState = propertiesWithEstimatedTaxes.reduce((acc, property) => {
       const state = property.state || property.place?.state || 'Unknown'
+      const placeName = property.place?.name || property.city || 'Unknown Place'
+      
       if (!acc[state]) {
         acc[state] = {
           count: 0,
           totalEstimatedTaxes: 0,
           totalStateTaxStamps: 0,
           totalPropertyTaxProration: 0,
+          places: {}
+        }
+      }
+      
+      if (!acc[state].places[placeName]) {
+        acc[state].places[placeName] = {
+          count: 0,
+          totalEstimatedTaxes: 0,
+          totalStateTaxStamps: 0,
+          totalPropertyTaxProration: 0,
+          millRate: property.place?.millRate,
           properties: []
         }
       }
+      
       acc[state].count++
-      acc[state].totalEstimatedTaxes += Number(property.estimatedTaxes || 0)
+      acc[state].totalEstimatedTaxes += Number(property.estimatedAnnualTaxes || 0)
       acc[state].totalStateTaxStamps += Number(property.stateTaxStamps || 0)
       acc[state].totalPropertyTaxProration += Number(property.propertyTaxProration || 0)
-      acc[state].properties.push(property)
+      
+      acc[state].places[placeName].count++
+      acc[state].places[placeName].totalEstimatedTaxes += Number(property.estimatedAnnualTaxes || 0)
+      acc[state].places[placeName].totalStateTaxStamps += Number(property.stateTaxStamps || 0)
+      acc[state].places[placeName].totalPropertyTaxProration += Number(property.propertyTaxProration || 0)
+      acc[state].places[placeName].properties.push(property)
+      
       return acc
     }, {} as Record<string, any>)
 
@@ -95,7 +133,7 @@ export async function GET() {
         averageEstimatedTaxes: propertiesWithTaxData > 0 ? totalEstimatedAnnualTaxes / propertiesWithTaxData : 0,
       },
       propertiesByState,
-      properties,
+      properties: propertiesWithEstimatedTaxes,
     })
   } catch (error) {
     console.error("Error fetching tax data:", error)

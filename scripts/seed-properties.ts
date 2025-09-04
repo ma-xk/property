@@ -34,7 +34,9 @@ const places = [
     // Plumbing Inspector Information
     plumbingInspectorName: "Mike Johnson",
     plumbingInspectorEmail: "plumbing@madawaska-me.org",
-    plumbingInspectorPhone: "(207) 728-6356"
+    plumbingInspectorPhone: "(207) 728-6356",
+    // Tax Rate Information
+    millRate: 18.5 // $18.50 per $1,000 of assessed value
   },
   {
     name: "Fort Kent",
@@ -62,7 +64,9 @@ const places = [
     // Plumbing Inspector Information
     plumbingInspectorName: "David Brown",
     plumbingInspectorEmail: "plumbing@fortkent.org",
-    plumbingInspectorPhone: "(207) 834-3105"
+    plumbingInspectorPhone: "(207) 834-3105",
+    // Tax Rate Information
+    millRate: 16.2 // $16.20 per $1,000 of assessed value
   }
 ]
 
@@ -140,7 +144,12 @@ const properties = [
     seller: "",
     sellerAgent: "Mindy Braley",
     buyerAgent: "Mindy Braley", 
-    titleCompany: "Gateway Title of Maine"
+    titleCompany: "Gateway Title of Maine",
+    // New tax assessment fields
+    assessedValue: 8200,
+    marketValue: 8500,
+    lastAssessmentDate: new Date("2024-04-01"),
+    assessmentNotes: "Assessed at 96.5% of market value per town policy"
   },
   {
     address: "840 North Perley Brook Road, Fort Kent, ME",
@@ -170,7 +179,12 @@ const properties = [
     seller: "",
     sellerAgent: "Sydney Dummond",
     buyerAgent: "Sydney Dummond",
-    titleCompany: "Gateway Title of Maine"
+    titleCompany: "Gateway Title of Maine",
+    // New tax assessment fields
+    assessedValue: 27400,
+    marketValue: 28000,
+    lastAssessmentDate: new Date("2024-03-01"),
+    assessmentNotes: "Rural land assessment based on comparable sales"
   },
   {
     address: "Lot 94 Winter Street, Madawaska, ME",
@@ -200,7 +214,12 @@ const properties = [
     seller: "",
     sellerAgent: "Robert Kieffer",
     buyerAgent: "Mindy Braley",
-    titleCompany: "Gateway Title of Maine"
+    titleCompany: "Gateway Title of Maine",
+    // New tax assessment fields
+    assessedValue: 20500,
+    marketValue: 21000,
+    lastAssessmentDate: new Date("2024-04-01"),
+    assessmentNotes: "Residential lot with dual road frontage premium"
   },
   {
     address: "Lot 45 Winter Street, Madawaska, ME",
@@ -230,7 +249,48 @@ const properties = [
     seller: "FSBO (Joseph James Pelletier)",
     sellerAgent: "",
     buyerAgent: "Mindy Braley",
-    titleCompany: "Gateway Title of Maine"
+    titleCompany: "Gateway Title of Maine",
+    // New tax assessment fields
+    assessedValue: 21100,
+    marketValue: 22000,
+    lastAssessmentDate: new Date("2024-04-01"),
+    assessmentNotes: "Large residential lot with cul-de-sac control premium"
+  }
+]
+
+// Sample tax payments data for historical records
+const taxPayments = [
+  // 5th Avenue Lot - 2024 payment
+  {
+    propertyAddress: "126 5th Avenue, Madawaska, ME",
+    year: 2024,
+    amount: 151.8,
+    paymentDate: new Date("2024-09-15"),
+    notes: "Annual property tax payment"
+  },
+  // Perley Brook Land - 2024 payment
+  {
+    propertyAddress: "840 North Perley Brook Road, Fort Kent, ME", 
+    year: 2024,
+    amount: 444.0,
+    paymentDate: new Date("2024-10-31"),
+    notes: "Annual property tax payment"
+  },
+  // Winter Street Lot 94 - 2024 payment
+  {
+    propertyAddress: "Lot 94 Winter Street, Madawaska, ME",
+    year: 2024,
+    amount: 379.5,
+    paymentDate: new Date("2024-09-15"),
+    notes: "Annual property tax payment"
+  },
+  // Winter Street Lot 45 - 2024 payment
+  {
+    propertyAddress: "Lot 45 Winter Street, Madawaska, ME",
+    year: 2024,
+    amount: 391.0,
+    paymentDate: new Date("2024-09-15"),
+    notes: "Annual property tax payment"
   }
 ]
 
@@ -253,6 +313,7 @@ async function main() {
 
     // Clean up existing data to avoid duplicates
     console.log("🗑️  Cleaning up existing data...")
+    await prisma.taxPayment.deleteMany({ where: { userId: user.id } })
     await prisma.property.deleteMany({ where: { userId: user.id } })
     await prisma.person.deleteMany({ where: { userId: user.id } })
     await prisma.place.deleteMany({ where: { userId: user.id } })
@@ -269,7 +330,7 @@ async function main() {
         }
       })
       createdPlaces.set(`${place.name}-${place.state}`, place)
-      console.log(`✅ Created place: ${place.name}, ${place.state}`)
+      console.log(`✅ Created place: ${place.name}, ${place.state} (Mill Rate: ${place.millRate})`)
     }
 
     // Create people
@@ -289,6 +350,7 @@ async function main() {
 
     // Create properties with relationships
     console.log(`🏠 Creating ${properties.length} properties...`)
+    const createdProperties = new Map<string, any>()
     
     for (const propertyData of properties) {
       // Find related place and people
@@ -316,7 +378,28 @@ async function main() {
           titleCompanyId: titleCompany?.id,
         }
       })
-      console.log(`✅ Created property: ${property.address}`)
+      createdProperties.set(property.address, property)
+      console.log(`✅ Created property: ${property.address} (Assessed: $${property.assessedValue}, Market: $${property.marketValue})`)
+    }
+
+    // Create tax payments
+    console.log(`💰 Creating ${taxPayments.length} tax payments...`)
+    
+    for (const paymentData of taxPayments) {
+      const property = createdProperties.get(paymentData.propertyAddress)
+      if (property) {
+        await prisma.taxPayment.create({
+          data: {
+            year: paymentData.year,
+            amount: paymentData.amount,
+            paymentDate: paymentData.paymentDate,
+            notes: paymentData.notes,
+            propertyId: property.id,
+            userId: user.id,
+          }
+        })
+        console.log(`✅ Created tax payment: ${paymentData.year} - $${paymentData.amount} for ${paymentData.propertyAddress}`)
+      }
     }
 
     console.log("🎉 Seeding completed successfully!")
@@ -324,12 +407,17 @@ async function main() {
     // Show summary
     const totalInvestment = properties.reduce((sum, p) => sum + p.purchasePrice, 0)
     const totalAcres = properties.reduce((sum, p) => sum + p.acres, 0)
+    const totalAssessedValue = properties.reduce((sum, p) => sum + (p.assessedValue || 0), 0)
+    const totalMarketValue = properties.reduce((sum, p) => sum + (p.marketValue || 0), 0)
     console.log(`📊 Summary:`)
     console.log(`   👥 People created: ${people.length}`)
     console.log(`   🏘️  Places created: ${places.length}`)
     console.log(`   🏠 Properties created: ${properties.length}`)
     console.log(`   💰 Total Investment: $${totalInvestment.toLocaleString()}`)
     console.log(`   🏞️  Total Acres: ${totalAcres} acres`)
+    console.log(`   📈 Total Assessed Value: $${totalAssessedValue.toLocaleString()}`)
+    console.log(`   📊 Total Market Value: $${totalMarketValue.toLocaleString()}`)
+    console.log(`   💸 Tax Payments created: ${taxPayments.length}`)
 
   } catch (error) {
     console.error("❌ Error seeding database:", error)

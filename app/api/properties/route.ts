@@ -24,7 +24,6 @@ const createPropertySchema = z.object({
   purchasePrice: z.number().min(0).optional(),
   earnestMoney: z.number().min(0).optional(),
   closingDate: z.string().optional(),
-  estimatedTaxes: z.number().min(0).optional(),
   
   // Financing Details
   financingType: z.string().optional(),

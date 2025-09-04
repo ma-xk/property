@@ -43,7 +43,7 @@ interface Property {
   purchasePrice?: number
   acres?: number
   type?: string
-  estimatedTaxes?: number
+
   available: boolean
   createdAt: string
 }
@@ -62,6 +62,7 @@ interface Place {
   lateInterestRate?: number
   assessmentMonth?: number
   assessmentDay?: number
+  millRate?: number
   taxNotes?: string
   
   // Zoning Information Fields
@@ -103,6 +104,7 @@ export default function PlaceDetailPage() {
     lateInterestRate: "",
     assessmentMonth: "",
     assessmentDay: "",
+    millRate: "",
     taxNotes: "",
   })
   const [isSaving, setIsSaving] = useState(false)
@@ -155,6 +157,7 @@ export default function PlaceDetailPage() {
       lateInterestRate: placeData.lateInterestRate?.toString() || "",
       assessmentMonth: placeData.assessmentMonth?.toString() || "",
       assessmentDay: placeData.assessmentDay?.toString() || "",
+      millRate: placeData.millRate?.toString() || "",
       taxNotes: placeData.taxNotes || "",
     })
   }
@@ -204,6 +207,7 @@ export default function PlaceDetailPage() {
         lateInterestRate: taxFormData.lateInterestRate ? parseFloat(taxFormData.lateInterestRate) : undefined,
         assessmentMonth: taxFormData.assessmentMonth ? parseInt(taxFormData.assessmentMonth) : undefined,
         assessmentDay: taxFormData.assessmentDay ? parseInt(taxFormData.assessmentDay) : undefined,
+        millRate: taxFormData.millRate ? parseFloat(taxFormData.millRate) : undefined,
         taxNotes: taxFormData.taxNotes || undefined,
       }
 
@@ -377,12 +381,7 @@ export default function PlaceDetailPage() {
     )
   }
 
-  const getTotalTaxes = () => {
-    if (!place) return 0
-    return place.properties.reduce((total, property) => 
-      total + (Number(property.estimatedTaxes) || 0), 0
-    )
-  }
+
 
   const getAvailableProperties = () => {
     if (!place) return 0
@@ -530,45 +529,34 @@ export default function PlaceDetailPage() {
         </motion.div>
 
         {/* Additional Stats */}
-        {getTotalTaxes() > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25 }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-6"
-          >
-            <Card className="">
-              <CardHeader className="pb-2">
-                <CardTitle className=" text-sm font-medium">Annual Taxes</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold ">{formatCurrency(getTotalTaxes())}</div>
-              </CardContent>
-            </Card>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+          className="grid grid-cols-1 md:grid-cols-2 gap-6"
+        >
+          <Card className="">
+            <CardHeader className="pb-2">
+              <CardTitle className=" text-sm font-medium">Property Types</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-lg font-bold ">
+                {new Set(place.properties.map(p => p.type).filter(Boolean)).size || 'Mixed'}
+              </div>
+            </CardContent>
+          </Card>
 
-            <Card className="">
-              <CardHeader className="pb-2">
-                <CardTitle className=" text-sm font-medium">Property Types</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-lg font-bold ">
-                  {new Set(place.properties.map(p => p.type).filter(Boolean)).size || 'Mixed'}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="">
-              <CardHeader className="pb-2">
-                <CardTitle className=" text-sm font-medium">Avg. Price/Acre</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-lg font-bold ">
-                  {getTotalAcres() > 0 ? formatCurrency(getTotalInvestment() / getTotalAcres()) : 'N/A'}
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
+          <Card className="">
+            <CardHeader className="pb-2">
+              <CardTitle className=" text-sm font-medium">Avg. Price/Acre</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-lg font-bold ">
+                {getTotalAcres() > 0 ? formatCurrency(getTotalInvestment() / getTotalAcres()) : 'N/A'}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
 
         {/* Tax Information */}
         <motion.div
@@ -796,6 +784,28 @@ export default function PlaceDetailPage() {
                         )}
                       </div>
                     </div>
+
+                    <div className="flex items-start gap-3">
+                      <DollarSign className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <Label className="text-sm font-medium">Mill Rate</Label>
+                        {isEditingTax ? (
+                          <Input
+                            type="number"
+                            value={taxFormData.millRate}
+                            onChange={(e) => handleTaxFormChange('millRate', e.target.value)}
+                            placeholder="0.00"
+                            step="0.01"
+                            min="0"
+                            className="mt-1"
+                          />
+                        ) : (
+                          <div className="text-sm text-muted-foreground mt-1">
+                            {place.millRate ? `${place.millRate} mills` : "-"}
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -832,6 +842,7 @@ export default function PlaceDetailPage() {
                !place.taxDueMonth && 
                !place.assessmentMonth && 
                !place.lateInterestRate && 
+               !place.millRate && 
                !place.taxNotes && (
                 <div className="text-center py-8 border-t mt-6">
                   <Receipt className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />

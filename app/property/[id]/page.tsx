@@ -27,6 +27,16 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { PropertyTaxInfo } from "@/components/property-tax-info"
 
+interface TaxPayment {
+  id: string
+  year: number
+  amount: number
+  paymentDate: string
+  notes?: string
+  createdAt: string
+  updatedAt: string
+}
+
 interface Property {
   id: string
   address: string
@@ -39,7 +49,12 @@ interface Property {
   purchasePrice?: number
   earnestMoney?: number
   closingDate?: string
-  estimatedTaxes?: number
+  
+  // Valuation Information
+  assessedValue?: number
+  marketValue?: number
+  lastAssessmentDate?: string
+  assessmentNotes?: string
   
   // Financing Details
   financingType?: string
@@ -87,8 +102,10 @@ interface Property {
     lateInterestRate?: number
     assessmentMonth?: number
     assessmentDay?: number
+    millRate?: number
     taxNotes?: string
   } | null
+  taxPayments?: TaxPayment[]
 }
 
 export default function PropertyDetailsPage() {
@@ -322,6 +339,34 @@ export default function PropertyDetailsPage() {
               </CardContent>
             </Card>
 
+            {/* Municipal Tax Information */}
+            <PropertyTaxInfo 
+              place={property.place} 
+              property={property}
+              propertyName={property.name || property.address}
+              onPropertyUpdate={async (updatedProperty) => {
+                try {
+                  const response = await fetch(`/api/properties/${propertyId}`, {
+                    method: 'PUT',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(updatedProperty),
+                  })
+
+                  if (!response.ok) {
+                    throw new Error('Failed to update property')
+                  }
+
+                  const updatedData = await response.json()
+                  setProperty(updatedData)
+                } catch (err) {
+                  console.error('Failed to update property:', err)
+                  throw err
+                }
+              }}
+            />
+
             {/* Purchase & Financial Information */}
             <Card className="">
               <CardHeader>
@@ -353,12 +398,7 @@ export default function PropertyDetailsPage() {
                     </div>
                   </div>
                   
-                  <div>
-                    <div className="text-muted-foreground text-sm mb-1">Annual Taxes</div>
-                    <div className="text-lg font-semibold ">
-                      {formatCurrency(property.estimatedTaxes)}
-                    </div>
-                  </div>
+
                 </div>
                 
                 {property.financingTerms && (
@@ -600,12 +640,6 @@ export default function PropertyDetailsPage() {
                 </Button>
               </CardContent>
             </Card>
-
-            {/* Municipal Tax Information */}
-            <PropertyTaxInfo 
-              place={property.place} 
-              propertyName={property.name || property.address}
-            />
           </div>
         </motion.div>
     </div>

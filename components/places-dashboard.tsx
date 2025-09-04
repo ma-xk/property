@@ -27,7 +27,7 @@ interface Property {
   purchasePrice?: number
   acres?: number
   type?: string
-  estimatedTaxes?: number
+
   available: boolean
   createdAt: string
 }
