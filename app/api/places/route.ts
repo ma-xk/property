@@ -62,7 +62,10 @@ export async function GET() {
         properties: {
           select: {
             id: true,
-            address: true,
+            streetAddress: true,
+            city: true,
+            state: true,
+            zipCode: true,
             name: true,
             purchasePrice: true,
             acres: true,
@@ -129,7 +132,10 @@ export async function POST(req: NextRequest) {
         properties: {
           select: {
             id: true,
-            address: true,
+            streetAddress: true,
+            city: true,
+            state: true,
+            zipCode: true,
             name: true,
             purchasePrice: true,
             acres: true,

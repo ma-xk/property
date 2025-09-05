@@ -39,7 +39,10 @@ export async function GET(
         propertiesAsSeller: {
           select: {
             id: true,
-            address: true,
+            streetAddress: true,
+            city: true,
+            state: true,
+            zipCode: true,
             name: true,
             purchasePrice: true,
             acres: true,
@@ -50,7 +53,10 @@ export async function GET(
         propertiesAsSellerAgent: {
           select: {
             id: true,
-            address: true,
+            streetAddress: true,
+            city: true,
+            state: true,
+            zipCode: true,
             name: true,
             purchasePrice: true,
             acres: true,
@@ -61,7 +67,10 @@ export async function GET(
         propertiesAsBuyerAgent: {
           select: {
             id: true,
-            address: true,
+            streetAddress: true,
+            city: true,
+            state: true,
+            zipCode: true,
             name: true,
             purchasePrice: true,
             acres: true,
@@ -72,7 +81,10 @@ export async function GET(
         propertiesAsTitleCompany: {
           select: {
             id: true,
-            address: true,
+            streetAddress: true,
+            city: true,
+            state: true,
+            zipCode: true,
             name: true,
             purchasePrice: true,
             acres: true,
@@ -160,7 +172,10 @@ export async function PUT(
         propertiesAsSeller: {
           select: {
             id: true,
-            address: true,
+            streetAddress: true,
+            city: true,
+            state: true,
+            zipCode: true,
             name: true,
             purchasePrice: true,
             acres: true,
@@ -171,7 +186,10 @@ export async function PUT(
         propertiesAsSellerAgent: {
           select: {
             id: true,
-            address: true,
+            streetAddress: true,
+            city: true,
+            state: true,
+            zipCode: true,
             name: true,
             purchasePrice: true,
             acres: true,
@@ -182,7 +200,10 @@ export async function PUT(
         propertiesAsBuyerAgent: {
           select: {
             id: true,
-            address: true,
+            streetAddress: true,
+            city: true,
+            state: true,
+            zipCode: true,
             name: true,
             purchasePrice: true,
             acres: true,
@@ -193,7 +214,10 @@ export async function PUT(
         propertiesAsTitleCompany: {
           select: {
             id: true,
-            address: true,
+            streetAddress: true,
+            city: true,
+            state: true,
+            zipCode: true,
             name: true,
             purchasePrice: true,
             acres: true,

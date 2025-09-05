@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { ComprehensivePropertyForm } from "@/components/comprehensive-property-form"
+import { formatPropertyAddress } from "@/lib/utils"
 
 interface Person {
   id: string
@@ -37,7 +38,6 @@ interface Place {
 
 interface Property {
   id: string
-  address: string // Legacy full address
   streetAddress?: string
   city?: string
   state?: string
@@ -125,11 +125,12 @@ export function PropertiesDashboard() {
     fetchProperties() // Refresh the list
   }
 
-  const filteredProperties = properties.filter(property =>
-    property.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    property.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    property.type?.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const filteredProperties = properties.filter(property => {
+    const fullAddress = formatPropertyAddress(property).toLowerCase()
+    return fullAddress.includes(searchTerm.toLowerCase()) ||
+      property.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      property.type?.toLowerCase().includes(searchTerm.toLowerCase())
+  })
 
   const formatCurrency = (amount?: number | null) => {
     if (amount === null || amount === undefined) return "Not set"
@@ -282,10 +283,7 @@ export function PropertiesDashboard() {
                             <div className="flex items-start text-muted-foreground text-sm">
                               <MapPin className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
                               <span className="leading-tight">
-                                {property.streetAddress ? 
-                                  `${property.streetAddress}, ${property.city}, ${property.state} ${property.zipCode}`.replace(/,\s*$/, '') :
-                                  property.address
-                                }
+                                {formatPropertyAddress(property)}
                               </span>
                             </div>
                             {property.place && (

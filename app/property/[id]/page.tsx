@@ -26,6 +26,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { PropertyTaxInfo } from "@/components/property-tax-info"
+import { formatPropertyAddress } from "@/lib/utils"
 
 interface TaxPayment {
   id: string
@@ -39,7 +40,10 @@ interface TaxPayment {
 
 interface Property {
   id: string
-  address: string
+  streetAddress?: string
+  city?: string
+  state?: string
+  zipCode?: string
   name?: string
   description?: string
   acres?: number
@@ -253,7 +257,7 @@ export default function PropertyDetailsPage() {
               </h1>
               <div className="flex items-center text-muted-foreground mt-2">
                 <MapPin className="h-5 w-5 mr-2" />
-                <span>{property.address}</span>
+                <span>{formatPropertyAddress(property)}</span>
               </div>
             </div>
             
@@ -343,7 +347,7 @@ export default function PropertyDetailsPage() {
             <PropertyTaxInfo 
               place={property.place} 
               property={property}
-              propertyName={property.name || property.address}
+              propertyName={property.name || formatPropertyAddress(property)}
               onPropertyUpdate={async (updatedProperty) => {
                 try {
                   const response = await fetch(`/api/properties/${propertyId}`, {

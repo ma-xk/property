@@ -116,7 +116,6 @@ const people = [
 
 const properties = [
   {
-    address: "126 5th Avenue, Madawaska, ME",
     streetAddress: "126 5th Avenue",
     city: "Madawaska",
     state: "ME",
@@ -151,7 +150,6 @@ const properties = [
     assessmentNotes: "Assessed at 96.5% of market value per town policy"
   },
   {
-    address: "840 North Perley Brook Road, Fort Kent, ME",
     streetAddress: "840 North Perley Brook Road",
     city: "Fort Kent",
     state: "ME",
@@ -185,7 +183,6 @@ const properties = [
     assessmentNotes: "Rural land assessment based on comparable sales"
   },
   {
-    address: "Lot 94 Winter Street, Madawaska, ME",
     streetAddress: "Lot 94 Winter Street",
     city: "Madawaska", 
     state: "ME",
@@ -219,7 +216,6 @@ const properties = [
     assessmentNotes: "Residential lot with dual road frontage premium"
   },
   {
-    address: "Lot 45 Winter Street, Madawaska, ME",
     streetAddress: "Lot 45 Winter Street",
     city: "Madawaska",
     state: "ME", 
@@ -374,8 +370,9 @@ async function main() {
           titleCompanyId: titleCompany?.id,
         }
       })
-      createdProperties.set(property.address, property)
-      console.log(`✅ Created property: ${property.address} (Assessed: $${property.assessedValue}, Market: $${property.marketValue})`)
+      const addressKey = `${property.streetAddress}, ${property.city}, ${property.state}`
+      createdProperties.set(addressKey, property)
+      console.log(`✅ Created property: ${addressKey} (Assessed: $${property.assessedValue}, Market: $${property.marketValue})`)
     }
 
     // Create tax payments

@@ -22,7 +22,10 @@ import { Input } from "@/components/ui/input"
 
 interface Property {
   id: string
-  address: string
+  streetAddress?: string
+  city?: string
+  state?: string
+  zipCode?: string
   name?: string
   purchasePrice?: number
   acres?: number

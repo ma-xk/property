@@ -20,10 +20,7 @@ export function ComprehensivePropertyForm({ onSuccess, onCancel }: Comprehensive
   const [activeSection, setActiveSection] = useState(0)
 
   const [formData, setFormData] = useState({
-    // Required
-    address: "", // Legacy field - will be auto-populated from separate fields
-    
-    // New separate address fields
+    // Address fields
     streetAddress: "",
     city: "",
     state: "",
@@ -94,17 +91,8 @@ export function ComprehensivePropertyForm({ onSuccess, onCancel }: Comprehensive
     setError("")
 
     try {
-      // Auto-populate legacy address field from separate components
-      const fullAddress = [
-        formData.streetAddress,
-        formData.city,
-        formData.state,
-        formData.zipCode
-      ].filter(Boolean).join(', ')
-
       // Prepare data for submission, converting strings to appropriate types
       const submitData = {
-        address: fullAddress || formData.address, // Use constructed address or fallback
         streetAddress: formData.streetAddress || undefined,
         city: formData.city || undefined,
         state: formData.state || undefined,

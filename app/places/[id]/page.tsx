@@ -35,10 +35,14 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { formatPropertyAddress } from "@/lib/utils"
 
 interface Property {
   id: string
-  address: string
+  streetAddress?: string
+  city?: string
+  state?: string
+  zipCode?: string
   name?: string
   purchasePrice?: number
   acres?: number
@@ -1201,7 +1205,7 @@ export default function PlaceDetailPage() {
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
                           <h3 className=" font-semibold">
-                            {property.name || property.address}
+                            {property.name || formatPropertyAddress(property)}
                           </h3>
                           <div className={`px-2 py-1 rounded-full text-xs font-medium ${
                             property.available 
@@ -1214,7 +1218,7 @@ export default function PlaceDetailPage() {
                         <div className="flex items-center gap-4 text-sm text-muted-foreground">
                           <div className="flex items-center gap-1">
                             <MapPin className="h-3 w-3" />
-                            {property.address}
+                            {formatPropertyAddress(property)}
                           </div>
                           {property.type && (
                             <div className="flex items-center gap-1">

@@ -6,12 +6,10 @@ import { z } from "zod"
 
 // Validation schema for property creation
 const createPropertySchema = z.object({
-  address: z.string().min(1, "Address is required"), // Legacy field
-  
-  // New separate address fields
-  streetAddress: z.string().optional(),
-  city: z.string().optional(),
-  state: z.string().optional(),
+  // Address fields
+  streetAddress: z.string().min(1, "Street address is required"),
+  city: z.string().min(1, "City is required"),
+  state: z.string().min(1, "State is required"),
   zipCode: z.string().optional(),
   
   // Basic Property Info
@@ -93,53 +91,6 @@ export async function GET() {
   }
 }
 
-// Helper function to extract city/state from address (fallback for legacy addresses)
-function extractLocationFromAddress(address: string) {
-  // Basic address parsing - assumes format like "123 Main St, CityName, StateName, ZIP"
-  const parts = address.split(',').map(part => part.trim())
-  
-  if (parts.length >= 3) {
-    const city = parts[parts.length - 3] // Third from end is usually city
-    const stateZip = parts[parts.length - 2] // Second from end is usually "State ZIP"
-    const state = stateZip.split(' ')[0] // First word is state
-    
-    return { city, state }
-  } else if (parts.length >= 2) {
-    const city = parts[parts.length - 2] // Second from end is city
-    const state = parts[parts.length - 1].split(' ')[0] // State from last part
-    
-    return { city, state }
-  }
-  
-  // Fallback - try to extract anything that looks like a city
-  const words = address.split(' ')
-  const cityIndex = words.findIndex(word => 
-    word.includes(',') || word.match(/^[A-Z][a-z]+$/)
-  )
-  
-  if (cityIndex !== -1) {
-    return { 
-      city: words[cityIndex].replace(',', ''), 
-      state: words[cityIndex + 1]?.replace(',', '') 
-    }
-  }
-  
-  return { city: null, state: null }
-}
-
-// Helper function to get city and state from property data
-function getCityAndState(validatedData: any) {
-  // Prefer new separate fields
-  if (validatedData.city) {
-    return {
-      city: validatedData.city.trim(),
-      state: validatedData.state?.trim() || null
-    }
-  }
-  
-  // Fallback to parsing legacy address field
-  return extractLocationFromAddress(validatedData.address)
-}
 
 // Helper function to find or create a person
 async function findOrCreatePerson(name: string, role: string, userId: string) {
@@ -216,16 +167,13 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const validatedData = createPropertySchema.parse(body)
 
-    // Get city and state from separate fields or parse from address
-    const { city, state } = getCityAndState(validatedData)
-    
     // Create people and place in parallel
     const [sellerPerson, sellerAgentPerson, buyerAgentPerson, titleCompanyPerson, place] = await Promise.all([
       validatedData.seller ? findOrCreatePerson(validatedData.seller, "Seller", session.user.id) : null,
       validatedData.sellerAgent ? findOrCreatePerson(validatedData.sellerAgent, "Seller Agent", session.user.id) : null,
       validatedData.buyerAgent ? findOrCreatePerson(validatedData.buyerAgent, "Buyer Agent", session.user.id) : null,
       validatedData.titleCompany ? findOrCreatePerson(validatedData.titleCompany, "Title Company", session.user.id) : null,
-      city ? findOrCreatePlace(city, state, session.user.id) : null
+      validatedData.city ? findOrCreatePlace(validatedData.city, validatedData.state, session.user.id) : null
     ])
 
     // Create property with all relationships

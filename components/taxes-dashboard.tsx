@@ -6,6 +6,7 @@ import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
+import { formatPropertyAddress } from "@/lib/utils"
 import { 
   DollarSign, 
   FileText, 
@@ -42,7 +43,6 @@ interface TaxData {
   }>
   properties: Array<{
     id: string
-    address: string
     streetAddress?: string
     city?: string
     state?: string
@@ -351,7 +351,7 @@ export function TaxesDashboard() {
                         href={`/property/${property.id}`}
                         className="font-medium text-sm hover:text-primary transition-colors cursor-pointer block underline decoration-dotted"
                       >
-                        {property.name || property.address}
+                        {property.name || formatPropertyAddress(property)}
                       </Link>
                       <p className="text-xs text-muted-foreground">
                         {property.city && property.state 
@@ -367,7 +367,7 @@ export function TaxesDashboard() {
                               ) : (
                                 `${property.place.name}, ${property.place.state}`
                               ))
-                            : property.address
+                            : formatPropertyAddress(property)
                         }
                       </p>
                       {property.closingDate && (

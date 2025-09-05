@@ -38,28 +38,40 @@ export async function GET() {
         propertiesAsSeller: {
           select: {
             id: true,
-            address: true,
+            streetAddress: true,
+            city: true,
+            state: true,
+            zipCode: true,
             name: true,
           }
         },
         propertiesAsSellerAgent: {
           select: {
             id: true,
-            address: true,
+            streetAddress: true,
+            city: true,
+            state: true,
+            zipCode: true,
             name: true,
           }
         },
         propertiesAsBuyerAgent: {
           select: {
             id: true,
-            address: true,
+            streetAddress: true,
+            city: true,
+            state: true,
+            zipCode: true,
             name: true,
           }
         },
         propertiesAsTitleCompany: {
           select: {
             id: true,
-            address: true,
+            streetAddress: true,
+            city: true,
+            state: true,
+            zipCode: true,
             name: true,
           }
         },
@@ -117,28 +129,40 @@ export async function POST(req: NextRequest) {
         propertiesAsSeller: {
           select: {
             id: true,
-            address: true,
+            streetAddress: true,
+            city: true,
+            state: true,
+            zipCode: true,
             name: true,
           }
         },
         propertiesAsSellerAgent: {
           select: {
             id: true,
-            address: true,
+            streetAddress: true,
+            city: true,
+            state: true,
+            zipCode: true,
             name: true,
           }
         },
         propertiesAsBuyerAgent: {
           select: {
             id: true,
-            address: true,
+            streetAddress: true,
+            city: true,
+            state: true,
+            zipCode: true,
             name: true,
           }
         },
         propertiesAsTitleCompany: {
           select: {
             id: true,
-            address: true,
+            streetAddress: true,
+            city: true,
+            state: true,
+            zipCode: true,
             name: true,
           }
         },

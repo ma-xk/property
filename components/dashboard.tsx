@@ -20,7 +20,10 @@ import { Input } from "@/components/ui/input"
 const mockLandProperties = [
   {
     id: 1,
-    address: "126 5th Avenue, Madawaska, ME",
+    streetAddress: "126 5th Avenue",
+    city: "Madawaska",
+    state: "ME",
+    zipCode: "04756",
     purchasePrice: 5000,
     acres: 0.1,
     zoning: "High Density Residential",
@@ -47,7 +50,10 @@ const mockLandProperties = [
   },
   {
     id: 2,
-    address: "840 North Perley Brook Road, Fort Kent, ME",
+    streetAddress: "840 North Perley Brook Road",
+    city: "Fort Kent",
+    state: "ME",
+    zipCode: "04743",
     purchasePrice: 13500,
     acres: 11,
     zoning: "Rural",
@@ -74,7 +80,10 @@ const mockLandProperties = [
   },
   {
     id: 3,
-    address: "Lot 94 Winter Street, Madawaska, ME",
+    streetAddress: "Lot 94 Winter Street",
+    city: "Madawaska",
+    state: "ME",
+    zipCode: "04756",
     purchasePrice: 12500,
     acres: 0.5,
     zoning: "High Density Residential",
@@ -101,7 +110,10 @@ const mockLandProperties = [
   },
   {
     id: 4,
-    address: "Lot 45 Winter Street, Madawaska, ME",
+    streetAddress: "Lot 45 Winter Street",
+    city: "Madawaska",
+    state: "ME",
+    zipCode: "04756",
     purchasePrice: 30000,
     acres: 2,
     zoning: "High Density Residential", 
@@ -233,7 +245,7 @@ export function Dashboard() {
                         <div className="flex-1">
                           <div className="flex items-center gap-1 text-slate-300 mb-1">
                             <MapPin className="h-3 w-3" />
-                            <span className="text-sm font-medium text-white">{property.address}</span>
+                            <span className="text-sm font-medium text-white">{`${property.streetAddress}, ${property.city}, ${property.state}`}</span>
                           </div>
                           <p className="text-xs text-slate-400 leading-tight">{property.description}</p>
                         </div>

@@ -22,7 +22,6 @@ export async function GET() {
       },
       select: {
         id: true,
-        address: true,
         streetAddress: true,
         city: true,
         state: true,

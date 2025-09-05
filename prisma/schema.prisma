@@ -116,7 +116,6 @@ model Person {
 
 model Property {
   id                   String    @id @default(cuid())
-  address              String
   name                 String?
   description          String?
   type                 String?

@@ -21,7 +21,6 @@ export function CreatePropertyForm({ onSuccess, onCancel, showCard = true }: Cre
 
   const [formData, setFormData] = useState({
     // Address fields
-    address: "",
     streetAddress: "",
     city: "",
     state: "",
@@ -86,7 +85,6 @@ export function CreatePropertyForm({ onSuccess, onCancel, showCard = true }: Cre
       // Prepare data for submission, converting strings to numbers where needed
       const submitData = {
         // Address fields
-        address: formData.address,
         streetAddress: formData.streetAddress || undefined,
         city: formData.city || undefined,
         state: formData.state || undefined,
@@ -157,7 +155,6 @@ export function CreatePropertyForm({ onSuccess, onCancel, showCard = true }: Cre
       // Reset form
       setFormData({
         // Address fields
-        address: "",
         streetAddress: "",
         city: "",
         state: "",
@@ -222,17 +219,6 @@ export function CreatePropertyForm({ onSuccess, onCancel, showCard = true }: Cre
           {/* Address Section */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Address Information</h3>
-            <div className="space-y-2">
-              <Label htmlFor="address">Full Address *</Label>
-              <Input
-                id="address"
-                name="address"
-                value={formData.address}
-                onChange={handleInputChange}
-                placeholder="123 Main St, City, State, ZIP"
-                required
-              />
-            </div>
             
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="space-y-2 md:col-span-2">
@@ -705,7 +691,7 @@ export function CreatePropertyForm({ onSuccess, onCancel, showCard = true }: Cre
           </div>
 
       <div className="flex gap-3 pt-4">
-        <Button type="submit" disabled={isLoading || !formData.address.trim()} className="bg-blue-600 text-white hover:bg-blue-700">
+        <Button type="submit" disabled={isLoading || !formData.streetAddress.trim() || !formData.city.trim() || !formData.state.trim()} className="bg-blue-600 text-white hover:bg-blue-700">
           {isLoading ? "Creating..." : "Create Property"}
         </Button>
         {onCancel && (

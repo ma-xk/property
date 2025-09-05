@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { Search, Building2, Users, MapPin, X } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { formatPropertyAddress } from "@/lib/utils"
 
 interface SearchResult {
   id: string
@@ -18,7 +19,10 @@ interface SearchResult {
 interface Property {
   id: string
   name?: string
-  address: string
+  streetAddress?: string
+  city?: string
+  state?: string
+  zipCode?: string
   type?: string
 }
 
@@ -104,14 +108,14 @@ export function GlobalSearch() {
       properties.forEach(property => {
         if (
           (property.name && property.name.toLowerCase().includes(searchLower)) ||
-          property.address.toLowerCase().includes(searchLower) ||
+          formatPropertyAddress(property).toLowerCase().includes(searchLower) ||
           (property.type && property.type.toLowerCase().includes(searchLower))
         ) {
           newResults.push({
             id: property.id,
             type: 'property',
             title: property.name || 'Untitled Property',
-            subtitle: property.address,
+            subtitle: formatPropertyAddress(property),
             icon: <Building2 className="h-4 w-4 text-blue-600" />
           })
         }
