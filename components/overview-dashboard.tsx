@@ -77,7 +77,7 @@ export function OverviewDashboard() {
         setPeople(Array.isArray(peopleData) ? peopleData : [])
         setPlaces(Array.isArray(placesData) ? placesData : [])
       } catch (error) {
-        console.error('Error fetching data:', error)
+        // Handle error silently
       } finally {
         setLoading(false)
       }
@@ -102,7 +102,9 @@ export function OverviewDashboard() {
     fetch('/api/properties')
       .then(res => res.json())
       .then(data => setProperties(Array.isArray(data) ? data : []))
-      .catch(error => console.error('Error refreshing properties:', error))
+      .catch(error => {
+        // Handle error silently
+      })
   }
 
   const handlePersonCreated = () => {
@@ -111,7 +113,9 @@ export function OverviewDashboard() {
     fetch('/api/people')
       .then(res => res.json())
       .then(data => setPeople(Array.isArray(data) ? data : []))
-      .catch(error => console.error('Error refreshing people:', error))
+      .catch(error => {
+        // Handle error silently
+      })
   }
 
   const handlePlaceCreated = () => {
@@ -120,7 +124,9 @@ export function OverviewDashboard() {
     fetch('/api/places')
       .then(res => res.json())
       .then(data => setPlaces(Array.isArray(data) ? data : []))
-      .catch(error => console.error('Error refreshing places:', error))
+      .catch(error => {
+        // Handle error silently
+      })
   }
 
   if (loading) {

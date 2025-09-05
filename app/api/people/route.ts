@@ -71,7 +71,6 @@ export async function GET() {
 
     return NextResponse.json(people)
   } catch (error) {
-    console.error("Error fetching people:", error)
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -154,8 +153,6 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       )
     }
-    
-    console.error("Error creating person:", error)
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

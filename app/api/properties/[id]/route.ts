@@ -48,7 +48,6 @@ export async function GET(
 
     return NextResponse.json(property)
   } catch (error) {
-    console.error("Error fetching property:", error)
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -115,7 +114,6 @@ export async function PUT(
 
     return NextResponse.json(updatedProperty)
   } catch (error) {
-    console.error("Error updating property:", error)
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -163,7 +161,6 @@ export async function DELETE(
 
     return NextResponse.json({ message: "Property deleted successfully" })
   } catch (error) {
-    console.error("Error deleting property:", error)
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

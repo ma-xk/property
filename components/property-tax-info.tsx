@@ -130,7 +130,7 @@ export function PropertyTaxInfo({ place, property, propertyName, onPropertyUpdat
       await onPropertyUpdate(updateData)
       setIsEditingValuation(false)
     } catch (err) {
-      console.error("Failed to save valuation information:", err)
+      // Handle error silently or show user-friendly message
     } finally {
       setIsSaving(false)
     }
@@ -199,7 +199,6 @@ export function PropertyTaxInfo({ place, property, propertyName, onPropertyUpdat
       setTaxPayments(prev => [newPayment, ...prev].sort((a, b) => b.year - a.year))
       setIsAddingPayment(false)
     } catch (err) {
-      console.error("Failed to save tax payment:", err)
       alert(err instanceof Error ? err.message : "Failed to save tax payment")
     } finally {
       setIsSavingPayment(false)
@@ -220,7 +219,6 @@ export function PropertyTaxInfo({ place, property, propertyName, onPropertyUpdat
 
       setTaxPayments(prev => prev.filter(p => p.id !== paymentId))
     } catch (err) {
-      console.error("Failed to delete tax payment:", err)
       alert("Failed to delete tax payment")
     }
   }

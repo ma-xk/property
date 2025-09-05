@@ -102,7 +102,6 @@ export async function GET(
 
     return NextResponse.json(place)
   } catch (error) {
-    console.error("Error fetching place:", error)
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -204,14 +203,11 @@ export async function PUT(
     return NextResponse.json(place)
   } catch (error) {
     if (error instanceof z.ZodError) {
-      console.error("Validation error details:", error.issues)
       return NextResponse.json(
         { error: "Validation error", details: error.issues },
         { status: 400 }
       )
     }
-    
-    console.error("Error updating place:", error)
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -274,7 +270,6 @@ export async function DELETE(
 
     return NextResponse.json({ message: "Place deleted successfully" })
   } catch (error) {
-    console.error("Error deleting place:", error)
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

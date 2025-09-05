@@ -80,8 +80,6 @@ export async function PUT(
         { status: 400 }
       )
     }
-    
-    console.error("Error updating tax payment:", error)
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -130,7 +128,6 @@ export async function DELETE(
 
     return NextResponse.json({ message: "Tax payment deleted successfully" })
   } catch (error) {
-    console.error("Error deleting tax payment:", error)
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

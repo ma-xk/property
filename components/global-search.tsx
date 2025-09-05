@@ -66,7 +66,7 @@ export function GlobalSearch() {
         setPeople(peopleData)
         setPlaces(placesData)
       } catch (error) {
-        console.error('Error fetching data:', error)
+        // Handle error silently
       }
     }
 

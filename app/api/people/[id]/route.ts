@@ -92,7 +92,6 @@ export async function GET(
 
     return NextResponse.json(person)
   } catch (error) {
-    console.error("Error fetching person:", error)
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -213,8 +212,6 @@ export async function PUT(
         { status: 400 }
       )
     }
-    
-    console.error("Error updating person:", error)
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -262,7 +259,6 @@ export async function DELETE(
 
     return NextResponse.json({ message: "Person deleted successfully" })
   } catch (error) {
-    console.error("Error deleting person:", error)
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

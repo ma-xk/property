@@ -86,7 +86,6 @@ export async function GET() {
 
     return NextResponse.json(properties)
   } catch (error) {
-    console.error("Error fetching properties:", error)
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -259,8 +258,6 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       )
     }
-    
-    console.error("Error creating property:", error)
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

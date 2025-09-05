@@ -361,7 +361,6 @@ export default function PropertyDetailsPage() {
                   const updatedData = await response.json()
                   setProperty(updatedData)
                 } catch (err) {
-                  console.error('Failed to update property:', err)
                   throw err
                 }
               }}
@@ -620,7 +619,6 @@ export default function PropertyDetailsPage() {
                   className="w-full bg-blue-600 hover:bg-blue-700 "
                   onClick={() => {
                     // TODO: Implement edit functionality
-                    console.log("Edit property")
                   }}
                 >
                   <Edit className="h-4 w-4 mr-2" />
@@ -632,7 +630,6 @@ export default function PropertyDetailsPage() {
                   className="w-full"
                   onClick={() => {
                     // TODO: Toggle availability
-                    console.log("Toggle availability")
                   }}
                 >
                   <Settings className="h-4 w-4 mr-2" />
