@@ -27,6 +27,7 @@ import {
 import { CreatePropertyForm } from "@/components/create-property-form"
 import { CreatePersonForm } from "@/components/create-person-form"
 import { CreatePlaceForm } from "@/components/create-place-form"
+import { DashboardMap } from "@/components/dashboard-map"
 
 interface Property {
   id: string
@@ -216,6 +217,15 @@ export function OverviewDashboard() {
             </p>
           </CardContent>
         </Card>
+      </motion.div>
+
+      {/* Property Map */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.25 }}
+      >
+        <DashboardMap />
       </motion.div>
 
       {/* Quick Actions */}

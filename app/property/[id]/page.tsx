@@ -26,6 +26,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { PropertyTaxInfo } from "@/components/property-tax-info"
+import { ParcelMap } from "@/components/parcel-map"
 import { formatPropertyAddress } from "@/lib/utils"
 
 interface TaxPayment {
@@ -342,6 +343,9 @@ export default function PropertyDetailsPage() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Parcel Map */}
+            <ParcelMap propertyId={propertyId} />
 
             {/* Municipal Tax Information */}
             <PropertyTaxInfo 

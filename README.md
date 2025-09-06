@@ -255,6 +255,8 @@ export NEXTAUTH_SECRET="your-development-secret-here"
 - **Styling**: Tailwind CSS
 - **UI Components**: Radix UI
 - **Forms**: React Hook Form with Zod validation
+- **Mapping**: Leaflet with React-Leaflet for interactive maps
+- **Geospatial Data**: Integration with Maine GeoLibrary services
 - **Deployment**: Vercel
 
 ## 📚 Useful Resources
@@ -290,6 +292,9 @@ This project is licensed under the MIT License.
 - ✅ **Tax Calculation Engine** - Automatic calculation of estimated annual taxes using assessed/market values and mill rates with clear breakdowns
 - ✅ **Zoning & Code Enforcement** - Store zoning office addresses, phone numbers, website URLs, plus contact details for Code Enforcement Officers and Plumbing Inspectors
 - ✅ **Financial Analytics** - Monitor purchase prices, earnest money, comprehensive closing costs breakdown, and investment totals with professional currency formatting
+- ✅ **Interactive Property Mapping** - Global map on dashboard showing all properties with location data, clickable markers with property details, and automatic bounds calculation for optimal viewing
+- ✅ **Advanced Parcel Viewer** - Detailed parcel maps on property detail pages showing exact property boundaries, parcel information (Map/Lot, State ID, Town, County), area calculations, and LUPC zoning overlays for unorganized territories
+- ✅ **Real-Time Parcel Data Integration** - Live integration with Maine GeoLibrary services for accurate parcel boundaries, property details, and zoning information with intelligent geocoding and spatial queries
 - ✅ **Global Search & Navigation** - Real-time search across all properties, people, and places with intelligent filtering and quick navigation
 - ✅ **Multi-Dashboard Analytics** - Overview dashboard plus specialized dashboards for properties, people, places, and taxes with detailed statistics and visual summaries
 - ✅ **Relationship Management** - Advanced linking system connecting properties to people (sellers, agents, title companies) and places with referential integrity
