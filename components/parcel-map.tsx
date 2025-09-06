@@ -247,7 +247,7 @@ export function ParcelMap({ propertyId, className }: ParcelMapProps) {
   }
 
   // Calculate center point from parcel data
-  const getParcelCenter = () => {
+  const getParcelCenter = (): [number, number] => {
     if (!parcelData || !parcelData.geojson.features.length) {
       return [47.3543, -68.3235] // Default to Madawaska, ME
     }
@@ -265,10 +265,10 @@ export function ParcelMap({ propertyId, className }: ParcelMapProps) {
       })
     })
     
-    return [totalLat / pointCount, totalLng / pointCount] as [number, number]
+    return [totalLat / pointCount, totalLng / pointCount]
   }
 
-  const parcelCenter = getParcelCenter()
+  const parcelCenter: [number, number] = getParcelCenter()
 
   return (
     <Card className={className}>

@@ -27,7 +27,27 @@ import {
 import { CreatePropertyForm } from "@/components/create-property-form"
 import { CreatePersonForm } from "@/components/create-person-form"
 import { CreatePlaceForm } from "@/components/create-place-form"
-import { DashboardMap } from "@/components/dashboard-map"
+import dynamic from "next/dynamic"
+
+const DashboardMap = dynamic(() => import("@/components/dashboard-map").then(mod => ({ default: mod.DashboardMap })), {
+  ssr: false,
+  loading: () => (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <MapPin className="h-5 w-5" />
+          Property Map
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="flex items-center justify-center py-8">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+          <span className="ml-2">Loading map...</span>
+        </div>
+      </CardContent>
+    </Card>
+  )
+})
 
 interface Property {
   id: string

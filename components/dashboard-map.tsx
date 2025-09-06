@@ -245,10 +245,10 @@ export function DashboardMap() {
   }
 
   const bounds = calculateBounds()
-  const center = bounds ? [
+  const center: [number, number] = bounds ? [
     (bounds[0][0] + bounds[1][0]) / 2,
     (bounds[0][1] + bounds[1][1]) / 2
-  ] as [number, number] : [47.3543, -68.3235] // Default to Madawaska, ME
+  ] : [47.3543, -68.3235] // Default to Madawaska, ME
 
   return (
     <Card>
