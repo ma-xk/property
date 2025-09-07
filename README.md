@@ -290,6 +290,8 @@ This project is licensed under the MIT License.
 - ✅ **Property Valuation Tracking** - Monitor assessed values, market values, assessment dates, and assessment notes with automatic tax calculations using mill rates
 - ✅ **Historical Tax Payment Records** - Track actual tax payments by year with payment dates, amounts, and notes for comprehensive tax history
 - ✅ **Tax Calculation Engine** - Automatic calculation of estimated annual taxes using assessed/market values and mill rates with clear breakdowns
+- ✅ **Mill Rate Time Series Tracking** - Historical mill rate tracking by municipality with year-over-year analysis, trend visualization, and automatic current mill rate updates
+- ✅ **Property Valuation Time Series** - Comprehensive historical valuation tracking with assessed value, market value, and assessment date progression over time with trend analysis and percentage change calculations
 - ✅ **Zoning & Code Enforcement** - Store zoning office addresses, phone numbers, website URLs, plus contact details for Code Enforcement Officers and Plumbing Inspectors
 - ✅ **Financial Analytics** - Monitor purchase prices, earnest money, comprehensive closing costs breakdown, and investment totals with professional currency formatting
 - ✅ **Interactive Property Mapping** - Global map on dashboard showing all properties with location data, clickable markers with property details, and automatic bounds calculation for optimal viewing

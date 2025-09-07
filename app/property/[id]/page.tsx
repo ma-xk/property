@@ -26,6 +26,8 @@ import {
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { PropertyTaxInfo } from "@/components/property-tax-info"
+import { PropertyValuationHistory } from "@/components/property-valuation-history"
+import { TaxPayments } from "@/components/tax-payments"
 import { ParcelMap } from "@/components/parcel-map"
 import { formatPropertyAddress } from "@/lib/utils"
 
@@ -34,6 +36,26 @@ interface TaxPayment {
   year: number
   amount: number
   paymentDate: string
+  notes?: string
+  createdAt: string
+  updatedAt: string
+}
+
+interface PropertyValuationHistory {
+  id: string
+  year: number
+  assessedValue?: number
+  marketValue?: number
+  assessmentDate?: string
+  assessmentNotes?: string
+  createdAt: string
+  updatedAt: string
+}
+
+interface MillRateHistory {
+  id: string
+  year: number
+  millRate: number
   notes?: string
   createdAt: string
   updatedAt: string
@@ -109,8 +131,10 @@ interface Property {
     assessmentDay?: number
     millRate?: number
     taxNotes?: string
+    millRateHistories?: MillRateHistory[]
   } | null
   taxPayments?: TaxPayment[]
+  valuationHistories?: PropertyValuationHistory[]
 }
 
 export default function PropertyDetailsPage() {
@@ -370,6 +394,42 @@ export default function PropertyDetailsPage() {
                   setProperty(updatedData)
                 } catch (err) {
                   throw err
+                }
+              }}
+            />
+
+            {/* Property Valuation History */}
+            <PropertyValuationHistory
+              propertyId={propertyId}
+              valuationHistories={property.valuationHistories || []}
+              onUpdate={async () => {
+                try {
+                  const response = await fetch(`/api/properties/${propertyId}`)
+                  if (!response.ok) {
+                    throw new Error('Failed to fetch property')
+                  }
+                  const updatedData = await response.json()
+                  setProperty(updatedData)
+                } catch (err) {
+                  console.error('Failed to refresh property data:', err)
+                }
+              }}
+            />
+
+            {/* Tax Payments */}
+            <TaxPayments
+              propertyId={propertyId}
+              taxPayments={property.taxPayments || []}
+              onUpdate={async () => {
+                try {
+                  const response = await fetch(`/api/properties/${propertyId}`)
+                  if (!response.ok) {
+                    throw new Error('Failed to fetch property')
+                  }
+                  const updatedData = await response.json()
+                  setProperty(updatedData)
+                } catch (err) {
+                  console.error('Failed to refresh property data:', err)
                 }
               }}
             />

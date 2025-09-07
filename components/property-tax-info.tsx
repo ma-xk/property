@@ -23,6 +23,15 @@ import {
   TrendingUp
 } from "lucide-react"
 
+interface MillRateHistory {
+  id: string
+  year: number
+  millRate: number
+  notes?: string
+  createdAt: string
+  updatedAt: string
+}
+
 interface Place {
   id: string
   name: string
@@ -38,6 +47,7 @@ interface Place {
   assessmentDay?: number
   millRate?: number
   taxNotes?: string
+  millRateHistories?: MillRateHistory[]
 }
 
 interface TaxPayment {
@@ -50,6 +60,17 @@ interface TaxPayment {
   updatedAt: string
 }
 
+interface PropertyValuationHistory {
+  id: string
+  year: number
+  assessedValue?: number
+  marketValue?: number
+  assessmentDate?: string
+  assessmentNotes?: string
+  createdAt: string
+  updatedAt: string
+}
+
 interface Property {
   id: string
   assessedValue?: number
@@ -57,6 +78,7 @@ interface Property {
   lastAssessmentDate?: string
   assessmentNotes?: string
   taxPayments?: TaxPayment[]
+  valuationHistories?: PropertyValuationHistory[]
 }
 
 interface PropertyTaxInfoProps {
@@ -76,16 +98,7 @@ export function PropertyTaxInfo({ place, property, propertyName, onPropertyUpdat
     assessmentNotes: "",
   })
 
-  // Tax payment state
-  const [isAddingPayment, setIsAddingPayment] = useState(false)
-  const [isSavingPayment, setIsSavingPayment] = useState(false)
-  const [taxPayments, setTaxPayments] = useState<TaxPayment[]>(property?.taxPayments || [])
-  const [paymentFormData, setPaymentFormData] = useState({
-    year: new Date().getFullYear().toString(),
-    amount: "",
-    paymentDate: "",
-    notes: "",
-  })
+
 
   const initializeValuationFormData = () => {
     setValuationFormData({
@@ -143,92 +156,8 @@ export function PropertyTaxInfo({ place, property, propertyName, onPropertyUpdat
     }))
   }
 
-  // Update tax payments when property changes
-  useEffect(() => {
-    setTaxPayments(property?.taxPayments || [])
-  }, [property?.taxPayments])
 
-  // Tax payment handlers
-  const handleAddPayment = () => {
-    setIsAddingPayment(true)
-    setPaymentFormData({
-      year: new Date().getFullYear().toString(),
-      amount: "",
-      paymentDate: "",
-      notes: "",
-    })
-  }
 
-  const handleCancelPayment = () => {
-    setIsAddingPayment(false)
-    setPaymentFormData({
-      year: new Date().getFullYear().toString(),
-      amount: "",
-      paymentDate: "",
-      notes: "",
-    })
-  }
-
-  const handleSavePayment = async () => {
-    if (!property) return
-
-    try {
-      setIsSavingPayment(true)
-      
-      const paymentData = {
-        year: parseInt(paymentFormData.year),
-        amount: parseFloat(paymentFormData.amount),
-        paymentDate: new Date(paymentFormData.paymentDate).toISOString(),
-        notes: paymentFormData.notes || undefined,
-      }
-
-      const response = await fetch(`/api/properties/${property.id}/tax-payments`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(paymentData),
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to save tax payment')
-      }
-
-      const newPayment = await response.json()
-      setTaxPayments(prev => [newPayment, ...prev].sort((a, b) => b.year - a.year))
-      setIsAddingPayment(false)
-    } catch (err) {
-      alert(err instanceof Error ? err.message : "Failed to save tax payment")
-    } finally {
-      setIsSavingPayment(false)
-    }
-  }
-
-  const handleDeletePayment = async (paymentId: string) => {
-    if (!property || !confirm('Are you sure you want to delete this tax payment?')) return
-
-    try {
-      const response = await fetch(`/api/properties/${property.id}/tax-payments/${paymentId}`, {
-        method: 'DELETE',
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to delete tax payment')
-      }
-
-      setTaxPayments(prev => prev.filter(p => p.id !== paymentId))
-    } catch (err) {
-      alert("Failed to delete tax payment")
-    }
-  }
-
-  const handlePaymentFormChange = (field: string, value: string) => {
-    setPaymentFormData(prev => ({
-      ...prev,
-      [field]: value
-    }))
-  }
   const formatTaxDate = (month?: number, day?: number) => {
     if (!month) return null
     const monthNames = [
@@ -564,9 +493,11 @@ export function PropertyTaxInfo({ place, property, propertyName, onPropertyUpdat
                       )}
                     </div>
                   </div>
+
                 </div>
               </div>
             </div>
+
 
             {/* Tax Calculation Section */}
             {property && place && (property.assessedValue || property.marketValue) && place.millRate && (
@@ -637,140 +568,6 @@ export function PropertyTaxInfo({ place, property, propertyName, onPropertyUpdat
               </div>
             )}
 
-            {/* Historical Taxes Section */}
-            <div className="mt-8 pt-8 border-t border-border">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold flex items-center gap-2">
-                  <Receipt className="h-5 w-5" />
-                  Historical Taxes
-                </h3>
-                <Button
-                  size="sm"
-                  onClick={handleAddPayment}
-                  disabled={isAddingPayment}
-                >
-                  <DollarSign className="h-4 w-4 mr-1" />
-                  Add Payment
-                </Button>
-              </div>
-
-              {/* Add Payment Form */}
-              {isAddingPayment && (
-                <div className="mb-6 p-4 border border-border rounded-lg bg-muted/30">
-                  <h4 className="font-medium mb-4">Add Tax Payment</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label className="text-sm font-medium">Tax Year</Label>
-                      <Input
-                        type="number"
-                        value={paymentFormData.year}
-                        onChange={(e) => handlePaymentFormChange('year', e.target.value)}
-                        placeholder="2024"
-                        min="1900"
-                        max={new Date().getFullYear() + 10}
-                        className="mt-1"
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-sm font-medium">Amount</Label>
-                      <Input
-                        type="number"
-                        value={paymentFormData.amount}
-                        onChange={(e) => handlePaymentFormChange('amount', e.target.value)}
-                        placeholder="0.00"
-                        step="0.01"
-                        min="0"
-                        className="mt-1"
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-sm font-medium">Payment Date</Label>
-                      <Input
-                        type="date"
-                        value={paymentFormData.paymentDate}
-                        onChange={(e) => handlePaymentFormChange('paymentDate', e.target.value)}
-                        className="mt-1"
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-sm font-medium">Notes (Optional)</Label>
-                      <Input
-                        value={paymentFormData.notes}
-                        onChange={(e) => handlePaymentFormChange('notes', e.target.value)}
-                        placeholder="Payment notes..."
-                        className="mt-1"
-                      />
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 mt-4">
-                    <Button
-                      size="sm"
-                      onClick={handleSavePayment}
-                      disabled={isSavingPayment || !paymentFormData.year || !paymentFormData.amount || !paymentFormData.paymentDate}
-                    >
-                      <Save className="h-4 w-4 mr-1" />
-                      {isSavingPayment ? "Saving..." : "Save Payment"}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={handleCancelPayment}
-                      disabled={isSavingPayment}
-                    >
-                      <X className="h-4 w-4 mr-1" />
-                      Cancel
-                    </Button>
-                  </div>
-                </div>
-              )}
-
-              {/* Tax Payments Table */}
-              {taxPayments.length > 0 ? (
-                <div className="border border-border rounded-lg overflow-hidden">
-                  <table className="w-full">
-                    <thead className="bg-muted/50">
-                      <tr>
-                        <th className="text-left p-3 font-medium">Tax Year</th>
-                        <th className="text-left p-3 font-medium">Amount</th>
-                        <th className="text-left p-3 font-medium">Payment Date</th>
-                        <th className="text-left p-3 font-medium">Notes</th>
-                        <th className="text-left p-3 font-medium">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {taxPayments.map((payment, index) => (
-                        <tr key={payment.id} className={index % 2 === 0 ? "bg-background" : "bg-muted/20"}>
-                          <td className="p-3 font-medium">{payment.year}</td>
-                          <td className="p-3">${payment.amount.toLocaleString()}</td>
-                          <td className="p-3">{new Date(payment.paymentDate).toLocaleDateString()}</td>
-                          <td className="p-3 text-muted-foreground">
-                            {payment.notes || "-"}
-                          </td>
-                          <td className="p-3">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleDeletePayment(payment.id)}
-                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                            >
-                              <X className="h-3 w-3" />
-                            </Button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <div className="text-center py-8 border border-dashed border-border rounded-lg">
-                  <Receipt className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-                  <h3 className="text-lg font-semibold mb-2 text-muted-foreground">No tax payments recorded</h3>
-                  <p className="text-muted-foreground text-sm mb-4">
-                    Start tracking your actual tax payments by adding your first payment above.
-                  </p>
-                </div>
-              )}
-            </div>
           </div>
         )}
       </CardContent>

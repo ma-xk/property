@@ -48,6 +48,8 @@ model User {
   properties    Property[]
   sessions      Session[]
   taxPayments   TaxPayment[]
+  millRateHistories MillRateHistory[]
+  propertyValuationHistories PropertyValuationHistory[]
 }
 
 model VerificationToken {
@@ -88,6 +90,7 @@ model Place {
   millRate               Decimal?
   user                   User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   properties             Property[]
+  millRateHistories      MillRateHistory[]
 
   @@unique([name, state, userId])
   @@index([userId])
@@ -169,6 +172,7 @@ model Property {
   titleCompanyPerson   Person?   @relation("PropertyTitleCompany", fields: [titleCompanyId], references: [id])
   user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   taxPayments          TaxPayment[]
+  valuationHistories   PropertyValuationHistory[]
 
   @@index([userId])
   @@index([placeId])
@@ -196,6 +200,50 @@ model TaxPayment {
   updatedAt   DateTime @updatedAt
   
   @@unique([propertyId, year]) // One payment per property per year
+  @@index([propertyId])
+  @@index([userId])
+}
+
+model MillRateHistory {
+  id        String   @id @default(cuid())
+  year      Int      // Tax year (e.g., 2024)
+  millRate  Decimal  // Mill rate for this year
+  notes     String?  // Optional notes about the mill rate
+  
+  // Relationships
+  placeId   String
+  place     Place    @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  
+  userId    String   // For security - ensure user can only access their mill rates
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([placeId, year]) // One mill rate per place per year
+  @@index([placeId])
+  @@index([userId])
+}
+
+model PropertyValuationHistory {
+  id                 String   @id @default(cuid())
+  year               Int      // Assessment year (e.g., 2024)
+  assessedValue      Decimal? // Assessed value for this year
+  marketValue        Decimal? // Market value for this year
+  assessmentDate     DateTime? // Date of assessment
+  assessmentNotes    String?  // Notes about this assessment
+  
+  // Relationships
+  propertyId         String
+  property           Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  
+  userId             String   // For security - ensure user can only access their valuations
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  
+  @@unique([propertyId, year]) // One valuation per property per year
   @@index([propertyId])
   @@index([userId])
 }

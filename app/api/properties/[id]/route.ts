@@ -30,8 +30,21 @@ export async function GET(
         sellerAgentPerson: true,
         buyerAgentPerson: true,
         titleCompanyPerson: true,
-        place: true,
+        place: {
+          include: {
+            millRateHistories: {
+              orderBy: {
+                year: 'desc'
+              }
+            }
+          }
+        },
         taxPayments: {
+          orderBy: {
+            year: 'desc'
+          }
+        },
+        valuationHistories: {
           orderBy: {
             year: 'desc'
           }
@@ -103,8 +116,21 @@ export async function PUT(
         sellerAgentPerson: true,
         buyerAgentPerson: true,
         titleCompanyPerson: true,
-        place: true,
+        place: {
+          include: {
+            millRateHistories: {
+              orderBy: {
+                year: 'desc'
+              }
+            }
+          }
+        },
         taxPayments: {
+          orderBy: {
+            year: 'desc'
+          }
+        },
+        valuationHistories: {
           orderBy: {
             year: 'desc'
           }

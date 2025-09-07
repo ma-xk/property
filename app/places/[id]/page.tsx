@@ -36,6 +36,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { formatPropertyAddress } from "@/lib/utils"
+import { MillRateHistory } from "@/components/mill-rate-history"
 
 interface Property {
   id: string
@@ -56,6 +57,15 @@ interface Property {
     state?: string
     millRate?: number
   }
+}
+
+interface MillRateHistory {
+  id: string
+  year: number
+  millRate: number
+  notes?: string
+  createdAt: string
+  updatedAt: string
 }
 
 interface Place {
@@ -93,6 +103,7 @@ interface Place {
   createdAt: string
   updatedAt: string
   properties: Property[]
+  millRateHistories: MillRateHistory[]
   _count: {
     properties: number
   }
@@ -132,6 +143,7 @@ export default function PlaceDetailPage() {
     plumbingInspectorPhone: "",
   })
   const [isSavingZoning, setIsSavingZoning] = useState(false)
+
 
   useEffect(() => {
     if (params.id) {
@@ -249,6 +261,7 @@ export default function PlaceDetailPage() {
       [field]: value
     }))
   }
+
 
   const handleEditZoning = () => {
     setIsEditingZoning(true)
@@ -816,8 +829,10 @@ export default function PlaceDetailPage() {
                         )}
                       </div>
                     </div>
+
                   </div>
                 </div>
+
 
                 {/* Notes */}
                 <div className="space-y-4 md:col-span-2 lg:col-span-1">
@@ -864,6 +879,19 @@ export default function PlaceDetailPage() {
               )}
             </CardContent>
           </Card>
+        </motion.div>
+
+        {/* Mill Rate History */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.375 }}
+        >
+          <MillRateHistory
+            placeId={place.id}
+            millRateHistories={place.millRateHistories || []}
+            onUpdate={fetchPlace}
+          />
         </motion.div>
 
         {/* Zoning Information */}
@@ -1312,3 +1340,4 @@ export default function PlaceDetailPage() {
     </div>
   )
 }
+

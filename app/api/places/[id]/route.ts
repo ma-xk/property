@@ -88,6 +88,11 @@ export async function GET(
             createdAt: 'desc'
           }
         },
+        millRateHistories: {
+          orderBy: {
+            year: 'desc'
+          }
+        },
         _count: {
           select: {
             properties: true
@@ -196,6 +201,11 @@ export async function PUT(
           },
           orderBy: {
             createdAt: 'desc'
+          }
+        },
+        millRateHistories: {
+          orderBy: {
+            year: 'desc'
           }
         },
         _count: {

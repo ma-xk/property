@@ -286,6 +286,158 @@ const taxPayments = [
   }
 ]
 
+// Sample mill rate history data for places
+const millRateHistories = [
+  // Madawaska mill rate history
+  {
+    placeName: "Madawaska",
+    placeState: "ME",
+    year: 2022,
+    millRate: 18.0,
+    notes: "Previous mill rate before increase"
+  },
+  {
+    placeName: "Madawaska",
+    placeState: "ME", 
+    year: 2023,
+    millRate: 18.2,
+    notes: "Slight increase due to infrastructure improvements"
+  },
+  {
+    placeName: "Madawaska",
+    placeState: "ME",
+    year: 2024,
+    millRate: 18.5,
+    notes: "Current mill rate reflecting town budget needs"
+  },
+  // Fort Kent mill rate history
+  {
+    placeName: "Fort Kent",
+    placeState: "ME",
+    year: 2022,
+    millRate: 15.8,
+    notes: "Previous mill rate before adjustments"
+  },
+  {
+    placeName: "Fort Kent",
+    placeState: "ME",
+    year: 2023,
+    millRate: 16.0,
+    notes: "Minor increase for town services"
+  },
+  {
+    placeName: "Fort Kent",
+    placeState: "ME",
+    year: 2024,
+    millRate: 16.2,
+    notes: "Current mill rate with school district funding"
+  }
+]
+
+// Sample property valuation history data
+const propertyValuationHistories = [
+  // 5th Avenue Lot valuation history
+  {
+    propertyAddress: "126 5th Avenue, Madawaska, ME",
+    year: 2022,
+    assessedValue: 7800,
+    marketValue: 8000,
+    assessmentDate: new Date("2022-04-01"),
+    assessmentNotes: "Initial assessment after purchase"
+  },
+  {
+    propertyAddress: "126 5th Avenue, Madawaska, ME",
+    year: 2023,
+    assessedValue: 8000,
+    marketValue: 8200,
+    assessmentDate: new Date("2023-04-01"),
+    assessmentNotes: "Value increase due to market conditions"
+  },
+  {
+    propertyAddress: "126 5th Avenue, Madawaska, ME",
+    year: 2024,
+    assessedValue: 8200,
+    marketValue: 8500,
+    assessmentDate: new Date("2024-04-01"),
+    assessmentNotes: "Current assessment reflecting improvements"
+  },
+  // Perley Brook Land valuation history
+  {
+    propertyAddress: "840 North Perley Brook Road, Fort Kent, ME",
+    year: 2022,
+    assessedValue: 26000,
+    marketValue: 26500,
+    assessmentDate: new Date("2022-03-01"),
+    assessmentNotes: "Rural land assessment based on acreage"
+  },
+  {
+    propertyAddress: "840 North Perley Brook Road, Fort Kent, ME",
+    year: 2023,
+    assessedValue: 26700,
+    marketValue: 27200,
+    assessmentDate: new Date("2023-03-01"),
+    assessmentNotes: "Slight increase due to comparable sales"
+  },
+  {
+    propertyAddress: "840 North Perley Brook Road, Fort Kent, ME",
+    year: 2024,
+    assessedValue: 27400,
+    marketValue: 28000,
+    assessmentDate: new Date("2024-03-01"),
+    assessmentNotes: "Current assessment reflecting market trends"
+  },
+  // Winter Street Lot 94 valuation history
+  {
+    propertyAddress: "Lot 94 Winter Street, Madawaska, ME",
+    year: 2022,
+    assessedValue: 19000,
+    marketValue: 19500,
+    assessmentDate: new Date("2022-04-01"),
+    assessmentNotes: "Residential lot assessment"
+  },
+  {
+    propertyAddress: "Lot 94 Winter Street, Madawaska, ME",
+    year: 2023,
+    assessedValue: 19750,
+    marketValue: 20250,
+    assessmentDate: new Date("2023-04-01"),
+    assessmentNotes: "Value increase due to location premium"
+  },
+  {
+    propertyAddress: "Lot 94 Winter Street, Madawaska, ME",
+    year: 2024,
+    assessedValue: 20500,
+    marketValue: 21000,
+    assessmentDate: new Date("2024-04-01"),
+    assessmentNotes: "Current assessment with dual road frontage premium"
+  },
+  // Winter Street Lot 45 valuation history
+  {
+    propertyAddress: "Lot 45 Winter Street, Madawaska, ME",
+    year: 2022,
+    assessedValue: 19500,
+    marketValue: 20000,
+    assessmentDate: new Date("2022-04-01"),
+    assessmentNotes: "Large residential lot assessment"
+  },
+  {
+    propertyAddress: "Lot 45 Winter Street, Madawaska, ME",
+    year: 2023,
+    assessedValue: 20300,
+    marketValue: 21000,
+    assessmentDate: new Date("2023-04-01"),
+    assessmentNotes: "Value increase due to cul-de-sac control"
+  },
+  {
+    propertyAddress: "Lot 45 Winter Street, Madawaska, ME",
+    year: 2024,
+    assessedValue: 21100,
+    marketValue: 22000,
+    assessmentDate: new Date("2024-04-01"),
+    assessmentNotes: "Current assessment with cul-de-sac control premium"
+  }
+]
+
 async function main() {
   console.log("🌱 Starting comprehensive seeding...")
 
@@ -305,6 +457,8 @@ async function main() {
 
     // Clean up existing data to avoid duplicates
     console.log("🗑️  Cleaning up existing data...")
+    await prisma.propertyValuationHistory.deleteMany({ where: { userId: user.id } })
+    await prisma.millRateHistory.deleteMany({ where: { userId: user.id } })
     await prisma.taxPayment.deleteMany({ where: { userId: user.id } })
     await prisma.property.deleteMany({ where: { userId: user.id } })
     await prisma.person.deleteMany({ where: { userId: user.id } })
@@ -395,6 +549,46 @@ async function main() {
       }
     }
 
+    // Create mill rate histories
+    console.log(`📊 Creating ${millRateHistories.length} mill rate history records...`)
+    
+    for (const millRateData of millRateHistories) {
+      const place = createdPlaces.get(`${millRateData.placeName}-${millRateData.placeState}`)
+      if (place) {
+        await prisma.millRateHistory.create({
+          data: {
+            year: millRateData.year,
+            millRate: millRateData.millRate,
+            notes: millRateData.notes,
+            placeId: place.id,
+            userId: user.id,
+          }
+        })
+        console.log(`✅ Created mill rate history: ${millRateData.year} - ${millRateData.millRate} mills for ${millRateData.placeName}`)
+      }
+    }
+
+    // Create property valuation histories
+    console.log(`📈 Creating ${propertyValuationHistories.length} property valuation history records...`)
+    
+    for (const valuationData of propertyValuationHistories) {
+      const property = createdProperties.get(valuationData.propertyAddress)
+      if (property) {
+        await prisma.propertyValuationHistory.create({
+          data: {
+            year: valuationData.year,
+            assessedValue: valuationData.assessedValue,
+            marketValue: valuationData.marketValue,
+            assessmentDate: valuationData.assessmentDate,
+            assessmentNotes: valuationData.assessmentNotes,
+            propertyId: property.id,
+            userId: user.id,
+          }
+        })
+        console.log(`✅ Created valuation history: ${valuationData.year} - Assessed: $${valuationData.assessedValue}, Market: $${valuationData.marketValue} for ${valuationData.propertyAddress}`)
+      }
+    }
+
     console.log("🎉 Seeding completed successfully!")
     
     // Show summary
@@ -411,6 +605,8 @@ async function main() {
     console.log(`   📈 Total Assessed Value: $${totalAssessedValue.toLocaleString()}`)
     console.log(`   📊 Total Market Value: $${totalMarketValue.toLocaleString()}`)
     console.log(`   💸 Tax Payments created: ${taxPayments.length}`)
+    console.log(`   📊 Mill Rate Histories created: ${millRateHistories.length}`)
+    console.log(`   📈 Property Valuation Histories created: ${propertyValuationHistories.length}`)
 
   } catch (error) {
     console.error("❌ Error seeding database:", error)
