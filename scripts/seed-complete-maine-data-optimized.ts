@@ -6,11 +6,19 @@ import * as path from 'path'
 // Load environment variables from .env.local
 dotenv.config({ path: '.env.local' })
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient({
+  datasources: {
+    db: {
+      url: process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL
+    }
+  },
+  // Optimize for bulk operations
+  log: ['error', 'warn'],
+})
 
 // Maine counties list
 const MAINE_COUNTIES = [
-  "Aroostook", "Franklin", "Hancock", "Kennebec", "Knox", "Lincoln", 
+  "Androscoggin","Aroostook", "Cumberland", "Franklin", "Hancock", "Kennebec", "Knox", "Lincoln", 
   "Oxford", "Penobscot", "Piscataquis", "Sagadahoc", "Somerset", 
   "Waldo", "Washington", "York"
 ] as const
@@ -175,9 +183,10 @@ async function readMunicipalMillRateCSV(): Promise<MunicipalMillRateData[]> {
   return municipalData
 }
 
-async function seedCompleteMaineData() {
+async function seedCompleteMaineDataOptimized() {
   try {
-    console.log('🏛️ Starting comprehensive Maine data seeding...')
+    console.log('🏛️ Starting OPTIMIZED comprehensive Maine data seeding...')
+    console.log('⚡ Using batch operations for maximum performance')
     
     // Find a user to associate the data with
     const user = await prisma.user.findFirst()
@@ -240,78 +249,81 @@ async function seedCompleteMaineData() {
       console.log('✅ Found existing Maine state')
     }
     
-    // Create all Maine counties
+    // Create all Maine counties in batch
     console.log(`🏛️  Creating ${MAINE_COUNTIES.length} Maine counties...`)
-    const createdCounties = new Map<string, any>()
+    const countyData = MAINE_COUNTIES.map(countyName => ({
+      name: countyName,
+      kind: 'COUNTY' as const,
+      state: 'ME',
+      country: 'United States',
+      description: `${countyName} County, Maine`,
+      userId: user.id,
+      parentId: maineState.id,
+      statePlaceId: maineState.id
+    }))
     
-    for (const countyName of MAINE_COUNTIES) {
-      const county = await prisma.place.create({
-        data: {
-          name: countyName,
-          kind: 'COUNTY',
-          state: 'ME',
-          country: 'United States',
-          description: `${countyName} County, Maine`,
-          userId: user.id,
-          parentId: maineState.id,
-          statePlaceId: maineState.id
-        }
-      })
-      createdCounties.set(countyName, county)
-      console.log(`✅ Created county: ${countyName}`)
-    }
+    const createdCounties = await prisma.place.createMany({
+      data: countyData,
+      skipDuplicates: true
+    })
     
-    // Create county mill rate histories
+    console.log(`✅ Created ${createdCounties.count} counties`)
+    
+    // Get the created counties for mill rate creation
+    const counties = await prisma.place.findMany({
+      where: {
+        userId: user.id,
+        kind: 'COUNTY'
+      }
+    })
+    const countyMap = new Map(counties.map(c => [c.name, c]))
+    
+    // Create county mill rate histories in batch
     console.log(`📊 Creating county mill rate histories...`)
-    let countyMillRateCount = 0
+    const countyMillRateData_batch = countyMillRateData
+      .map(data => {
+        const county = countyMap.get(data.county)
+        return county ? {
+          year: data.year,
+          millRate: data.millRate,
+          notes: `${data.county} County mill rate for ${data.year}`,
+          placeId: county.id,
+          userId: user.id
+        } : null
+      })
+      .filter(Boolean)
     
-    for (const data of countyMillRateData) {
-      const county = createdCounties.get(data.county)
-      if (county) {
-        await prisma.millRateHistory.create({
-          data: {
-            year: data.year,
-            millRate: data.millRate,
-            notes: `${data.county} County mill rate for ${data.year}`,
-            placeId: county.id,
-            userId: user.id
-          }
-        })
-        countyMillRateCount++
-      }
-    }
+    const countyMillRateResult = await prisma.millRateHistory.createMany({
+      data: countyMillRateData_batch,
+      skipDuplicates: true
+    })
     
-    console.log(`✅ Created ${countyMillRateCount} county mill rate records`)
+    console.log(`✅ Created ${countyMillRateResult.count} county mill rate records`)
     
-    // Create municipalities
+    // Create municipalities in batch
     console.log(`🏘️ Creating ${municipalityData.length} municipalities...`)
-    const createdMunicipalities = new Map<string, any>()
-    let createdMunicipalityCount = 0
-    let skippedMunicipalityCount = 0
-    
-    for (const record of municipalityData) {
-      const municipalityName = record.Municipality
-      const countyName = record.County.replace(/\s*\(.*\)/, '') // Remove (seat) etc.
-      const municipalityType = record.Type
-      
-      // Map CSV types to our PlaceKind enum
-      let placeKind: 'TOWN' | 'UT' | 'CITY'
-      if (municipalityType.includes('City')) {
-        placeKind = 'CITY'
-      } else if (municipalityType.includes('Plantation')) {
-        placeKind = 'UT' // Treat plantations as unorganized territories
-      } else {
-        placeKind = 'TOWN'
-      }
-      
-      const county = createdCounties.get(countyName)
-      if (!county) {
-        console.log(`⚠️  County not found for ${municipalityName}: ${countyName}`)
-        continue
-      }
-      
-      const municipality = await prisma.place.create({
-        data: {
+    const municipalityData_batch = municipalityData
+      .map(record => {
+        const municipalityName = record.Municipality
+        const countyName = record.County.replace(/\s*\(.*\)/, '') // Remove (seat) etc.
+        const municipalityType = record.Type
+        
+        // Map CSV types to our PlaceKind enum
+        let placeKind: 'TOWN' | 'UT' | 'CITY'
+        if (municipalityType.includes('City')) {
+          placeKind = 'CITY'
+        } else if (municipalityType.includes('Plantation')) {
+          placeKind = 'UT' // Treat plantations as unorganized territories
+        } else {
+          placeKind = 'TOWN'
+        }
+        
+        const county = countyMap.get(countyName)
+        if (!county) {
+          return null
+        }
+        
+        return {
           name: municipalityName,
           kind: placeKind,
           state: 'ME',
@@ -323,73 +335,81 @@ async function seedCompleteMaineData() {
           statePlaceId: maineState.id
         }
       })
-      
-      createdMunicipalities.set(`${municipalityName}-${countyName}`, municipality)
-      createdMunicipalityCount++
-      
-      if (createdMunicipalityCount % 50 === 0) {
-        console.log(`📝 Created ${createdMunicipalityCount} municipalities...`)
+      .filter(Boolean)
+    
+    const municipalityResult = await prisma.place.createMany({
+      data: municipalityData_batch,
+      skipDuplicates: true
+    })
+    
+    console.log(`✅ Created ${municipalityResult.count} municipalities`)
+    
+    // Get created municipalities for mill rate creation
+    const municipalities = await prisma.place.findMany({
+      where: {
+        userId: user.id,
+        kind: { in: ['TOWN', 'UT', 'CITY'] }
       }
-    }
+    })
+    const municipalityMap = new Map(municipalities.map(m => [`${m.name}-${m.countyId}`, m]))
     
-    console.log(`✅ Created ${createdMunicipalityCount} municipalities`)
+    // Create municipal mill rate histories in batch (OPTIMIZED!)
+    console.log(`📊 Creating municipal mill rate histories (OPTIMIZED BATCH)...`)
     
-    // Create municipal mill rate histories
-    console.log(`📊 Creating municipal mill rate histories...`)
-    let municipalMillRateCount = 0
-    let skippedMillRateCount = 0
+    // Process in chunks to avoid memory issues
+    const BATCH_SIZE = 1000
+    let totalCreated = 0
     
-    for (const data of municipalMillRateData) {
-      // Try to find matching municipality
-      const municipalityKey = `${data.municipality}-${data.county}`
-      let municipality = createdMunicipalities.get(municipalityKey)
+    for (let i = 0; i < municipalMillRateData.length; i += BATCH_SIZE) {
+      const batch = municipalMillRateData.slice(i, i + BATCH_SIZE)
       
-      // If not found, try without county (some municipalities might not have county in CSV)
-      if (!municipality) {
-        municipality = Array.from(createdMunicipalities.values()).find(m => 
-          m.name.toLowerCase() === data.municipality.toLowerCase()
-        )
-      }
-      
-      if (municipality) {
-        // Check if mill rate already exists for this municipality and year
-        const existingRate = await prisma.millRateHistory.findFirst({
-          where: {
-            placeId: municipality.id,
-            year: data.year,
-            userId: user.id
+      const batchData = batch
+        .map(data => {
+          // Try to find matching municipality
+          const municipalityKey = `${data.municipality}-${data.county}`
+          let municipality = municipalityMap.get(municipalityKey)
+          
+          // If not found, try without county (some municipalities might not have county in CSV)
+          if (!municipality) {
+            municipality = municipalities.find(m => 
+              m.name.toLowerCase() === data.municipality.toLowerCase()
+            )
           }
+          
+          return municipality ? {
+            year: data.year,
+            millRate: data.millRate,
+            notes: data.percentageChange ? 
+              `Percentage change: ${data.percentageChange}%` : 
+              'Municipal mill rate data',
+            placeId: municipality.id,
+            userId: user.id
+          } : null
         })
-        
-        if (!existingRate) {
-          await prisma.millRateHistory.create({
-            data: {
-              year: data.year,
-              millRate: data.millRate,
-              notes: data.percentageChange ? 
-                `Percentage change: ${data.percentageChange}%` : 
-                'Municipal mill rate data',
-              placeId: municipality.id,
-              userId: user.id
-            }
-          })
-          municipalMillRateCount++
-        } else {
-          skippedMillRateCount++
-        }
+        .filter(Boolean)
+      
+      if (batchData.length > 0) {
+        const result = await prisma.millRateHistory.createMany({
+          data: batchData,
+          skipDuplicates: true
+        })
+        totalCreated += result.count
       }
+      
+      // Progress logging
+      const progress = Math.min(i + BATCH_SIZE, municipalMillRateData.length)
+      console.log(`📊 Processed ${progress}/${municipalMillRateData.length} municipal mill rate records...`)
     }
     
-    console.log(`✅ Created ${municipalMillRateCount} municipal mill rate records`)
-    console.log(`⏭️  Skipped ${skippedMillRateCount} existing records`)
+    console.log(`✅ Created ${totalCreated} municipal mill rate records`)
     
     // Final summary
-    console.log('\n🎉 Complete Maine data seeding finished!')
+    console.log('\n🎉 OPTIMIZED Maine data seeding finished!')
     console.log(`📊 Summary:`)
-    console.log(`   🏛️  Counties created: ${MAINE_COUNTIES.length}`)
-    console.log(`   📈 County mill rate records: ${countyMillRateCount}`)
-    console.log(`   🏘️  Municipalities created: ${createdMunicipalityCount}`)
-    console.log(`   📊 Municipal mill rate records: ${municipalMillRateCount}`)
+    console.log(`   🏛️  Counties created: ${createdCounties.count}`)
+    console.log(`   📈 County mill rate records: ${countyMillRateResult.count}`)
+    console.log(`   🏘️  Municipalities created: ${municipalityResult.count}`)
+    console.log(`   📊 Municipal mill rate records: ${totalCreated}`)
     console.log(`   📅 County data years: 1990-2022`)
     console.log(`   📅 Municipal data years: 1991-2023`)
     
@@ -420,7 +440,7 @@ async function seedCompleteMaineData() {
   }
 }
 
-seedCompleteMaineData()
+seedCompleteMaineDataOptimized()
   .catch((error) => {
     console.error(error)
     process.exit(1)
