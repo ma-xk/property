@@ -282,27 +282,62 @@ This project is licensed under the MIT License.
 ---
 
 **🌟 App Features:**
+
+**🏠 Property Management**
 - ✅ **Comprehensive Property Management** - Complete real estate tracking with detailed purchase info, financing terms, closing costs, property specifications (acres, zoning), and legacy rental management features
+- ✅ **Hierarchical Location System** - Advanced STATE → COUNTY → (TOWN | UT | CITY) hierarchy ensuring every property rolls up to a proper region with automatic place creation and relationship management
+- ✅ **Smart Property Creation** - Streamlined property creation with state/county/place type dropdowns, automatic hierarchical place creation, and intelligent data validation
+- ✅ **Financial Analytics** - Monitor purchase prices, earnest money, comprehensive closing costs breakdown, and investment totals with professional currency formatting
+
+**👥 Contact & Relationship Management**
 - ✅ **Advanced Contact Management** - Track people (agents, sellers, buyers, title companies) with roles, contact info, companies, and automatic property relationship linking
-- ✅ **Municipal Location Management** - Manage places with comprehensive municipal information including tax office details, zoning office contacts, code enforcement officers, and plumbing inspector information
-- ✅ **Advanced Tax Management System** - Comprehensive tax dashboard with consolidated analytics, state-by-state breakdowns, annual tax estimates, state tax stamps tracking, property tax proration analysis, and mill rate calculations
+- ✅ **Relationship Management** - Advanced linking system connecting properties to people (sellers, agents, title companies) and places with referential integrity
+
+**🏛️ Municipal & Location Management**
+- ✅ **Hierarchical Place Management** - Manage places with STATE/COUNTY/TOWN-UT-CITY hierarchy, comprehensive municipal information including tax office details, zoning office contacts, code enforcement officers, and plumbing inspector information
+- ✅ **Complete Maine Municipal Database** - Pre-configured with all 14 Maine counties and 440+ municipalities (Towns, Cities, Plantations) with automatic hierarchy creation and comprehensive coverage
+- ✅ **Municipal Mill Rate Database** - Historical mill rate data for 33 years (1991-2023) covering 440+ Maine municipalities with percentage changes and state weighted averages
+- ✅ **County Historical Data** - Complete mill rate history for all Maine counties (1990-2022) enabling comprehensive tax analysis and trend visualization
+- ✅ **Progressive Disclosure System** - Smart filtering showing only counties and municipalities with associated properties, keeping the interface clean while maintaining comprehensive data coverage
 - ✅ **Municipal Tax Information** - Track tax payment addresses, websites, office phone numbers, due dates, late interest rates, assessment schedules, mill rates, and custom tax notes per location
+- ✅ **Zoning & Code Enforcement** - Store zoning office addresses, phone numbers, website URLs, plus contact details for Code Enforcement Officers and Plumbing Inspectors
+
+**💰 Tax Management & Analytics**
+- ✅ **Advanced Tax Management System** - Comprehensive tax dashboard with consolidated analytics, state-by-state breakdowns, annual tax estimates, state tax stamps tracking, property tax proration analysis, and mill rate calculations
 - ✅ **Property Valuation Tracking** - Monitor assessed values, market values, assessment dates, and assessment notes with automatic tax calculations using mill rates
 - ✅ **Historical Tax Payment Records** - Track actual tax payments by year with payment dates, amounts, and notes for comprehensive tax history
 - ✅ **Tax Calculation Engine** - Automatic calculation of estimated annual taxes using assessed/market values and mill rates with clear breakdowns
-- ✅ **Mill Rate Time Series Tracking** - Historical mill rate tracking by municipality with year-over-year analysis, trend visualization, and automatic current mill rate updates
+- ✅ **Comprehensive Mill Rate Database** - 33 years of municipal mill rate data (1991-2023) with automatic population for new properties and historical trend analysis
+- ✅ **County-Level Tax Analytics** - Complete mill rate history for all Maine counties (1990-2022) enabling comprehensive tax burden analysis and investment decision support
 - ✅ **Property Valuation Time Series** - Comprehensive historical valuation tracking with assessed value, market value, and assessment date progression over time with trend analysis and percentage change calculations
-- ✅ **Zoning & Code Enforcement** - Store zoning office addresses, phone numbers, website URLs, plus contact details for Code Enforcement Officers and Plumbing Inspectors
-- ✅ **Financial Analytics** - Monitor purchase prices, earnest money, comprehensive closing costs breakdown, and investment totals with professional currency formatting
+- ✅ **Automatic Tax Information Population** - New properties automatically inherit current mill rates and tax information from their municipality, eliminating manual lookup
+
+**🗺️ Mapping & Geographic Features**
 - ✅ **Interactive Property Mapping** - Global map on dashboard showing all properties with location data, clickable markers with property details, and automatic bounds calculation for optimal viewing
 - ✅ **Advanced Parcel Viewer** - Detailed parcel maps on property detail pages showing exact property boundaries, parcel information (Map/Lot, State ID, Town, County), area calculations, and LUPC zoning overlays for unorganized territories
 - ✅ **Real-Time Parcel Data Integration** - Live integration with Maine GeoLibrary services for accurate parcel boundaries, property details, and zoning information with intelligent geocoding and spatial queries
+
+**📊 Advanced Analytics & Data Visualization**
+- ✅ **Municipal Mill Rate Analytics** - Interactive line charts showing historical mill rate trends by county with revenue tracker-style visualizations
+- ✅ **Maine Data Coverage Analytics** - Comprehensive overview of data coverage including total counties, municipalities, and years of historical data
+- ✅ **Tax Trend Analysis** - Year-over-year mill rate analysis with percentage change calculations and trend identification
+- ✅ **County Comparison Tools** - Side-by-side comparison of mill rates across Maine counties with visual trend analysis
+- ✅ **Municipality-Level Insights** - Granular analysis of municipal tax rates with automatic mill rate population for new properties
+
+**🔍 Search & Navigation**
 - ✅ **Global Search & Navigation** - Real-time search across all properties, people, and places with intelligent filtering and quick navigation
-- ✅ **Multi-Dashboard Analytics** - Overview dashboard plus specialized dashboards for properties, people, places, and taxes with detailed statistics and visual summaries
-- ✅ **Relationship Management** - Advanced linking system connecting properties to people (sellers, agents, title companies) and places with referential integrity
+- ✅ **Multi-Dashboard Analytics** - Overview dashboard plus specialized dashboards for properties, people, places, taxes, and analytics with detailed statistics and visual summaries
+
+**🌱 Data Management & Seeding**
+- ✅ **Comprehensive Maine Data Seeding** - Automated scripts to populate the database with complete Maine municipal data including all counties, municipalities, and historical mill rates
+- ✅ **Sample Property Portfolio** - Pre-configured sample properties with realistic data for testing and demonstration purposes
+- ✅ **Historical Data Integration** - Seamless import of CSV-based historical data including mill rates, municipal information, and tax records
+- ✅ **Smart Data Relationships** - Automatic creation of hierarchical relationships between states, counties, and municipalities with referential integrity
+
+**🔐 Security & Infrastructure**
 - ✅ **Secure Authentication** - Complete user authentication system with NextAuth.js, registration, and session management
 - ✅ **Modern Responsive UI** - Beautiful interface built with shadcn/ui components, Tailwind CSS styling, and smooth Framer Motion animations
-- ✅ **Type-Safe Database** - PostgreSQL database with Prisma ORM providing full type safety, migrations, and optimized queries
+- ✅ **Type-Safe Database** - PostgreSQL database with Prisma ORM providing full type safety, migrations, and optimized queries with hierarchical relationships
 - ✅ **Production Deployment** - Fully deployed and optimized for production use with proper error handling and loading states
 
 Need help? Check the issues tab or create a new issue for support.

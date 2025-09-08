@@ -12,6 +12,10 @@ const createPropertySchema = z.object({
   state: z.string().min(1, "State is required"),
   zipCode: z.string().optional(),
   
+  // Place hierarchy fields
+  county: z.string().optional(),
+  placeType: z.enum(["TOWN", "UT", "CITY"]).optional(),
+  
   // Basic Property Info
   name: z.string().optional(),
   description: z.string().optional(),
@@ -75,7 +79,15 @@ export async function GET() {
         sellerAgentPerson: true,
         buyerAgentPerson: true,
         titleCompanyPerson: true,
-        place: true,
+        place: {
+          include: {
+            county: {
+              select: {
+                name: true
+              }
+            }
+          }
+        },
       },
       orderBy: {
         createdAt: 'desc'
@@ -120,33 +132,107 @@ async function findOrCreatePerson(name: string, role: string, userId: string) {
   return person
 }
 
-// Helper function to find or create a place (represents a town/city)
-async function findOrCreatePlace(city: string, state: string | null, userId: string) {
+// Helper function to find or create hierarchical places
+async function findOrCreateHierarchicalPlace(
+  city: string, 
+  state: string | null, 
+  county: string | null, 
+  placeType: string | null, 
+  userId: string
+) {
   if (!city || city.trim() === '') return null
   
   const trimmedCity = city.trim()
   const trimmedState = state?.trim() || null
+  const trimmedCounty = county?.trim() || null
+  const trimmedPlaceType = placeType?.trim() || null
   
-  // Try to find existing place with same city and state
-  let place = await prisma.place.findFirst({
-    where: {
-      name: trimmedCity,
-      state: trimmedState,
-      userId: userId
-    }
-  })
-  
-  // If not found, create new place representing this town/city
-  if (!place) {
-    place = await prisma.place.create({
-      data: {
-        name: trimmedCity,
-        state: trimmedState,
-        country: "United States",
-        description: `All properties in ${trimmedCity}${trimmedState ? `, ${trimmedState}` : ''}`,
+  // First, ensure we have a STATE place
+  let statePlace = null
+  if (trimmedState) {
+    // Normalize state input - convert "Maine" to "ME" for consistency
+    const normalizedState = trimmedState === "Maine" ? "ME" : trimmedState
+    
+    // Look for existing state place
+    statePlace = await prisma.place.findFirst({
+      where: {
+        kind: "STATE",
+        state: normalizedState,
         userId: userId
       }
     })
+    
+    if (!statePlace) {
+      // Create state place with full name
+      const stateName = normalizedState === "ME" ? "Maine" : normalizedState
+      statePlace = await prisma.place.create({
+        data: {
+          name: stateName,
+          kind: "STATE",
+          state: normalizedState,
+          country: "United States",
+          description: `State of ${stateName}`,
+          userId: userId
+        }
+      })
+    }
+  }
+  
+  // Then, ensure we have a COUNTY place
+  let countyPlace = null
+  if (trimmedCounty && statePlace) {
+    countyPlace = await prisma.place.findFirst({
+      where: {
+        name: trimmedCounty,
+        kind: "COUNTY",
+        parentId: statePlace.id,
+        userId: userId
+      }
+    })
+    
+    if (!countyPlace) {
+      countyPlace = await prisma.place.create({
+        data: {
+          name: trimmedCounty,
+          kind: "COUNTY",
+          state: trimmedState,
+          country: "United States",
+          description: `${trimmedCounty} County, ${trimmedState}`,
+          parentId: statePlace.id,
+          statePlaceId: statePlace.id,
+          userId: userId
+        }
+      })
+    }
+  }
+  
+  // Finally, create the TOWN/UT/CITY place
+  let place = null
+  if (trimmedPlaceType && countyPlace) {
+    place = await prisma.place.findFirst({
+      where: {
+        name: trimmedCity,
+        kind: trimmedPlaceType as any,
+        parentId: countyPlace.id,
+        userId: userId
+      }
+    })
+    
+    if (!place) {
+      place = await prisma.place.create({
+        data: {
+          name: trimmedCity,
+          kind: trimmedPlaceType as any,
+          state: trimmedState,
+          country: "United States",
+          description: `${trimmedCity}, ${trimmedCounty} County, ${trimmedState}`,
+          parentId: countyPlace.id,
+          countyId: countyPlace.id,
+          statePlaceId: statePlace?.id,
+          userId: userId
+        }
+      })
+    }
   }
   
   return place
@@ -173,13 +259,33 @@ export async function POST(req: NextRequest) {
       validatedData.sellerAgent ? findOrCreatePerson(validatedData.sellerAgent, "Seller Agent", session.user.id) : null,
       validatedData.buyerAgent ? findOrCreatePerson(validatedData.buyerAgent, "Buyer Agent", session.user.id) : null,
       validatedData.titleCompany ? findOrCreatePerson(validatedData.titleCompany, "Title Company", session.user.id) : null,
-      validatedData.city ? findOrCreatePlace(validatedData.city, validatedData.state, session.user.id) : null
+      validatedData.city ? findOrCreateHierarchicalPlace(
+        validatedData.city, 
+        validatedData.state || null, 
+        validatedData.county || null, 
+        validatedData.placeType || null, 
+        session.user.id
+      ) : null
     ])
+
+    // Filter out hierarchical fields that don't belong on the Property model
+    const { county, placeType, ...propertyData } = validatedData
+
+    // Log the data being used for property creation
+    console.log("Creating property with data:", {
+      ...propertyData,
+      userId: session.user.id,
+      sellerId: sellerPerson?.id,
+      sellerAgentId: sellerAgentPerson?.id,
+      buyerAgentId: buyerAgentPerson?.id,
+      titleCompanyId: titleCompanyPerson?.id,
+      placeId: place?.id,
+    })
 
     // Create property with all relationships
     const property = await prisma.property.create({
       data: {
-        ...validatedData,
+        ...propertyData,
         userId: session.user.id,
         // Link to created people
         sellerId: sellerPerson?.id,
@@ -200,6 +306,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(property, { status: 201 })
   } catch (error) {
+    console.error("Property creation error:", error)
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: "Validation error", details: error.issues },
@@ -207,7 +314,7 @@ export async function POST(req: NextRequest) {
       )
     }
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Internal server error", details: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }
     )
   }

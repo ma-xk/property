@@ -13,7 +13,8 @@ import {
   LogOut,
   Settings,
   ChevronUp,
-  Receipt
+  Receipt,
+  BarChart3
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -75,6 +76,11 @@ const items = [
     title: "Taxes",
     url: "/taxes",
     icon: Receipt,
+  },
+  {
+    title: "Analytics",
+    url: "/analytics",
+    icon: BarChart3,
   },
 ]
 

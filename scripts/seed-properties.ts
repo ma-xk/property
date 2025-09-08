@@ -6,10 +6,28 @@ dotenv.config({ path: '.env.local' })
 
 const prisma = new PrismaClient()
 
-// Sample places data
-const places = [
+// Hierarchical places data - STATE → COUNTY → TOWN
+const hierarchicalPlaces = [
+  // STATE level
+  {
+    name: "Maine",
+    kind: "STATE",
+    state: "ME",
+    country: "United States",
+    description: "State of Maine"
+  },
+  // COUNTY level
+  {
+    name: "Aroostook",
+    kind: "COUNTY", 
+    state: "ME",
+    country: "United States",
+    description: "Aroostook County, Maine"
+  },
+  // TOWN level
   {
     name: "Madawaska",
+    kind: "TOWN",
     state: "ME",
     country: "United States",
     description: "Aroostook County town in northern Maine",
@@ -40,6 +58,7 @@ const places = [
   },
   {
     name: "Fort Kent",
+    kind: "TOWN",
     state: "ME", 
     country: "United States",
     description: "Northernmost town in Maine, near the Canadian border",
@@ -288,9 +307,275 @@ const taxPayments = [
 
 // Sample mill rate history data for places
 const millRateHistories = [
+  // Aroostook County mill rate history (1990-2022)
+  {
+    placeName: "Aroostook",
+    placeKind: "COUNTY",
+    placeState: "ME",
+    year: 1990,
+    millRate: 9.02,
+    notes: "County mill rate for 1990"
+  },
+  {
+    placeName: "Aroostook",
+    placeKind: "COUNTY",
+    placeState: "ME",
+    year: 1991,
+    millRate: 7.90,
+    notes: "County mill rate for 1991"
+  },
+  {
+    placeName: "Aroostook",
+    placeKind: "COUNTY",
+    placeState: "ME",
+    year: 1992,
+    millRate: 7.77,
+    notes: "County mill rate for 1992"
+  },
+  {
+    placeName: "Aroostook",
+    placeKind: "COUNTY",
+    placeState: "ME",
+    year: 1993,
+    millRate: 9.53,
+    notes: "County mill rate for 1993"
+  },
+  {
+    placeName: "Aroostook",
+    placeKind: "COUNTY",
+    placeState: "ME",
+    year: 1994,
+    millRate: 8.85,
+    notes: "County mill rate for 1994"
+  },
+  {
+    placeName: "Aroostook",
+    placeKind: "COUNTY",
+    placeState: "ME",
+    year: 1995,
+    millRate: 8.44,
+    notes: "County mill rate for 1995"
+  },
+  {
+    placeName: "Aroostook",
+    placeKind: "COUNTY",
+    placeState: "ME",
+    year: 1996,
+    millRate: 7.33,
+    notes: "County mill rate for 1996"
+  },
+  {
+    placeName: "Aroostook",
+    placeKind: "COUNTY",
+    placeState: "ME",
+    year: 1997,
+    millRate: 6.81,
+    notes: "County mill rate for 1997"
+  },
+  {
+    placeName: "Aroostook",
+    placeKind: "COUNTY",
+    placeState: "ME",
+    year: 1998,
+    millRate: 6.02,
+    notes: "County mill rate for 1998"
+  },
+  {
+    placeName: "Aroostook",
+    placeKind: "COUNTY",
+    placeState: "ME",
+    year: 1999,
+    millRate: 7.07,
+    notes: "County mill rate for 1999"
+  },
+  {
+    placeName: "Aroostook",
+    placeKind: "COUNTY",
+    placeState: "ME",
+    year: 2000,
+    millRate: 8.20,
+    notes: "County mill rate for 2000"
+  },
+  {
+    placeName: "Aroostook",
+    placeKind: "COUNTY",
+    placeState: "ME",
+    year: 2001,
+    millRate: 8.56,
+    notes: "County mill rate for 2001"
+  },
+  {
+    placeName: "Aroostook",
+    placeKind: "COUNTY",
+    placeState: "ME",
+    year: 2002,
+    millRate: 7.88,
+    notes: "County mill rate for 2002"
+  },
+  {
+    placeName: "Aroostook",
+    placeKind: "COUNTY",
+    placeState: "ME",
+    year: 2003,
+    millRate: 7.56,
+    notes: "County mill rate for 2003"
+  },
+  {
+    placeName: "Aroostook",
+    placeKind: "COUNTY",
+    placeState: "ME",
+    year: 2004,
+    millRate: 7.54,
+    notes: "County mill rate for 2004"
+  },
+  {
+    placeName: "Aroostook",
+    placeKind: "COUNTY",
+    placeState: "ME",
+    year: 2005,
+    millRate: 7.54,
+    notes: "County mill rate for 2005"
+  },
+  {
+    placeName: "Aroostook",
+    placeKind: "COUNTY",
+    placeState: "ME",
+    year: 2006,
+    millRate: 6.96,
+    notes: "County mill rate for 2006"
+  },
+  {
+    placeName: "Aroostook",
+    placeKind: "COUNTY",
+    placeState: "ME",
+    year: 2007,
+    millRate: 6.46,
+    notes: "County mill rate for 2007"
+  },
+  {
+    placeName: "Aroostook",
+    placeKind: "COUNTY",
+    placeState: "ME",
+    year: 2008,
+    millRate: 6.41,
+    notes: "County mill rate for 2008"
+  },
+  {
+    placeName: "Aroostook",
+    placeKind: "COUNTY",
+    placeState: "ME",
+    year: 2009,
+    millRate: 8.25,
+    notes: "County mill rate for 2009"
+  },
+  {
+    placeName: "Aroostook",
+    placeKind: "COUNTY",
+    placeState: "ME",
+    year: 2010,
+    millRate: 7.41,
+    notes: "County mill rate for 2010"
+  },
+  {
+    placeName: "Aroostook",
+    placeKind: "COUNTY",
+    placeState: "ME",
+    year: 2011,
+    millRate: 6.58,
+    notes: "County mill rate for 2011"
+  },
+  {
+    placeName: "Aroostook",
+    placeKind: "COUNTY",
+    placeState: "ME",
+    year: 2012,
+    millRate: 6.66,
+    notes: "County mill rate for 2012"
+  },
+  {
+    placeName: "Aroostook",
+    placeKind: "COUNTY",
+    placeState: "ME",
+    year: 2013,
+    millRate: 6.72,
+    notes: "County mill rate for 2013"
+  },
+  {
+    placeName: "Aroostook",
+    placeKind: "COUNTY",
+    placeState: "ME",
+    year: 2014,
+    millRate: 6.69,
+    notes: "County mill rate for 2014"
+  },
+  {
+    placeName: "Aroostook",
+    placeKind: "COUNTY",
+    placeState: "ME",
+    year: 2015,
+    millRate: 6.93,
+    notes: "County mill rate for 2015"
+  },
+  {
+    placeName: "Aroostook",
+    placeKind: "COUNTY",
+    placeState: "ME",
+    year: 2016,
+    millRate: 6.37,
+    notes: "County mill rate for 2016"
+  },
+  {
+    placeName: "Aroostook",
+    placeKind: "COUNTY",
+    placeState: "ME",
+    year: 2017,
+    millRate: 6.31,
+    notes: "County mill rate for 2017"
+  },
+  {
+    placeName: "Aroostook",
+    placeKind: "COUNTY",
+    placeState: "ME",
+    year: 2018,
+    millRate: 7.05,
+    notes: "County mill rate for 2018"
+  },
+  {
+    placeName: "Aroostook",
+    placeKind: "COUNTY",
+    placeState: "ME",
+    year: 2019,
+    millRate: 7.46,
+    notes: "County mill rate for 2019"
+  },
+  {
+    placeName: "Aroostook",
+    placeKind: "COUNTY",
+    placeState: "ME",
+    year: 2020,
+    millRate: 6.90,
+    notes: "County mill rate for 2020"
+  },
+  {
+    placeName: "Aroostook",
+    placeKind: "COUNTY",
+    placeState: "ME",
+    year: 2021,
+    millRate: 7.0,
+    notes: "County mill rate for 2021"
+  },
+  {
+    placeName: "Aroostook",
+    placeKind: "COUNTY",
+    placeState: "ME",
+    year: 2022,
+    millRate: 7.05,
+    notes: "County mill rate for 2022"
+  },
   // Madawaska mill rate history
   {
     placeName: "Madawaska",
+    placeKind: "TOWN",
     placeState: "ME",
     year: 2022,
     millRate: 18.0,
@@ -298,6 +583,7 @@ const millRateHistories = [
   },
   {
     placeName: "Madawaska",
+    placeKind: "TOWN",
     placeState: "ME", 
     year: 2023,
     millRate: 18.2,
@@ -305,6 +591,7 @@ const millRateHistories = [
   },
   {
     placeName: "Madawaska",
+    placeKind: "TOWN",
     placeState: "ME",
     year: 2024,
     millRate: 18.5,
@@ -313,6 +600,7 @@ const millRateHistories = [
   // Fort Kent mill rate history
   {
     placeName: "Fort Kent",
+    placeKind: "TOWN",
     placeState: "ME",
     year: 2022,
     millRate: 15.8,
@@ -320,6 +608,7 @@ const millRateHistories = [
   },
   {
     placeName: "Fort Kent",
+    placeKind: "TOWN",
     placeState: "ME",
     year: 2023,
     millRate: 16.0,
@@ -327,6 +616,7 @@ const millRateHistories = [
   },
   {
     placeName: "Fort Kent",
+    placeKind: "TOWN",
     placeState: "ME",
     year: 2024,
     millRate: 16.2,
@@ -455,28 +745,116 @@ async function main() {
 
     console.log(`📝 Found user: ${user.email}`)
 
-    // Clean up existing data to avoid duplicates
-    console.log("🗑️  Cleaning up existing data...")
+    // Clean up existing sample data to avoid duplicates
+    console.log("🗑️  Cleaning up existing sample data...")
     await prisma.propertyValuationHistory.deleteMany({ where: { userId: user.id } })
-    await prisma.millRateHistory.deleteMany({ where: { userId: user.id } })
     await prisma.taxPayment.deleteMany({ where: { userId: user.id } })
     await prisma.property.deleteMany({ where: { userId: user.id } })
     await prisma.person.deleteMany({ where: { userId: user.id } })
-    await prisma.place.deleteMany({ where: { userId: user.id } })
+    // Note: We don't delete places here to preserve the comprehensive Maine data
 
-    // Create places
-    console.log(`🏘️  Creating ${places.length} places...`)
+    // Find existing places (preserve comprehensive Maine data)
+    console.log(`🏘️  Finding existing places for sample properties...`)
     const createdPlaces = new Map<string, any>()
     
-    for (const placeData of places) {
-      const place = await prisma.place.create({
-        data: {
-          ...placeData,
-          userId: user.id,
+    // Find Maine state
+    const mainePlace = await prisma.place.findFirst({
+      where: {
+        kind: 'STATE',
+        name: 'Maine',
+        userId: user.id
+      }
+    })
+    
+    if (!mainePlace) {
+      throw new Error("Maine state not found. Please run 'seed-complete-maine-data.ts' first to create the comprehensive Maine data.")
+    }
+    createdPlaces.set("Maine-STATE", mainePlace)
+    console.log(`✅ Found state: ${mainePlace.name} (${mainePlace.kind})`)
+    
+    // Find Aroostook county
+    const aroostookPlace = await prisma.place.findFirst({
+      where: {
+        kind: 'COUNTY',
+        name: 'Aroostook',
+        userId: user.id
+      }
+    })
+    
+    if (!aroostookPlace) {
+      throw new Error("Aroostook county not found. Please run 'seed-complete-maine-data.ts' first to create the comprehensive Maine data.")
+    }
+    createdPlaces.set("Aroostook-COUNTY", aroostookPlace)
+    console.log(`✅ Found county: ${aroostookPlace.name} (${aroostookPlace.kind})`)
+    
+    // Find towns (Madawaska and Fort Kent) and update with tax information
+    const towns = ['Madawaska', 'Fort Kent']
+    for (const townName of towns) {
+      const town = await prisma.place.findFirst({
+        where: {
+          kind: 'TOWN',
+          name: townName,
+          userId: user.id
         }
       })
-      createdPlaces.set(`${place.name}-${place.state}`, place)
-      console.log(`✅ Created place: ${place.name}, ${place.state} (Mill Rate: ${place.millRate})`)
+      
+      if (!town) {
+        throw new Error(`${townName} town not found. Please run 'seed-complete-maine-data.ts' first to create the comprehensive Maine data.`)
+      }
+      
+      // Update town with tax information if not already set
+      if (!town.millRate) {
+        const taxData = townName === 'Madawaska' ? {
+          taxPaymentAddress: '328 St. Thomas Street, Madawaska, ME 04756',
+          taxPaymentWebsite: 'https://www.madawaska-me.org/tax-collector',
+          taxOfficePhone: '(207) 728-6356',
+          taxDueMonth: 9,
+          taxDueDay: 15,
+          lateInterestRate: 7.0,
+          assessmentMonth: 4,
+          assessmentDay: 1,
+          taxNotes: 'Tax bills mailed in August, due September 15th. Late payments accrue 7% interest.',
+          millRate: 18.5,
+          zoningOfficeAddress: '328 St. Thomas Street, Madawaska, ME 04756',
+          zoningOfficePhone: '(207) 728-6356',
+          zoningOfficeWebsiteUrl: 'https://www.madawaska-me.org/planning-zoning',
+          ceoName: 'John Smith',
+          ceoEmail: 'ceo@madawaska-me.org',
+          ceoPhone: '(207) 728-6356',
+          plumbingInspectorName: 'Mike Johnson',
+          plumbingInspectorEmail: 'plumbing@madawaska-me.org',
+          plumbingInspectorPhone: '(207) 728-6356'
+        } : {
+          taxPaymentAddress: '416 West Main Street, Fort Kent, ME 04743',
+          taxPaymentWebsite: 'https://www.fortkent.org/tax-collector',
+          taxOfficePhone: '(207) 834-3105',
+          taxDueMonth: 10,
+          taxDueDay: 31,
+          lateInterestRate: 8.0,
+          assessmentMonth: 3,
+          assessmentDay: 1,
+          taxNotes: 'Tax bills mailed in September, due October 31st. Late payments accrue 8% interest.',
+          millRate: 16.2,
+          zoningOfficeAddress: '416 West Main Street, Fort Kent, ME 04743',
+          zoningOfficePhone: '(207) 834-3105',
+          zoningOfficeWebsiteUrl: 'https://www.fortkent.org/planning-zoning',
+          ceoName: 'Sarah Wilson',
+          ceoEmail: 'ceo@fortkent.org',
+          ceoPhone: '(207) 834-3105',
+          plumbingInspectorName: 'David Brown',
+          plumbingInspectorEmail: 'plumbing@fortkent.org',
+          plumbingInspectorPhone: '(207) 834-3105'
+        }
+        
+        await prisma.place.update({
+          where: { id: town.id },
+          data: taxData
+        })
+        console.log(`✅ Updated ${townName} with tax and zoning information`)
+      }
+      
+      createdPlaces.set(`${town.name}-TOWN`, town)
+      console.log(`✅ Found town: ${town.name} (${town.kind}) - Mill Rate: ${town.millRate || 'N/A'}`)
     }
 
     // Create people
@@ -500,7 +878,7 @@ async function main() {
     
     for (const propertyData of properties) {
       // Find related place and people
-      const place = createdPlaces.get(`${propertyData.city}-${propertyData.state}`)
+      const place = createdPlaces.get(`${propertyData.city}-TOWN`)
       const buyerAgent = createdPeople.get(propertyData.buyerAgent)
       const sellerAgent = propertyData.sellerAgent ? createdPeople.get(propertyData.sellerAgent) : null
       const titleCompany = createdPeople.get(propertyData.titleCompany)
@@ -549,22 +927,44 @@ async function main() {
       }
     }
 
-    // Create mill rate histories
-    console.log(`📊 Creating ${millRateHistories.length} mill rate history records...`)
+    // Create mill rate histories (only for towns, skip county data to avoid duplicates)
+    console.log(`📊 Creating town mill rate history records...`)
     
     for (const millRateData of millRateHistories) {
-      const place = createdPlaces.get(`${millRateData.placeName}-${millRateData.placeState}`)
+      // Skip county mill rates since they're already in the comprehensive data
+      if (millRateData.placeKind === 'COUNTY') {
+        console.log(`⏭️  Skipping county mill rate (already exists): ${millRateData.placeName} ${millRateData.year}`)
+        continue
+      }
+      
+      const placeKey = `${millRateData.placeName}-${millRateData.placeKind}`
+      const place = createdPlaces.get(placeKey)
       if (place) {
-        await prisma.millRateHistory.create({
-          data: {
-            year: millRateData.year,
-            millRate: millRateData.millRate,
-            notes: millRateData.notes,
+        // Check if mill rate already exists
+        const existingRate = await prisma.millRateHistory.findFirst({
+          where: {
             placeId: place.id,
-            userId: user.id,
+            year: millRateData.year,
+            userId: user.id
           }
         })
-        console.log(`✅ Created mill rate history: ${millRateData.year} - ${millRateData.millRate} mills for ${millRateData.placeName}`)
+        
+        if (!existingRate) {
+          await prisma.millRateHistory.create({
+            data: {
+              year: millRateData.year,
+              millRate: millRateData.millRate,
+              notes: millRateData.notes,
+              placeId: place.id,
+              userId: user.id,
+            }
+          })
+          console.log(`✅ Created mill rate history: ${millRateData.year} - ${millRateData.millRate} mills for ${millRateData.placeName} (${millRateData.placeKind})`)
+        } else {
+          console.log(`⏭️  Skipping existing mill rate: ${millRateData.placeName} ${millRateData.year}`)
+        }
+      } else {
+        console.log(`⚠️  Place not found for mill rate: ${placeKey}`)
       }
     }
 
@@ -598,14 +998,17 @@ async function main() {
     const totalMarketValue = properties.reduce((sum, p) => sum + (p.marketValue || 0), 0)
     console.log(`📊 Summary:`)
     console.log(`   👥 People created: ${people.length}`)
-    console.log(`   🏘️  Places created: ${places.length}`)
+    console.log(`   🏘️  Places found: 4 (Maine, Aroostook, Madawaska, Fort Kent)`)
+    console.log(`      - Note: Places are preserved from comprehensive Maine data`)
     console.log(`   🏠 Properties created: ${properties.length}`)
     console.log(`   💰 Total Investment: $${totalInvestment.toLocaleString()}`)
     console.log(`   🏞️  Total Acres: ${totalAcres} acres`)
     console.log(`   📈 Total Assessed Value: $${totalAssessedValue.toLocaleString()}`)
     console.log(`   📊 Total Market Value: $${totalMarketValue.toLocaleString()}`)
     console.log(`   💸 Tax Payments created: ${taxPayments.length}`)
-    console.log(`   📊 Mill Rate Histories created: ${millRateHistories.length}`)
+    console.log(`   📊 Mill Rate Histories created: ${millRateHistories.filter(m => m.placeKind !== 'COUNTY').length}`)
+    console.log(`      - County mill rates: Skipped (already exist in comprehensive data)`)
+    console.log(`      - Town mill rates: Added for Madawaska & Fort Kent (2022-2024)`)
     console.log(`   📈 Property Valuation Histories created: ${propertyValuationHistories.length}`)
 
   } catch (error) {

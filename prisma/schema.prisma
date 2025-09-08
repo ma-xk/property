@@ -60,15 +60,40 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+enum PlaceKind {
+  STATE
+  COUNTY
+  TOWN
+  UT
+  CITY
+}
+
 model Place {
   id                     String     @id @default(cuid())
   name                   String
+  kind                   PlaceKind
   state                  String?
   country                String     @default("United States")
   description            String?
   userId                 String
   createdAt              DateTime   @default(now())
   updatedAt              DateTime   @updatedAt
+  
+  // Hierarchical relationships (matching existing migration)
+  parentId               String?
+  parent                 Place?     @relation("PlaceHierarchy", fields: [parentId], references: [id])
+  children               Place[]    @relation("PlaceHierarchy")
+  
+  // Direct relationships for easier querying
+  countyId               String?
+  county                 Place?     @relation("CountyPlaces", fields: [countyId], references: [id])
+  placesInCounty         Place[]    @relation("CountyPlaces")
+  
+  statePlaceId           String?
+  statePlace             Place?     @relation("StatePlaces", fields: [statePlaceId], references: [id])
+  placesInState          Place[]    @relation("StatePlaces")
+  
+  // Tax-related fields
   assessmentDay          Int?
   assessmentMonth        Int?
   lateInterestRate       Decimal?
@@ -88,12 +113,16 @@ model Place {
   zoningOfficePhone      String?
   zoningOfficeWebsiteUrl String?
   millRate               Decimal?
+  
   user                   User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   properties             Property[]
   millRateHistories      MillRateHistory[]
 
-  @@unique([name, state, userId])
+  @@unique([name, kind, parentId, userId])
   @@index([userId])
+  @@index([parentId])
+  @@index([countyId])
+  @@index([statePlaceId])
 }
 
 model Person {

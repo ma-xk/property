@@ -7,9 +7,15 @@ import { z } from "zod"
 // Validation schema for place creation
 const createPlaceSchema = z.object({
   name: z.string().min(1, "Name is required"),
+  kind: z.enum(["STATE", "COUNTY", "TOWN", "UT", "CITY"]),
   state: z.string().optional(),
   country: z.string().optional().default("United States"),
   description: z.string().optional(),
+  
+  // Hierarchical relationships
+  parentId: z.string().optional(),
+  countyId: z.string().optional(),
+  statePlaceId: z.string().optional(),
   
   // Tax Information Fields
   taxPaymentAddress: z.string().nullable().optional(),
@@ -72,15 +78,45 @@ export async function GET() {
             type: true,
           }
         },
+        parent: {
+          select: {
+            id: true,
+            name: true,
+            kind: true,
+          }
+        },
+        county: {
+          select: {
+            id: true,
+            name: true,
+            kind: true,
+          }
+        },
+        statePlace: {
+          select: {
+            id: true,
+            name: true,
+            kind: true,
+          }
+        },
+        children: {
+          select: {
+            id: true,
+            name: true,
+            kind: true,
+          }
+        },
         _count: {
           select: {
-            properties: true
+            properties: true,
+            children: true
           }
         }
       },
-      orderBy: {
-        createdAt: 'desc'
-      }
+      orderBy: [
+        { kind: 'asc' },
+        { name: 'asc' }
+      ]
     })
 
     return NextResponse.json(places)
@@ -107,18 +143,19 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const validatedData = createPlaceSchema.parse(body)
 
-    // Check if place with same name and state already exists for this user
+    // Check if place with same name, kind, and parent already exists for this user
     const existingPlace = await prisma.place.findFirst({
       where: {
         name: validatedData.name,
-        state: validatedData.state || null,
+        kind: validatedData.kind,
+        parentId: validatedData.parentId || null,
         userId: session.user.id
       }
     })
 
     if (existingPlace) {
       return NextResponse.json(
-        { error: "A place with this name and state already exists" },
+        { error: "A place with this name, type, and parent already exists" },
         { status: 409 }
       )
     }
