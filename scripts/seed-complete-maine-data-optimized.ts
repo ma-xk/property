@@ -291,7 +291,7 @@ async function seedCompleteMaineDataOptimized() {
           userId: user.id
         } : null
       })
-      .filter(Boolean)
+      .filter((item): item is NonNullable<typeof item> => item !== null)
     
     const countyMillRateResult = await prisma.millRateHistory.createMany({
       data: countyMillRateData_batch,
@@ -335,7 +335,7 @@ async function seedCompleteMaineDataOptimized() {
           statePlaceId: maineState.id
         }
       })
-      .filter(Boolean)
+      .filter((item): item is NonNullable<typeof item> => item !== null)
     
     const municipalityResult = await prisma.place.createMany({
       data: municipalityData_batch,
@@ -386,7 +386,7 @@ async function seedCompleteMaineDataOptimized() {
             userId: user.id
           } : null
         })
-        .filter(Boolean)
+        .filter((item): item is NonNullable<typeof item> => item !== null)
       
       if (batchData.length > 0) {
         const result = await prisma.millRateHistory.createMany({
