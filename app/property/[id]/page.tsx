@@ -104,6 +104,40 @@ interface Property {
   buyerAgent?: string
   titleCompany?: string
   
+  // Relationship fields
+  sellerPerson?: {
+    id: string
+    name: string
+    email?: string
+    phone?: string
+    company?: string
+    role?: string
+  }
+  sellerAgentPerson?: {
+    id: string
+    name: string
+    email?: string
+    phone?: string
+    company?: string
+    role?: string
+  }
+  buyerAgentPerson?: {
+    id: string
+    name: string
+    email?: string
+    phone?: string
+    company?: string
+    role?: string
+  }
+  titleCompanyPerson?: {
+    id: string
+    name: string
+    email?: string
+    phone?: string
+    company?: string
+    role?: string
+  }
+  
   // Legacy fields
   type?: string
   bedrooms?: number
@@ -545,17 +579,73 @@ export default function PropertyDetailsPage() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {[
-                    { label: "Seller", value: property.seller },
-                    { label: "Seller Agent", value: property.sellerAgent },
-                    { label: "Buyer Agent", value: property.buyerAgent },
-                    { label: "Title Company", value: property.titleCompany },
-                  ].map((item, index) => (
-                    <div key={index} className="space-y-1">
-                      <div className="text-muted-foreground text-sm">{item.label}</div>
-                      <div className="">{item.value || "Not specified"}</div>
+                  {/* Seller */}
+                  <div className="space-y-1">
+                    <div className="text-muted-foreground text-sm">Seller</div>
+                    <div className="">
+                      {property.sellerPerson ? (
+                        <button
+                          onClick={() => router.push(`/people/${property.sellerPerson!.id}`)}
+                          className="text-blue-600 hover:text-blue-800 hover:underline transition-colors cursor-pointer"
+                        >
+                          {property.sellerPerson.name}
+                        </button>
+                      ) : (
+                        property.seller || "Not specified"
+                      )}
                     </div>
-                  ))}
+                  </div>
+
+                  {/* Seller Agent */}
+                  <div className="space-y-1">
+                    <div className="text-muted-foreground text-sm">Seller Agent</div>
+                    <div className="">
+                      {property.sellerAgentPerson ? (
+                        <button
+                          onClick={() => router.push(`/people/${property.sellerAgentPerson!.id}`)}
+                          className="text-blue-600 hover:text-blue-800 hover:underline transition-colors cursor-pointer"
+                        >
+                          {property.sellerAgentPerson.name}
+                        </button>
+                      ) : (
+                        property.sellerAgent || "Not specified"
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Buyer Agent */}
+                  <div className="space-y-1">
+                    <div className="text-muted-foreground text-sm">Buyer Agent</div>
+                    <div className="">
+                      {property.buyerAgentPerson ? (
+                        <button
+                          onClick={() => router.push(`/people/${property.buyerAgentPerson!.id}`)}
+                          className="text-blue-600 hover:text-blue-800 hover:underline transition-colors cursor-pointer"
+                        >
+                          {property.buyerAgentPerson.name}
+                        </button>
+                      ) : (
+                        property.buyerAgent || "Not specified"
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Title Company */}
+                  <div className="space-y-1">
+                    <div className="text-muted-foreground text-sm">Title Company</div>
+                    <div className="">
+                      {property.titleCompanyPerson ? (
+                        <button
+                          onClick={() => router.push(`/people/${property.titleCompanyPerson!.id}`)}
+                          className="text-blue-600 hover:text-blue-800 hover:underline transition-colors cursor-pointer"
+                        >
+                          {property.titleCompanyPerson.name}
+                        </button>
+                      ) : (
+                        property.titleCompany || "Not specified"
+                      )}
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -677,34 +767,6 @@ export default function PropertyDetailsPage() {
               </CardContent>
             </Card>
 
-            {/* Quick Actions */}
-            <Card className="">
-              <CardHeader>
-                <CardTitle className=" text-lg">Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button 
-                  className="w-full bg-blue-600 hover:bg-blue-700 "
-                  onClick={() => {
-                    // TODO: Implement edit functionality
-                  }}
-                >
-                  <Edit className="h-4 w-4 mr-2" />
-                  Edit Property
-                </Button>
-                
-                <Button 
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => {
-                    // TODO: Toggle availability
-                  }}
-                >
-                  <Settings className="h-4 w-4 mr-2" />
-                  {property.available ? 'Mark as Occupied' : 'Mark as Available'}
-                </Button>
-              </CardContent>
-            </Card>
           </div>
         </motion.div>
     </div>
