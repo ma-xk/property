@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useRef, useCallback } from "react"
+import { useEffect, useState, useRef, useCallback, useMemo } from "react"
 import dynamic from "next/dynamic"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -122,6 +122,9 @@ export function UnifiedMap({
   const [properties, setProperties] = useState<PropertyWithLocation[]>([])
   const [parcelData, setParcelData] = useState<ParcelData | null>(null)
   const [wetlandsData, setWetlandsData] = useState<any>(null)
+  const [wetlandsLoading, setWetlandsLoading] = useState(false)
+  const [propertiesLoading, setPropertiesLoading] = useState(false)
+  const [parcelsLoading, setParcelsLoading] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [mapBounds, setMapBounds] = useState<[[number, number], [number, number]] | null>(null)
@@ -195,48 +198,85 @@ export function UnifiedMap({
     fetchDashboardParcelData()
   }, [showAllProperties, layers.parcels, properties.length, parcelData, loading])
 
-  // Update map bounds when data changes
-  useEffect(() => {
-    const newBounds = calculateBounds()
-    if (newBounds) {
-      setMapBounds(newBounds)
+  // Calculate map bounds to fit all visible data - simplified approach
+  const bounds = useMemo(() => {
+    const allPoints: [number, number][] = []
+    
+    // Add property locations
+    if (layers.properties) {
+      properties.forEach(property => {
+        if (property.lat && property.lng) {
+          allPoints.push([property.lat, property.lng])
+        }
+      })
     }
+    
+    // Add parcel bounds
+    if (layers.parcels && parcelData) {
+      parcelData.geojson.features.forEach((feature: any) => {
+        feature.geometry.coordinates.forEach((ring: any) => {
+          ring.forEach((coord: any) => {
+            const [lng, lat] = coord
+            allPoints.push([lat, lng])
+          })
+        })
+      })
+    }
+    
+    // Add wetlands bounds
+    if (layers.wetlands && wetlandsData) {
+      wetlandsData.features.forEach((feature: any) => {
+        if (feature.geometry && feature.geometry.coordinates) {
+          feature.geometry.coordinates.forEach((ring: any) => {
+            ring.forEach((coord: any) => {
+              const [lng, lat] = coord
+              allPoints.push([lat, lng])
+            })
+          })
+        }
+      })
+    }
+    
+    if (allPoints.length === 0) return null
+    
+    let minLat = Infinity, minLng = Infinity, maxLat = -Infinity, maxLng = -Infinity
+    
+    allPoints.forEach(([lat, lng]) => {
+      minLat = Math.min(minLat, lat)
+      minLng = Math.min(minLng, lng)
+      maxLat = Math.max(maxLat, lat)
+      maxLng = Math.max(maxLng, lng)
+    })
+    
+    return [[minLat, minLng], [maxLat, maxLng]] as [[number, number], [number, number]]
   }, [layers.properties, layers.parcels, layers.wetlands, properties, parcelData, wetlandsData])
 
-  // Fetch additional data when layers are toggled
+  // Fetch properties when needed
   useEffect(() => {
-    const fetchAdditionalData = async () => {
-      // Don't fetch if we're still in initial loading state
-      if (loading) return
-      
-      try {
-        // Fetch properties if needed but not loaded (for any view)
-        if (layers.properties && properties.length === 0) {
-          await fetchPropertiesWithLocations()
-        }
-        
-        // For dashboard view, fetch parcel data for all properties if parcels layer is enabled
-        if (layers.parcels && showAllProperties && properties.length > 0) {
-          await fetchAllParcelData()
-        }
-        
-        // Fetch wetlands data if wetlands layer is enabled and we have bounds
-        if (layers.wetlands && mapBounds && !wetlandsData) {
-          try {
-            await fetchWetlandsData(mapBounds)
-          } catch (err) {
-            console.error('Wetlands fetch failed, continuing without wetlands data:', err)
-            // Don't throw - just log and continue
-          }
-        }
-      } catch (err) {
-        console.error('Additional data fetch error:', err)
-        // Don't set error state for additional data - just log it
-      }
+    if (loading) return
+    if (layers.properties && properties.length === 0 && !propertiesLoading) {
+      setPropertiesLoading(true)
+      fetchPropertiesWithLocations().finally(() => setPropertiesLoading(false))
     }
+  }, [layers.properties, properties.length, propertiesLoading, loading])
 
-    fetchAdditionalData()
-  }, [layers.properties, layers.parcels, layers.wetlands, mapBounds, wetlandsData])
+  // Fetch parcel data for dashboard
+  useEffect(() => {
+    if (loading) return
+    if (layers.parcels && showAllProperties && properties.length > 0 && !parcelsLoading) {
+      setParcelsLoading(true)
+      fetchAllParcelData().finally(() => setParcelsLoading(false))
+    }
+  }, [layers.parcels, showAllProperties, properties.length, parcelsLoading, loading])
+
+  // Fetch wetlands data when needed
+  useEffect(() => {
+    if (loading) return
+    if (layers.wetlands && bounds && !wetlandsData && !wetlandsLoading) {
+      setWetlandsLoading(true)
+      fetchWetlandsData(bounds).finally(() => setWetlandsLoading(false))
+    }
+  }, [layers.wetlands, bounds, wetlandsData, wetlandsLoading, loading])
 
   const fetchPropertiesWithLocations = async () => {
     try {
@@ -755,60 +795,6 @@ export function UnifiedMap({
     }
   }
 
-  // Calculate map bounds to fit all visible data
-  const calculateBounds = () => {
-    const allPoints: [number, number][] = []
-    
-    // Add property locations
-    if (layers.properties) {
-      properties.forEach(property => {
-        if (property.lat && property.lng) {
-          allPoints.push([property.lat, property.lng])
-        }
-      })
-    }
-    
-    // Add parcel bounds
-    if (layers.parcels && parcelData) {
-      parcelData.geojson.features.forEach((feature: any) => {
-        feature.geometry.coordinates.forEach((ring: any) => {
-          ring.forEach((coord: any) => {
-            const [lng, lat] = coord
-            allPoints.push([lat, lng])
-          })
-        })
-      })
-    }
-    
-    // Add wetlands bounds
-    if (layers.wetlands && wetlandsData) {
-      wetlandsData.features.forEach((feature: any) => {
-        if (feature.geometry && feature.geometry.coordinates) {
-          feature.geometry.coordinates.forEach((ring: any) => {
-            ring.forEach((coord: any) => {
-              const [lng, lat] = coord
-              allPoints.push([lat, lng])
-            })
-          })
-        }
-      })
-    }
-    
-    if (allPoints.length === 0) return null
-    
-    let minLat = Infinity, minLng = Infinity, maxLat = -Infinity, maxLng = -Infinity
-    
-    allPoints.forEach(([lat, lng]) => {
-      minLat = Math.min(minLat, lat)
-      minLng = Math.min(minLng, lng)
-      maxLat = Math.max(maxLat, lat)
-      maxLng = Math.max(maxLng, lng)
-    })
-    
-    return [[minLat, minLng], [maxLat, maxLng]] as [[number, number], [number, number]]
-  }
-
-  const bounds = calculateBounds()
   
   // Calculate center point - use bounds if available, otherwise use first available data point
   const getCenter = (): [number, number] => {
@@ -1346,15 +1332,7 @@ export function UnifiedMap({
               {/* Parcel boundaries and LUPC zoning */}
               {layers.parcels && parcelData && (
                 <GeoJSON
-                  data={{
-                    ...parcelData.geojson,
-                    features: parcelData.geojson.features.filter(feature => {
-                      if (feature.properties.source === "LUPC") {
-                        return layers.lupcZoning
-                      }
-                      return true
-                    })
-                  }}
+                  data={parcelData.geojson as any}
                   style={getParcelStyle}
                   onEachFeature={onEachFeature}
                 />
