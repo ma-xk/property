@@ -312,10 +312,16 @@ This project is licensed under the MIT License.
 - ✅ **Property Valuation Time Series** - Comprehensive historical valuation tracking with assessed value, market value, and assessment date progression over time with trend analysis and percentage change calculations
 - ✅ **Automatic Tax Information Population** - New properties automatically inherit current mill rates and tax information from their municipality, eliminating manual lookup
 
-**🗺️ Mapping & Geographic Features**
-- ✅ **Interactive Property Mapping** - Global map on dashboard showing all properties with location data, clickable markers with property details, and automatic bounds calculation for optimal viewing
-- ✅ **Advanced Parcel Viewer** - Detailed parcel maps on property detail pages showing exact property boundaries, parcel information (Map/Lot, State ID, Town, County), area calculations, and LUPC zoning overlays for unorganized territories
-- ✅ **Real-Time Parcel Data Integration** - Live integration with Maine GeoLibrary services for accurate parcel boundaries, property details, and zoning information with intelligent geocoding and spatial queries
+**🗺️ Advanced Mapping & Geographic Features**
+- ✅ **Unified Interactive Mapping System** - Comprehensive mapping solution with dynamic layer controls, real-time data loading, and intelligent bounds calculation supporting both single property and multi-property views
+- ✅ **Multi-Layer Data Visualization** - Toggleable layers for property markers, parcel boundaries, LUPC zoning overlays, and wetlands data with real-time loading states and feature counts
+- ✅ **Advanced Parcel Data Integration** - Live integration with Maine GeoLibrary services providing accurate parcel boundaries, detailed property information (Map/Lot, State ID, Town, County, area, perimeter), and automatic geocoding
+- ✅ **LUPC Zoning Overlays** - Specialized zoning visualization for unorganized territories with distinct styling, detailed popup information, and zone classification data
+- ✅ **National Wetlands Inventory Integration** - Real-time wetlands data from USFWS with comprehensive wetland classification, area calculations, and official NWI styling matching government standards
+- ✅ **Intelligent Map Bounds** - Automatic bounds calculation that adapts to single property (detailed view) vs. multi-property (overview) scenarios with appropriate zoom levels and padding
+- ✅ **Interactive Popups & Details** - Rich popup information for properties (address, purchase price, status, parcel count), parcels (boundary details, measurements), and wetlands (classification codes, area, system types)
+- ✅ **Responsive Layer Controls** - User-friendly layer toggle system with loading states, feature counts, and disabled states for unavailable data
+- ✅ **Error Handling & Fallbacks** - Robust error handling with graceful degradation, test data fallbacks, and informative error messages
 
 **📊 Advanced Analytics & Data Visualization**
 - ✅ **Municipal Mill Rate Analytics** - Interactive line charts showing historical mill rate trends by county with revenue tracker-style visualizations
