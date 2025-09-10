@@ -109,6 +109,9 @@ interface UnifiedMapProps {
   height?: string
   className?: string
   title?: string
+  center?: [number, number] | null
+  zoom?: number | null
+  bounds?: [[number, number], [number, number]] | null
 }
 
 export function UnifiedMap({ 
@@ -117,7 +120,10 @@ export function UnifiedMap({
   layers: initialLayers = {},
   height = "400px",
   className,
-  title = "Property Map"
+  title = "Property Map",
+  center: externalCenter,
+  zoom: externalZoom,
+  bounds: externalBounds
 }: UnifiedMapProps) {
   const [properties, setProperties] = useState<PropertyWithLocation[]>([])
   const [parcelData, setParcelData] = useState<ParcelData | null>(null)
@@ -129,6 +135,7 @@ export function UnifiedMap({
   const [error, setError] = useState<string | null>(null)
   const [mapBounds, setMapBounds] = useState<[[number, number], [number, number]] | null>(null)
   const [showLayerControls, setShowLayerControls] = useState(false)
+  const mapRef = useRef<any>(null)
   
   // Layer state with defaults
   const [layers, setLayers] = useState<LayerConfig>({
@@ -143,13 +150,18 @@ export function UnifiedMap({
   useEffect(() => {
     // Ensure Leaflet icons are properly configured
     if (typeof window !== 'undefined') {
+      console.log('Configuring Leaflet icons...')
       import('leaflet').then((L) => {
+        console.log('Leaflet imported successfully:', L)
         delete (L.default.Icon.Default.prototype as any)._getIconUrl
         L.default.Icon.Default.mergeOptions({
           iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
           iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
           shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
         })
+        console.log('Leaflet icons configured')
+      }).catch((error) => {
+        console.error('Error importing Leaflet:', error)
       })
     }
   }, [])
@@ -198,8 +210,14 @@ export function UnifiedMap({
     fetchDashboardParcelData()
   }, [showAllProperties, layers.parcels, properties.length, parcelData, loading])
 
-  // Calculate map bounds to fit all visible data - simplified approach
+  // Calculate map bounds - prioritize external bounds, then calculate from data
   const bounds = useMemo(() => {
+    // Use external bounds if provided (from address search)
+    if (externalBounds) {
+      console.log('Using external bounds for data fetching:', externalBounds)
+      return externalBounds
+    }
+    
     const allPoints: [number, number][] = []
     
     // Add property locations
@@ -249,7 +267,7 @@ export function UnifiedMap({
     })
     
     return [[minLat, minLng], [maxLat, maxLng]] as [[number, number], [number, number]]
-  }, [layers.properties, layers.parcels, layers.wetlands, properties, parcelData, wetlandsData])
+  }, [externalBounds, layers.properties, layers.parcels, layers.wetlands, properties, parcelData, wetlandsData])
 
   // Fetch properties when needed
   useEffect(() => {
@@ -269,6 +287,21 @@ export function UnifiedMap({
     }
   }, [layers.parcels, showAllProperties, properties.length, parcelsLoading, loading])
 
+  // Fetch parcel data by coordinates when external bounds are provided
+  useEffect(() => {
+    if (loading) return
+    if (layers.parcels && externalBounds && !parcelData && !parcelsLoading) {
+      setParcelsLoading(true)
+      const [minLat, minLng] = externalBounds[0]
+      const [maxLat, maxLng] = externalBounds[1]
+      const centerLat = (minLat + maxLat) / 2
+      const centerLng = (minLng + maxLng) / 2
+      
+      console.log(`Fetching parcel data for external bounds center: ${centerLat}, ${centerLng}`)
+      fetchParcelDataByCoordinates(centerLat, centerLng).finally(() => setParcelsLoading(false))
+    }
+  }, [layers.parcels, externalBounds, parcelData, parcelsLoading, loading])
+
   // Fetch wetlands data when needed
   useEffect(() => {
     if (loading) return
@@ -277,6 +310,33 @@ export function UnifiedMap({
       fetchWetlandsData(bounds).finally(() => setWetlandsLoading(false))
     }
   }, [layers.wetlands, bounds, wetlandsData, wetlandsLoading, loading])
+
+  // Reset data when external center changes (address search)
+  useEffect(() => {
+    if (externalCenter) {
+      console.log('External center changed, resetting data to fetch new location data')
+      setProperties([])
+      setParcelData(null)
+      setWetlandsData(null)
+      setMapBounds(null)
+    }
+  }, [externalCenter])
+
+  // Force map to invalidate size after rendering
+  useEffect(() => {
+    if (mapRef.current && typeof window !== 'undefined') {
+      const timer = setTimeout(() => {
+        try {
+          mapRef.current.invalidateSize()
+          console.log('Map size invalidated')
+        } catch (error) {
+          console.error('Error invalidating map size:', error)
+        }
+      }, 100)
+      
+      return () => clearTimeout(timer)
+    }
+  }, [properties.length, parcelData, wetlandsData, layers])
 
   const fetchPropertiesWithLocations = async () => {
     try {
@@ -427,6 +487,26 @@ export function UnifiedMap({
       }
     } catch (err) {
       console.error('All parcel data fetch error:', err)
+      throw err
+    }
+  }
+
+  const fetchParcelDataByCoordinates = async (lat: number, lng: number) => {
+    try {
+      console.log(`Fetching parcel data for coordinates: ${lat}, ${lng}`)
+      const response = await fetch(`/api/parcels/by-coordinates?lat=${lat}&lng=${lng}`)
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.details || errorData.error || "Failed to fetch parcel data")
+      }
+      
+      const data = await response.json()
+      setParcelData(data)
+      
+      console.log(`Parcel data fetched successfully: ${data.metadata.parcelCount} parcels, ${data.metadata.lupcCount} LUPC zones`)
+    } catch (err) {
+      console.error('Parcel fetch by coordinates error:', err)
       throw err
     }
   }
@@ -796,8 +876,13 @@ export function UnifiedMap({
   }
 
   
-  // Calculate center point - use bounds if available, otherwise use first available data point
+  // Calculate center point - use external center if provided, otherwise use bounds or data
   const getCenter = (): [number, number] => {
+    // Use external center if provided (from address search)
+    if (externalCenter) {
+      return externalCenter
+    }
+    
     if (bounds) {
       return [
         (bounds[0][0] + bounds[1][0]) / 2,
@@ -837,6 +922,17 @@ export function UnifiedMap({
   }
   
   const center = getCenter()
+  
+  // Calculate zoom level - use external zoom if provided, otherwise calculate based on data
+  const getZoom = (): number => {
+    if (externalZoom) {
+      return externalZoom
+    }
+    
+    return bounds ? (showAllProperties || (layers.properties && properties.length > 1) ? 10 : 16) : 8
+  }
+  
+  const zoom = getZoom()
 
   const formatCurrency = (amount: number | null) => {
     if (!amount) return '$0'
@@ -1150,6 +1246,16 @@ export function UnifiedMap({
     )
   }
 
+  console.log('Rendering UnifiedMap with:', {
+    hasLoadedData,
+    hasActiveLayers,
+    properties: properties.length,
+    parcelData: !!parcelData,
+    wetlandsData: !!wetlandsData,
+    center,
+    bounds
+  })
+
   return (
     <Card className={className}>
       <CardHeader>
@@ -1268,21 +1374,49 @@ export function UnifiedMap({
           )}
 
           {/* Map Container */}
-          <div className="w-full rounded-lg overflow-hidden border" style={{ height }}>
+          <div 
+            className="w-full rounded-lg overflow-hidden border" 
+            style={{ 
+              height,
+              position: 'relative'
+            }}
+          >
             <MapContainer
-              style={{ height: "100%", width: "100%" }}
+              ref={mapRef}
+              style={{ 
+                height: "100%", 
+                width: "100%", 
+                minHeight: "400px",
+                zIndex: 1
+              }}
               zoomControl={true}
               center={center}
-              zoom={bounds ? (showAllProperties || (layers.properties && properties.length > 1) ? 10 : 16) : 8}
-              bounds={bounds || undefined}
+              zoom={zoom}
+              bounds={bounds && !externalCenter ? bounds : undefined}
               boundsOptions={{ padding: (showAllProperties || (layers.properties && properties.length > 1)) ? [20, 20] : [10, 10] }}
+              key={`map-${center[0]}-${center[1]}-${zoom}`} // Force re-render when center or zoom changes
+              whenReady={() => {
+                console.log('Map is ready')
+                if (mapRef.current) {
+                  setTimeout(() => {
+                    mapRef.current.invalidateSize()
+                    console.log('Map size invalidated after ready')
+                  }, 100)
+                }
+              }}
             >
-              {/* OpenStreetMap - Standard reliable tiles */}
+              {/* CartoDB Positron - Alternative tile server */}
               <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                subdomains="abc"
-                maxZoom={19}
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                subdomains={['a', 'b', 'c', 'd']}
+                maxZoom={20}
+                opacity={1}
+                eventHandlers={{
+                  loading: () => console.log('Tiles loading...'),
+                  load: () => console.log('Tiles loaded successfully'),
+                  tileerror: (e) => console.error('Tile error:', e)
+                }}
               />
               
               {/* Property markers */}

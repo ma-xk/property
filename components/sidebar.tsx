@@ -14,7 +14,8 @@ import {
   Settings,
   ChevronUp,
   Receipt,
-  BarChart3
+  BarChart3,
+  Map
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -71,6 +72,11 @@ const items = [
     title: "Places",
     url: "/places",
     icon: MapPin,
+  },
+  {
+    title: "Map",
+    url: "/map",
+    icon: Map,
   },
   {
     title: "Taxes",
