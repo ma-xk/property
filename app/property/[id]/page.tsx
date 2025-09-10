@@ -28,7 +28,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { PropertyTaxInfo } from "@/components/property-tax-info"
 import { PropertyValuationHistory } from "@/components/property-valuation-history"
 import { TaxPayments } from "@/components/tax-payments"
-import { ParcelMap } from "@/components/parcel-map"
+import { UnifiedMap } from "@/components/unified-map"
 import { formatPropertyAddress } from "@/lib/utils"
 
 interface TaxPayment {
@@ -403,7 +403,13 @@ export default function PropertyDetailsPage() {
             </Card>
 
             {/* Parcel Map */}
-            <ParcelMap propertyId={propertyId} />
+            <UnifiedMap 
+              propertyId={propertyId}
+              showAllProperties={false}
+              layers={{ properties: false, parcels: true, lupcZoning: true }}
+              title="Property Parcel Map"
+              height="400px"
+            />
 
             {/* Municipal Tax Information */}
             <PropertyTaxInfo 

@@ -29,7 +29,7 @@ import { CreatePersonForm } from "@/components/create-person-form"
 import { CreatePlaceForm } from "@/components/create-place-form"
 import dynamic from "next/dynamic"
 
-const DashboardMap = dynamic(() => import("@/components/dashboard-map").then(mod => ({ default: mod.DashboardMap })), {
+const UnifiedMap = dynamic(() => import("@/components/unified-map").then(mod => ({ default: mod.UnifiedMap })), {
   ssr: false,
   loading: () => (
     <Card>
@@ -245,7 +245,12 @@ export function OverviewDashboard() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.25 }}
       >
-        <DashboardMap />
+        <UnifiedMap 
+          showAllProperties={true}
+          layers={{ properties: true, parcels: true, lupcZoning: true }}
+          title="Property Overview Map"
+          height="400px"
+        />
       </motion.div>
 
       {/* Quick Actions */}
