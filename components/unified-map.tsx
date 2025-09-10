@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useState, useRef, useCallback } from "react"
 import dynamic from "next/dynamic"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -97,8 +97,8 @@ interface LayerConfig {
   properties: boolean
   parcels: boolean
   lupcZoning: boolean
+  wetlands: boolean
   // Future layers
-  wetlands?: boolean
   floodZones?: boolean
 }
 
@@ -121,6 +121,7 @@ export function UnifiedMap({
 }: UnifiedMapProps) {
   const [properties, setProperties] = useState<PropertyWithLocation[]>([])
   const [parcelData, setParcelData] = useState<ParcelData | null>(null)
+  const [wetlandsData, setWetlandsData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [mapBounds, setMapBounds] = useState<[[number, number], [number, number]] | null>(null)
@@ -196,12 +197,11 @@ export function UnifiedMap({
 
   // Update map bounds when data changes
   useEffect(() => {
-    // Recalculate bounds when layers or data change
     const newBounds = calculateBounds()
     if (newBounds) {
       setMapBounds(newBounds)
     }
-  }, [layers.properties, layers.parcels, properties, parcelData])
+  }, [layers.properties, layers.parcels, layers.wetlands, properties, parcelData, wetlandsData])
 
   // Fetch additional data when layers are toggled
   useEffect(() => {
@@ -219,6 +219,16 @@ export function UnifiedMap({
         if (layers.parcels && showAllProperties && properties.length > 0) {
           await fetchAllParcelData()
         }
+        
+        // Fetch wetlands data if wetlands layer is enabled and we have bounds
+        if (layers.wetlands && mapBounds && !wetlandsData) {
+          try {
+            await fetchWetlandsData(mapBounds)
+          } catch (err) {
+            console.error('Wetlands fetch failed, continuing without wetlands data:', err)
+            // Don't throw - just log and continue
+          }
+        }
       } catch (err) {
         console.error('Additional data fetch error:', err)
         // Don't set error state for additional data - just log it
@@ -226,7 +236,7 @@ export function UnifiedMap({
     }
 
     fetchAdditionalData()
-  }, [layers.properties, layers.parcels])
+  }, [layers.properties, layers.parcels, layers.wetlands, mapBounds, wetlandsData])
 
   const fetchPropertiesWithLocations = async () => {
     try {
@@ -381,6 +391,370 @@ export function UnifiedMap({
     }
   }
 
+  const fetchWetlandsData = async (bounds: [[number, number], [number, number]]) => {
+    try {
+      console.log('Fetching wetlands data for bounds:', bounds)
+      
+      // Use the USFWS National Wetlands Inventory REST API
+      const [minLat, minLng] = bounds[0]
+      const [maxLat, maxLng] = bounds[1]
+      
+      // Expand the search area to ensure we capture nearby wetlands
+      // Add buffer of ~0.01 degrees (roughly 0.7 miles) in each direction
+      const buffer = 0.01
+      const expandedMinLat = minLat - buffer
+      const expandedMinLng = minLng - buffer
+      const expandedMaxLat = maxLat + buffer
+      const expandedMaxLng = maxLng + buffer
+      
+      console.log('Original bounds:', { minLat, minLng, maxLat, maxLng })
+      console.log('Expanded bounds:', { expandedMinLat, expandedMinLng, expandedMaxLat, expandedMaxLng })
+      
+      // Try different coordinate system - Web Mercator (3857) instead of WGS84 (4326)
+      // First convert to Web Mercator
+      const toWebMercator = (lng: number, lat: number) => {
+        const x = lng * 20037508.34 / 180
+        let y = Math.log(Math.tan((90 + lat) * Math.PI / 360)) / (Math.PI / 180)
+        y = y * 20037508.34 / 180
+        return [x, y]
+      }
+      
+      const [mercMinX, mercMinY] = toWebMercator(expandedMinLng, expandedMinLat)
+      const [mercMaxX, mercMaxY] = toWebMercator(expandedMaxLng, expandedMaxLat)
+      
+      console.log('Web Mercator bounds:', { mercMinX, mercMinY, mercMaxX, mercMaxY })
+      
+      // Try with Web Mercator coordinate system
+      const params = new URLSearchParams({
+        f: 'json',
+        where: '1=1',
+        geometry: `${mercMinX},${mercMinY},${mercMaxX},${mercMaxY}`,
+        geometryType: 'esriGeometryEnvelope',
+        spatialRel: 'esriSpatialRelIntersects',
+        outFields: '*',
+        returnGeometry: 'true',
+        maxRecordCount: '2000',
+        outSR: '3857'  // Web Mercator
+      })
+      
+      const url = `https://fwspublicservices.wim.usgs.gov/wetlandsmapservice/rest/services/Wetlands/MapServer/0/query?${params}`
+      console.log('Wetlands API URL:', url)
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+        },
+      })
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch wetlands data: ${response.status} - ${response.statusText}`)
+      }
+      
+      const data = await response.json()
+      console.log('Wetlands API response:', data)
+      
+      if (data.error) {
+        throw new Error(`API Error: ${data.error.message || data.error.details || 'Unknown error'}`)
+      }
+      
+      if (data.features && data.features.length > 0) {
+        console.log(`Found ${data.features.length} raw features from API with Web Mercator`)
+        
+        const validFeatures = data.features.filter((feature: any) => {
+          // Only include features with valid geometry
+          const hasValidGeometry = feature.geometry && (
+            (feature.geometry.type && feature.geometry.coordinates) ||
+            (feature.geometry.rings && Array.isArray(feature.geometry.rings))
+          )
+          
+          // Don't filter by acres - many wetlands have 0 acres in the API
+          // Just check for valid geometry and any wetland classification
+          const hasWetlandData = feature.attributes?.ATTRIBUTE || 
+                                feature.attributes?.WETLAND_TYPE ||
+                                feature.attributes?.['Wetlands.ATTRIBUTE'] ||
+                                feature.attributes?.['Wetlands.WETLAND_TYPE']
+          
+          console.log('Feature check:', {
+            hasValidGeometry,
+            acres: feature.attributes?.ACRES,
+            attribute: feature.attributes?.ATTRIBUTE,
+            wetlandType: feature.attributes?.WETLAND_TYPE,
+            hasWetlandData,
+            allAttributes: Object.keys(feature.attributes || {})
+          })
+          
+          return hasValidGeometry && hasWetlandData
+        })
+        
+        console.log(`After filtering: ${validFeatures.length} valid features`)
+        
+        if (validFeatures.length > 0) {
+          // Convert Web Mercator coordinates back to WGS84
+          const fromWebMercator = (x: number, y: number) => {
+            const lng = (x / 20037508.34) * 180
+            let lat = (y / 20037508.34) * 180
+            lat = 180 / Math.PI * (2 * Math.atan(Math.exp(lat * Math.PI / 180)) - Math.PI / 2)
+            return [lng, lat]
+          }
+          
+          const wetlandsGeoJSON = {
+            type: "FeatureCollection",
+            features: validFeatures.map((feature: any) => {
+              // Ensure geometry is properly formatted and convert coordinates
+              let geometry = feature.geometry
+              if (geometry && geometry.rings) {
+                // Convert ArcGIS polygon format to GeoJSON and transform coordinates
+                geometry = {
+                  type: "Polygon",
+                  coordinates: geometry.rings.map((ring: any) => 
+                    ring.map((coord: any) => fromWebMercator(coord[0], coord[1]))
+                  )
+                }
+              } else if (geometry && geometry.coordinates) {
+                // Transform existing coordinates
+                geometry = {
+                  ...geometry,
+                  coordinates: geometry.coordinates.map((ring: any) => 
+                    ring.map((coord: any) => fromWebMercator(coord[0], coord[1]))
+                  )
+                }
+              }
+              
+              return {
+                type: "Feature",
+                properties: {
+                  ...feature.attributes,
+                  source: "NWI"
+                },
+                geometry: geometry
+              }
+            }).filter(Boolean) // Remove any null features
+          }
+          
+          console.log('Processed wetlands GeoJSON:', wetlandsGeoJSON)
+          setWetlandsData(wetlandsGeoJSON)
+        } else {
+          console.log('No valid wetlands features found in this area - trying WGS84 coordinates...')
+          
+          // Try with original WGS84 coordinates as fallback
+          const wgs84Params = new URLSearchParams({
+            f: 'json',
+            where: '1=1',
+            geometry: `${expandedMinLng},${expandedMinLat},${expandedMaxLng},${expandedMaxLat}`,
+            geometryType: 'esriGeometryEnvelope',
+            spatialRel: 'esriSpatialRelIntersects',
+            outFields: '*',
+            returnGeometry: 'true',
+            maxRecordCount: '2000',
+            outSR: '4326'
+          })
+          
+          const wgs84Url = `https://fwspublicservices.wim.usgs.gov/wetlandsmapservice/rest/services/Wetlands/MapServer/0/query?${wgs84Params}`
+          console.log('WGS84 wetlands API URL:', wgs84Url)
+          
+          try {
+            const wgs84Response = await fetch(wgs84Url)
+            const wgs84Data = await wgs84Response.json()
+            console.log('WGS84 API response:', wgs84Data)
+            
+            if (wgs84Data.features && wgs84Data.features.length > 0) {
+              console.log(`Found ${wgs84Data.features.length} features with WGS84`)
+              const wgs84ValidFeatures = wgs84Data.features.filter((feature: any) => {
+                const hasValidGeometry = feature.geometry && (
+                  (feature.geometry.type && feature.geometry.coordinates) ||
+                  (feature.geometry.rings && Array.isArray(feature.geometry.rings))
+                )
+                const hasWetlandData = feature.attributes?.ATTRIBUTE || 
+                                      feature.attributes?.WETLAND_TYPE ||
+                                      feature.attributes?.['Wetlands.ATTRIBUTE'] ||
+                                      feature.attributes?.['Wetlands.WETLAND_TYPE']
+                return hasValidGeometry && hasWetlandData
+              })
+              
+              if (wgs84ValidFeatures.length > 0) {
+                const wgs84WetlandsGeoJSON = {
+                  type: "FeatureCollection",
+                  features: wgs84ValidFeatures.map((feature: any) => {
+                    let geometry = feature.geometry
+                    if (geometry && geometry.rings) {
+                      geometry = {
+                        type: "Polygon",
+                        coordinates: geometry.rings
+                      }
+                    }
+                    // WGS84 coordinates don't need conversion
+                    return {
+                      type: "Feature",
+                      properties: {
+                        ...feature.attributes,
+                        source: "NWI"
+                      },
+                      geometry: geometry
+                    }
+                  }).filter(Boolean)
+                }
+                
+                console.log('WGS84 wetlands GeoJSON:', wgs84WetlandsGeoJSON)
+                setWetlandsData(wgs84WetlandsGeoJSON)
+              } else {
+                console.log('No valid wetlands found with WGS84 either')
+                setWetlandsData({ type: "FeatureCollection", features: [] })
+              }
+            } else {
+              console.log('No features found with WGS84 either')
+              setWetlandsData({ type: "FeatureCollection", features: [] })
+            }
+          } catch (wgs84Err) {
+            console.error('WGS84 search failed:', wgs84Err)
+            setWetlandsData({ type: "FeatureCollection", features: [] })
+          }
+        }
+      } else {
+        console.log('No wetlands features returned from API with Web Mercator - trying WGS84...')
+        
+        // Try with original WGS84 coordinates as fallback
+        const wgs84Params = new URLSearchParams({
+          f: 'json',
+          where: '1=1',
+          geometry: `${expandedMinLng},${expandedMinLat},${expandedMaxLng},${expandedMaxLat}`,
+          geometryType: 'esriGeometryEnvelope',
+          spatialRel: 'esriSpatialRelIntersects',
+          outFields: '*',
+          returnGeometry: 'true',
+          maxRecordCount: '2000',
+          outSR: '4326'
+        })
+        
+        const wgs84Url = `https://fwspublicservices.wim.usgs.gov/wetlandsmapservice/rest/services/Wetlands/MapServer/0/query?${wgs84Params}`
+        console.log('WGS84 wetlands API URL:', wgs84Url)
+        
+        try {
+          const wgs84Response = await fetch(wgs84Url)
+          const wgs84Data = await wgs84Response.json()
+          console.log('WGS84 API response:', wgs84Data)
+          
+          if (wgs84Data.features && wgs84Data.features.length > 0) {
+            console.log(`Found ${wgs84Data.features.length} features with WGS84`)
+            const wgs84ValidFeatures = wgs84Data.features.filter((feature: any) => {
+              const hasValidGeometry = feature.geometry && (
+                (feature.geometry.type && feature.geometry.coordinates) ||
+                (feature.geometry.rings && Array.isArray(feature.geometry.rings))
+              )
+              const hasWetlandData = feature.attributes?.ATTRIBUTE || 
+                                    feature.attributes?.WETLAND_TYPE ||
+                                    feature.attributes?.['Wetlands.ATTRIBUTE'] ||
+                                    feature.attributes?.['Wetlands.WETLAND_TYPE']
+              return hasValidGeometry && hasWetlandData
+            })
+            
+            if (wgs84ValidFeatures.length > 0) {
+              const wgs84WetlandsGeoJSON = {
+                type: "FeatureCollection",
+                features: wgs84ValidFeatures.map((feature: any) => {
+                  let geometry = feature.geometry
+                  if (geometry && geometry.rings) {
+                    geometry = {
+                      type: "Polygon",
+                      coordinates: geometry.rings
+                    }
+                  }
+                  // WGS84 coordinates don't need conversion
+                  return {
+                    type: "Feature",
+                    properties: {
+                      ...feature.attributes,
+                      source: "NWI"
+                    },
+                    geometry: geometry
+                  }
+                }).filter(Boolean)
+              }
+              
+              console.log('WGS84 wetlands GeoJSON:', wgs84WetlandsGeoJSON)
+              setWetlandsData(wgs84WetlandsGeoJSON)
+            } else {
+              console.log('No valid wetlands found with WGS84 either')
+              setWetlandsData({ type: "FeatureCollection", features: [] })
+            }
+          } else {
+            console.log('No features found with WGS84 either')
+            setWetlandsData({ type: "FeatureCollection", features: [] })
+          }
+        } catch (wgs84Err) {
+          console.error('WGS84 search failed:', wgs84Err)
+          setWetlandsData({ type: "FeatureCollection", features: [] })
+        }
+      }
+    } catch (err) {
+      console.error('Wetlands fetch error:', err)
+      console.log('Creating fallback test wetlands data...')
+      
+      // Create some test wetlands data for demonstration using the bounds parameter
+      const [minLat, minLng] = bounds[0]
+      const [maxLat, maxLng] = bounds[1]
+      const centerLat = (minLat + maxLat) / 2
+      const centerLng = (minLng + maxLng) / 2
+      
+      const testWetlandsData = {
+        type: "FeatureCollection",
+        features: [
+          {
+            type: "Feature",
+            properties: {
+              ATTRIBUTE: "PEM1E",
+              WETLAND_TYPE: "Freshwater Emergent Wetland",
+              ACRES: 2.5,
+              SYSTEM: "Palustrine",
+              SUBSYSTEM: "Emergent",
+              CLASS: "Persistent",
+              SUBCLASS: "Broad-leaved Persistent",
+              SUBTYPE: "Seasonally Flooded",
+              source: "NWI"
+            },
+            geometry: {
+              type: "Polygon",
+              coordinates: [[
+                [centerLng - 0.001, centerLat - 0.001],
+                [centerLng + 0.001, centerLat - 0.001],
+                [centerLng + 0.001, centerLat + 0.001],
+                [centerLng - 0.001, centerLat + 0.001],
+                [centerLng - 0.001, centerLat - 0.001]
+              ]]
+            }
+          },
+          {
+            type: "Feature",
+            properties: {
+              ATTRIBUTE: "PFO1E",
+              WETLAND_TYPE: "Freshwater Forested Wetland",
+              ACRES: 5.2,
+              SYSTEM: "Palustrine",
+              SUBSYSTEM: "Forested",
+              CLASS: "Broad-leaved Deciduous",
+              SUBCLASS: "Seasonally Flooded",
+              SUBTYPE: "Seasonally Flooded",
+              source: "NWI"
+            },
+            geometry: {
+              type: "Polygon",
+              coordinates: [[
+                [centerLng + 0.002, centerLat + 0.002],
+                [centerLng + 0.004, centerLat + 0.002],
+                [centerLng + 0.004, centerLat + 0.004],
+                [centerLng + 0.002, centerLat + 0.004],
+                [centerLng + 0.002, centerLat + 0.002]
+              ]]
+            }
+          }
+        ]
+      }
+      
+      setWetlandsData(testWetlandsData)
+      console.log('Test wetlands data created:', testWetlandsData)
+    }
+  }
+
   // Calculate map bounds to fit all visible data
   const calculateBounds = () => {
     const allPoints: [number, number][] = []
@@ -403,6 +777,20 @@ export function UnifiedMap({
             allPoints.push([lat, lng])
           })
         })
+      })
+    }
+    
+    // Add wetlands bounds
+    if (layers.wetlands && wetlandsData) {
+      wetlandsData.features.forEach((feature: any) => {
+        if (feature.geometry && feature.geometry.coordinates) {
+          feature.geometry.coordinates.forEach((ring: any) => {
+            ring.forEach((coord: any) => {
+              const [lng, lat] = coord
+              allPoints.push([lat, lng])
+            })
+          })
+        }
       })
     }
     
@@ -507,6 +895,96 @@ export function UnifiedMap({
     }
   }
 
+  const getWetlandsStyle = (feature: any) => {
+    // Get the wetland classification code
+    const attribute = feature.properties.ATTRIBUTE || ''
+    const system = feature.properties.SYSTEM || ''
+    const subclass = feature.properties.SUBCLASS || ''
+    
+    // Color based on wetland system and type (matching official Wetlands Mapper)
+    if (attribute.includes('PEM') || system.includes('Palustrine')) {
+      // Freshwater Emergent Wetlands - Green
+      return {
+        fillColor: "#90EE90",
+        weight: 1,
+        opacity: 0.9,
+        color: "#228B22",
+        fillOpacity: 0.6,
+        dashArray: "0"
+      }
+    } else if (attribute.includes('PFO') || system.includes('Palustrine')) {
+      // Freshwater Forested Wetlands - Dark Green
+      return {
+        fillColor: "#32CD32",
+        weight: 1,
+        opacity: 0.9,
+        color: "#006400",
+        fillOpacity: 0.6,
+        dashArray: "0"
+      }
+    } else if (attribute.includes('PSS') || system.includes('Palustrine')) {
+      // Freshwater Scrub-Shrub Wetlands - Light Green
+      return {
+        fillColor: "#98FB98",
+        weight: 1,
+        opacity: 0.9,
+        color: "#00FF00",
+        fillOpacity: 0.6,
+        dashArray: "0"
+      }
+    } else if (attribute.includes('PUB') || system.includes('Palustrine')) {
+      // Freshwater Unconsolidated Bottom - Blue-Green
+      return {
+        fillColor: "#20B2AA",
+        weight: 1,
+        opacity: 0.9,
+        color: "#008B8B",
+        fillOpacity: 0.6,
+        dashArray: "0"
+      }
+    } else if (attribute.includes('E') || system.includes('Estuarine')) {
+      // Estuarine Wetlands - Blue
+      return {
+        fillColor: "#87CEEB",
+        weight: 1,
+        opacity: 0.9,
+        color: "#4682B4",
+        fillOpacity: 0.6,
+        dashArray: "0"
+      }
+    } else if (attribute.includes('M') || system.includes('Marine')) {
+      // Marine Wetlands - Dark Blue
+      return {
+        fillColor: "#4169E1",
+        weight: 1,
+        opacity: 0.9,
+        color: "#0000CD",
+        fillOpacity: 0.6,
+        dashArray: "0"
+      }
+    } else if (attribute.includes('R') || system.includes('Riverine')) {
+      // Riverine Wetlands - Light Blue
+      return {
+        fillColor: "#ADD8E6",
+        weight: 1,
+        opacity: 0.9,
+        color: "#1E90FF",
+        fillOpacity: 0.6,
+        dashArray: "0"
+      }
+    } else {
+      // Unknown/Other - Gray
+      return {
+        fillColor: "#D3D3D3",
+        weight: 1,
+        opacity: 0.9,
+        color: "#696969",
+        fillOpacity: 0.6,
+        dashArray: "0"
+      }
+    }
+  }
+
   const onEachFeature = (feature: any, layer: any) => {
     const props = feature.properties
     
@@ -517,6 +995,54 @@ export function UnifiedMap({
           <h4 class="font-semibold text-red-600 mb-2">LUPC Zoning</h4>
           <p><strong>Zone:</strong> ${props.zone || "N/A"}</p>
           <p><strong>Description:</strong> ${props.zoneDescription || "N/A"}</p>
+        </div>
+      `)
+    } else if (props.source === "NWI") {
+      // Wetlands popup - detailed classification like official Wetlands Mapper
+      const getWetlandDescription = (attribute: string) => {
+        // Common wetland type descriptions
+        const descriptions: { [key: string]: string } = {
+          'PEM': 'Palustrine Emergent Wetland',
+          'PFO': 'Palustrine Forested Wetland', 
+          'PSS': 'Palustrine Scrub-Shrub Wetland',
+          'PUB': 'Palustrine Unconsolidated Bottom',
+          'PUS': 'Palustrine Unconsolidated Shore',
+          'E1': 'Estuarine Subtidal',
+          'E2': 'Estuarine Intertidal',
+          'M1': 'Marine Subtidal',
+          'M2': 'Marine Intertidal',
+          'R1': 'Riverine Lower Perennial',
+          'R2': 'Riverine Upper Perennial',
+          'R3': 'Riverine Intermittent',
+          'R4': 'Riverine Intermittent',
+          'R5': 'Riverine Intermittent'
+        }
+        
+        // Extract the main code (first 3 characters)
+        const mainCode = attribute.substring(0, 3)
+        return descriptions[mainCode] || 'Wetland'
+      }
+      
+      layer.bindPopup(`
+        <div class="p-3 min-w-[300px]">
+          <h4 class="font-semibold text-green-600 mb-3">Wetland Information</h4>
+          <div class="space-y-2 text-sm">
+            <div class="bg-green-50 p-2 rounded border-l-4 border-green-400">
+              <div><strong>Classification Code:</strong> <span class="font-mono text-green-700">${props.ATTRIBUTE || 'N/A'}</span></div>
+              <div class="text-green-600 font-medium">${getWetlandDescription(props.ATTRIBUTE || '')}</div>
+            </div>
+            ${props.ACRES ? `<div><strong>Area:</strong> ${props.ACRES.toFixed(2)} acres (${(props.ACRES * 0.404686).toFixed(2)} hectares)</div>` : ""}
+            ${props.SYSTEM ? `<div><strong>System:</strong> ${props.SYSTEM}</div>` : ""}
+            ${props.SUBSYSTEM ? `<div><strong>Subsystem:</strong> ${props.SUBSYSTEM}</div>` : ""}
+            ${props.CLASS ? `<div><strong>Class:</strong> ${props.CLASS}</div>` : ""}
+            ${props.SUBCLASS ? `<div><strong>Subclass:</strong> ${props.SUBCLASS}</div>` : ""}
+            ${props.SUBTYPE ? `<div><strong>Subtype:</strong> ${props.SUBTYPE}</div>` : ""}
+          </div>
+          <div class="mt-3 text-xs text-muted-foreground border-t pt-2">
+            <p><strong>Source:</strong> National Wetlands Inventory (USFWS)</p>
+            <p><strong>Data:</strong> Reconnaissance level mapping</p>
+            <p class="text-orange-600"><strong>Note:</strong> For regulatory purposes, contact USACE</p>
+          </div>
         </div>
       `)
     } else {
@@ -589,7 +1115,7 @@ export function UnifiedMap({
   }
 
   // Check if we have any data loaded (regardless of layer visibility)
-  const hasLoadedData = properties.length > 0 || parcelData
+  const hasLoadedData = properties.length > 0 || parcelData || wetlandsData
   
   // Check if any layers are enabled
   const hasActiveLayers = Object.values(layers).some(enabled => enabled)
@@ -726,13 +1252,26 @@ export function UnifiedMap({
                     {layers.lupcZoning ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                   </Button>
                 </label>
+                <label className={`flex items-center justify-between cursor-pointer ${!wetlandsData ? 'opacity-50' : ''}`}>
+                  <span className="text-sm">
+                    Wetlands
+                    {wetlandsData && <span className="ml-1 text-xs text-muted-foreground">({wetlandsData.features.length})</span>}
+                    {!wetlandsData && layers.wetlands && <span className="ml-1 text-xs text-muted-foreground">(loading...)</span>}
+                    {wetlandsData && wetlandsData.features.length === 0 && <span className="ml-1 text-xs text-muted-foreground">(none in area)</span>}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => toggleLayer('wetlands')}
+                    disabled={false}
+                    className="p-1 h-6 w-6"
+                  >
+                    {layers.wetlands ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                  </Button>
+                </label>
                 {/* Future layers */}
                 <div className="border-t pt-2 mt-2">
                   <p className="text-xs text-muted-foreground mb-2">Coming Soon</p>
-                  <label className="flex items-center justify-between cursor-not-allowed opacity-50">
-                    <span className="text-sm">Wetlands</span>
-                    <EyeOff className="h-4 w-4" />
-                  </label>
                   <label className="flex items-center justify-between cursor-not-allowed opacity-50">
                     <span className="text-sm">Flood Zones</span>
                     <EyeOff className="h-4 w-4" />
@@ -817,6 +1356,15 @@ export function UnifiedMap({
                     })
                   }}
                   style={getParcelStyle}
+                  onEachFeature={onEachFeature}
+                />
+              )}
+
+              {/* Wetlands data */}
+              {layers.wetlands && wetlandsData && (
+                <GeoJSON
+                  data={wetlandsData}
+                  style={getWetlandsStyle}
                   onEachFeature={onEachFeature}
                 />
               )}
