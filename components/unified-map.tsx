@@ -653,6 +653,7 @@ export function UnifiedMap({
           }
           
           console.log('Processed wetlands GeoJSON:', wetlandsGeoJSON)
+          console.log('Sample wetland feature properties:', wetlandsGeoJSON.features[0]?.properties)
           setWetlandsData(wetlandsGeoJSON)
         } else {
           console.log('No valid wetlands features found in this area - trying WGS84 coordinates...')
@@ -716,6 +717,7 @@ export function UnifiedMap({
                 }
                 
                 console.log('WGS84 wetlands GeoJSON:', wgs84WetlandsGeoJSON)
+                console.log('Sample WGS84 wetland feature properties:', wgs84WetlandsGeoJSON.features[0]?.properties)
                 setWetlandsData(wgs84WetlandsGeoJSON)
               } else {
                 console.log('No valid wetlands found with WGS84 either')
@@ -792,6 +794,7 @@ export function UnifiedMap({
               }
               
               console.log('WGS84 wetlands GeoJSON:', wgs84WetlandsGeoJSON)
+              console.log('Sample WGS84 wetland feature properties:', wgs84WetlandsGeoJSON.features[0]?.properties)
               setWetlandsData(wgs84WetlandsGeoJSON)
             } else {
               console.log('No valid wetlands found with WGS84 either')
@@ -978,92 +981,217 @@ export function UnifiedMap({
   }
 
   const getWetlandsStyle = (feature: any) => {
-    // Get the wetland classification code
-    const attribute = feature.properties.ATTRIBUTE || ''
-    const system = feature.properties.SYSTEM || ''
-    const subclass = feature.properties.SUBCLASS || ''
+    // Get the wetland classification code and properties
+    const attribute = feature.properties.ATTRIBUTE || feature.properties['Wetlands.ATTRIBUTE'] || ''
+    const system = feature.properties.SYSTEM || feature.properties['Wetlands.SYSTEM'] || ''
+    const subclass = feature.properties.SUBCLASS || feature.properties['Wetlands.SUBCLASS'] || ''
+    const wetlandType = feature.properties.WETLAND_TYPE || feature.properties['Wetlands.WETLAND_TYPE'] || ''
     
-    // Color based on wetland system and type (matching official Wetlands Mapper)
-    if (attribute.includes('PEM') || system.includes('Palustrine')) {
-      // Freshwater Emergent Wetlands - Green
-      return {
-        fillColor: "#90EE90",
-        weight: 1,
-        opacity: 0.9,
-        color: "#228B22",
-        fillOpacity: 0.6,
-        dashArray: "0"
+    console.log('Wetland feature properties:', {
+      attribute,
+      system,
+      subclass,
+      wetlandType,
+      allProps: Object.keys(feature.properties)
+    })
+    
+    // Enhanced color coding based on wetland classification
+    // Primary classification by ATTRIBUTE code (most specific)
+    if (attribute) {
+      const attrUpper = attribute.toUpperCase()
+      
+      // Palustrine Emergent Wetlands (PEM)
+      if (attrUpper.startsWith('PEM')) {
+        return {
+          fillColor: "#90EE90", // Light Green
+          weight: 2,
+          opacity: 1,
+          color: "#228B22", // Forest Green
+          fillOpacity: 0.7,
+          dashArray: "0"
+        }
       }
-    } else if (attribute.includes('PFO') || system.includes('Palustrine')) {
-      // Freshwater Forested Wetlands - Dark Green
-      return {
-        fillColor: "#32CD32",
-        weight: 1,
-        opacity: 0.9,
-        color: "#006400",
-        fillOpacity: 0.6,
-        dashArray: "0"
+      
+      // Palustrine Forested Wetlands (PFO)
+      if (attrUpper.startsWith('PFO')) {
+        return {
+          fillColor: "#32CD32", // Lime Green
+          weight: 2,
+          opacity: 1,
+          color: "#006400", // Dark Green
+          fillOpacity: 0.7,
+          dashArray: "0"
+        }
       }
-    } else if (attribute.includes('PSS') || system.includes('Palustrine')) {
-      // Freshwater Scrub-Shrub Wetlands - Light Green
-      return {
-        fillColor: "#98FB98",
-        weight: 1,
-        opacity: 0.9,
-        color: "#00FF00",
-        fillOpacity: 0.6,
-        dashArray: "0"
+      
+      // Palustrine Scrub-Shrub Wetlands (PSS)
+      if (attrUpper.startsWith('PSS')) {
+        return {
+          fillColor: "#98FB98", // Pale Green
+          weight: 2,
+          opacity: 1,
+          color: "#00FF00", // Lime
+          fillOpacity: 0.7,
+          dashArray: "0"
+        }
       }
-    } else if (attribute.includes('PUB') || system.includes('Palustrine')) {
-      // Freshwater Unconsolidated Bottom - Blue-Green
-      return {
-        fillColor: "#20B2AA",
-        weight: 1,
-        opacity: 0.9,
-        color: "#008B8B",
-        fillOpacity: 0.6,
-        dashArray: "0"
+      
+      // Palustrine Unconsolidated Bottom (PUB)
+      if (attrUpper.startsWith('PUB')) {
+        return {
+          fillColor: "#20B2AA", // Light Sea Green
+          weight: 2,
+          opacity: 1,
+          color: "#008B8B", // Dark Cyan
+          fillOpacity: 0.7,
+          dashArray: "0"
+        }
       }
-    } else if (attribute.includes('E') || system.includes('Estuarine')) {
-      // Estuarine Wetlands - Blue
-      return {
-        fillColor: "#87CEEB",
-        weight: 1,
-        opacity: 0.9,
-        color: "#4682B4",
-        fillOpacity: 0.6,
-        dashArray: "0"
+      
+      // Palustrine Unconsolidated Shore (PUS)
+      if (attrUpper.startsWith('PUS')) {
+        return {
+          fillColor: "#40E0D0", // Turquoise
+          weight: 2,
+          opacity: 1,
+          color: "#00CED1", // Dark Turquoise
+          fillOpacity: 0.7,
+          dashArray: "0"
+        }
       }
-    } else if (attribute.includes('M') || system.includes('Marine')) {
-      // Marine Wetlands - Dark Blue
-      return {
-        fillColor: "#4169E1",
-        weight: 1,
-        opacity: 0.9,
-        color: "#0000CD",
-        fillOpacity: 0.6,
-        dashArray: "0"
+      
+      // Estuarine Wetlands (E)
+      if (attrUpper.startsWith('E')) {
+        return {
+          fillColor: "#87CEEB", // Sky Blue
+          weight: 2,
+          opacity: 1,
+          color: "#4682B4", // Steel Blue
+          fillOpacity: 0.7,
+          dashArray: "0"
+        }
       }
-    } else if (attribute.includes('R') || system.includes('Riverine')) {
-      // Riverine Wetlands - Light Blue
-      return {
-        fillColor: "#ADD8E6",
-        weight: 1,
-        opacity: 0.9,
-        color: "#1E90FF",
-        fillOpacity: 0.6,
-        dashArray: "0"
+      
+      // Marine Wetlands (M)
+      if (attrUpper.startsWith('M')) {
+        return {
+          fillColor: "#4169E1", // Royal Blue
+          weight: 2,
+          opacity: 1,
+          color: "#0000CD", // Medium Blue
+          fillOpacity: 0.7,
+          dashArray: "0"
+        }
       }
-    } else {
-      // Unknown/Other - Gray
-      return {
-        fillColor: "#D3D3D3",
-        weight: 1,
-        opacity: 0.9,
-        color: "#696969",
-        fillOpacity: 0.6,
-        dashArray: "0"
+      
+      // Riverine Wetlands (R)
+      if (attrUpper.startsWith('R')) {
+        return {
+          fillColor: "#ADD8E6", // Light Blue
+          weight: 2,
+          opacity: 1,
+          color: "#1E90FF", // Dodger Blue
+          fillOpacity: 0.7,
+          dashArray: "0"
+        }
       }
+    }
+    
+    // Fallback classification by SYSTEM
+    if (system) {
+      const systemUpper = system.toUpperCase()
+      
+      if (systemUpper.includes('PALUSTRINE')) {
+        return {
+          fillColor: "#90EE90", // Light Green
+          weight: 2,
+          opacity: 1,
+          color: "#228B22", // Forest Green
+          fillOpacity: 0.6,
+          dashArray: "5, 5" // Dashed line for less specific classification
+        }
+      }
+      
+      if (systemUpper.includes('ESTUARINE')) {
+        return {
+          fillColor: "#87CEEB", // Sky Blue
+          weight: 2,
+          opacity: 1,
+          color: "#4682B4", // Steel Blue
+          fillOpacity: 0.6,
+          dashArray: "5, 5"
+        }
+      }
+      
+      if (systemUpper.includes('MARINE')) {
+        return {
+          fillColor: "#4169E1", // Royal Blue
+          weight: 2,
+          opacity: 1,
+          color: "#0000CD", // Medium Blue
+          fillOpacity: 0.6,
+          dashArray: "5, 5"
+        }
+      }
+      
+      if (systemUpper.includes('RIVERINE')) {
+        return {
+          fillColor: "#ADD8E6", // Light Blue
+          weight: 2,
+          opacity: 1,
+          color: "#1E90FF", // Dodger Blue
+          fillOpacity: 0.6,
+          dashArray: "5, 5"
+        }
+      }
+    }
+    
+    // Fallback classification by WETLAND_TYPE
+    if (wetlandType) {
+      const typeUpper = wetlandType.toUpperCase()
+      
+      if (typeUpper.includes('EMERGENT')) {
+        return {
+          fillColor: "#90EE90", // Light Green
+          weight: 2,
+          opacity: 1,
+          color: "#228B22", // Forest Green
+          fillOpacity: 0.5,
+          dashArray: "10, 5" // More dashed for least specific
+        }
+      }
+      
+      if (typeUpper.includes('FORESTED')) {
+        return {
+          fillColor: "#32CD32", // Lime Green
+          weight: 2,
+          opacity: 1,
+          color: "#006400", // Dark Green
+          fillOpacity: 0.5,
+          dashArray: "10, 5"
+        }
+      }
+      
+      if (typeUpper.includes('SCRUB') || typeUpper.includes('SHRUB')) {
+        return {
+          fillColor: "#98FB98", // Pale Green
+          weight: 2,
+          opacity: 1,
+          color: "#00FF00", // Lime
+          fillOpacity: 0.5,
+          dashArray: "10, 5"
+        }
+      }
+    }
+    
+    // Unknown/Other - Gray with warning pattern
+    return {
+      fillColor: "#D3D3D3", // Light Gray
+      weight: 2,
+      opacity: 1,
+      color: "#696969", // Dim Gray
+      fillOpacity: 0.4,
+      dashArray: "15, 5" // Heavily dashed for unknown
     }
   }
 
@@ -1080,9 +1208,9 @@ export function UnifiedMap({
         </div>
       `)
     } else if (props.source === "NWI") {
-      // Wetlands popup - detailed classification like official Wetlands Mapper
+      // Enhanced wetlands popup with better classification display
       const getWetlandDescription = (attribute: string) => {
-        // Common wetland type descriptions
+        // Comprehensive wetland type descriptions
         const descriptions: { [key: string]: string } = {
           'PEM': 'Palustrine Emergent Wetland',
           'PFO': 'Palustrine Forested Wetland', 
@@ -1105,25 +1233,73 @@ export function UnifiedMap({
         return descriptions[mainCode] || 'Wetland'
       }
       
+      const getWetlandColor = (attribute: string) => {
+        const attrUpper = (attribute || '').toUpperCase()
+        if (attrUpper.startsWith('PEM')) return 'bg-green-100 border-green-400 text-green-800'
+        if (attrUpper.startsWith('PFO')) return 'bg-green-200 border-green-500 text-green-900'
+        if (attrUpper.startsWith('PSS')) return 'bg-green-50 border-green-300 text-green-700'
+        if (attrUpper.startsWith('PUB')) return 'bg-teal-100 border-teal-400 text-teal-800'
+        if (attrUpper.startsWith('PUS')) return 'bg-cyan-100 border-cyan-400 text-cyan-800'
+        if (attrUpper.startsWith('E')) return 'bg-blue-100 border-blue-400 text-blue-800'
+        if (attrUpper.startsWith('M')) return 'bg-blue-200 border-blue-500 text-blue-900'
+        if (attrUpper.startsWith('R')) return 'bg-sky-100 border-sky-400 text-sky-800'
+        return 'bg-gray-100 border-gray-400 text-gray-800'
+      }
+      
+      const attribute = props.ATTRIBUTE || props['Wetlands.ATTRIBUTE'] || 'Unknown'
+      const wetlandType = props.WETLAND_TYPE || props['Wetlands.WETLAND_TYPE'] || ''
+      const system = props.SYSTEM || props['Wetlands.SYSTEM'] || ''
+      const subsystem = props.SUBSYSTEM || props['Wetlands.SUBSYSTEM'] || ''
+      const wetlandClass = props.CLASS || props['Wetlands.CLASS'] || ''
+      const subclass = props.SUBCLASS || props['Wetlands.SUBCLASS'] || ''
+      const subtype = props.SUBTYPE || props['Wetlands.SUBTYPE'] || ''
+      const acres = props.ACRES || props['Wetlands.ACRES'] || 0
+      
       layer.bindPopup(`
-        <div class="p-3 min-w-[300px]">
-          <h4 class="font-semibold text-green-600 mb-3">Wetland Information</h4>
-          <div class="space-y-2 text-sm">
-            <div class="bg-green-50 p-2 rounded border-l-4 border-green-400">
-              <div><strong>Classification Code:</strong> <span class="font-mono text-green-700">${props.ATTRIBUTE || 'N/A'}</span></div>
-              <div class="text-green-600 font-medium">${getWetlandDescription(props.ATTRIBUTE || '')}</div>
+        <div class="p-3 min-w-[320px]">
+          <h4 class="font-semibold text-green-600 mb-3 flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full ${getWetlandColor(attribute).split(' ')[0]}"></span>
+            Wetland Information
+          </h4>
+          <div class="space-y-3 text-sm">
+            <div class="p-3 rounded border-l-4 ${getWetlandColor(attribute)}">
+              <div class="font-semibold mb-1">Classification Code</div>
+              <div class="font-mono text-lg">${attribute}</div>
+              <div class="font-medium mt-1">${getWetlandDescription(attribute)}</div>
             </div>
-            ${props.ACRES ? `<div><strong>Area:</strong> ${props.ACRES.toFixed(2)} acres (${(props.ACRES * 0.404686).toFixed(2)} hectares)</div>` : ""}
-            ${props.SYSTEM ? `<div><strong>System:</strong> ${props.SYSTEM}</div>` : ""}
-            ${props.SUBSYSTEM ? `<div><strong>Subsystem:</strong> ${props.SUBSYSTEM}</div>` : ""}
-            ${props.CLASS ? `<div><strong>Class:</strong> ${props.CLASS}</div>` : ""}
-            ${props.SUBCLASS ? `<div><strong>Subclass:</strong> ${props.SUBCLASS}</div>` : ""}
-            ${props.SUBTYPE ? `<div><strong>Subtype:</strong> ${props.SUBTYPE}</div>` : ""}
+            
+            ${wetlandType ? `
+              <div class="bg-blue-50 p-2 rounded">
+                <div class="font-medium text-blue-800">Wetland Type</div>
+                <div class="text-blue-700">${wetlandType}</div>
+              </div>
+            ` : ''}
+            
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              ${system ? `<div><strong>System:</strong> ${system}</div>` : ''}
+              ${subsystem ? `<div><strong>Subsystem:</strong> ${subsystem}</div>` : ''}
+              ${wetlandClass ? `<div><strong>Class:</strong> ${wetlandClass}</div>` : ''}
+              ${subclass ? `<div><strong>Subclass:</strong> ${subclass}</div>` : ''}
+              ${subtype ? `<div><strong>Subtype:</strong> ${subtype}</div>` : ''}
+              ${acres > 0 ? `<div><strong>Area:</strong> ${acres.toFixed(2)} acres</div>` : ''}
+            </div>
+            
+            ${acres > 0 ? `
+              <div class="bg-gray-50 p-2 rounded text-xs">
+                <div class="font-medium text-gray-700">Area Conversion</div>
+                <div class="text-gray-600">
+                  ${acres.toFixed(2)} acres = ${(acres * 0.404686).toFixed(2)} hectares = ${(acres * 43560).toFixed(0)} sq ft
+                </div>
+              </div>
+            ` : ''}
           </div>
-          <div class="mt-3 text-xs text-muted-foreground border-t pt-2">
-            <p><strong>Source:</strong> National Wetlands Inventory (USFWS)</p>
-            <p><strong>Data:</strong> Reconnaissance level mapping</p>
-            <p class="text-orange-600"><strong>Note:</strong> For regulatory purposes, contact USACE</p>
+          
+          <div class="mt-3 text-xs text-gray-500 border-t pt-2 space-y-1">
+            <div><strong>Source:</strong> National Wetlands Inventory (USFWS)</div>
+            <div><strong>Mapping Level:</strong> Reconnaissance</div>
+            <div class="text-orange-600 font-medium">
+              <strong>⚠️ Regulatory Note:</strong> Contact USACE for jurisdictional determinations
+            </div>
           </div>
         </div>
       `)
@@ -1361,6 +1537,43 @@ export function UnifiedMap({
                     {layers.wetlands ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                   </Button>
                 </label>
+                {/* Wetlands Legend */}
+                {layers.wetlands && wetlandsData && wetlandsData.features.length > 0 && (
+                  <div className="border-t pt-2 mt-2">
+                    <p className="text-xs text-muted-foreground mb-2">Wetland Types</p>
+                    <div className="space-y-1 text-xs">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded" style={{backgroundColor: "#90EE90"}}></div>
+                        <span>Emergent (PEM)</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded" style={{backgroundColor: "#32CD32"}}></div>
+                        <span>Forested (PFO)</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded" style={{backgroundColor: "#98FB98"}}></div>
+                        <span>Scrub-Shrub (PSS)</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded" style={{backgroundColor: "#20B2AA"}}></div>
+                        <span>Unconsolidated Bottom (PUB)</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded" style={{backgroundColor: "#87CEEB"}}></div>
+                        <span>Estuarine (E)</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded" style={{backgroundColor: "#4169E1"}}></div>
+                        <span>Marine (M)</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded" style={{backgroundColor: "#ADD8E6"}}></div>
+                        <span>Riverine (R)</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
                 {/* Future layers */}
                 <div className="border-t pt-2 mt-2">
                   <p className="text-xs text-muted-foreground mb-2">Coming Soon</p>
