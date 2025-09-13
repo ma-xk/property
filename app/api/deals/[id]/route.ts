@@ -367,6 +367,83 @@ export async function PUT(
   }
 }
 
+// PATCH - Update specific fields of a deal (simpler than PUT)
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await getServerSession(authOptions)
+    
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      )
+    }
+
+    const { id } = await params
+    const body = await req.json()
+    
+    // For PATCH, we'll allow partial updates without full validation
+    const allowedFields = [
+      'dealStage', 'dealStatus', 'name', 'description', 'targetClosingDate', 
+      'dealNotes', 'askingPrice', 'offerPrice', 'purchasePrice', 'closingDate'
+    ]
+    
+    const updateData: any = {}
+    Object.keys(body).forEach(key => {
+      if (allowedFields.includes(key) && body[key] !== undefined) {
+        updateData[key] = body[key]
+      }
+    })
+
+    // Handle date fields
+    if (updateData.targetClosingDate) {
+      updateData.targetClosingDate = new Date(updateData.targetClosingDate)
+    }
+    if (updateData.closingDate) {
+      updateData.closingDate = new Date(updateData.closingDate)
+    }
+
+    // Check if deal exists and belongs to user
+    const existingDeal = await prisma.deal.findFirst({
+      where: {
+        id: id,
+        userId: session.user.id
+      }
+    })
+
+    if (!existingDeal) {
+      return NextResponse.json(
+        { error: "Deal not found" },
+        { status: 404 }
+      )
+    }
+
+    const updatedDeal = await prisma.deal.update({
+      where: { id: id },
+      data: updateData,
+      include: {
+        seller: true,
+        sellerAgent: true,
+        buyerAgent: true,
+        titleCompany: true,
+        place: true,
+        promotedProperty: true
+      }
+    })
+
+    return NextResponse.json(updatedDeal)
+  } catch (error) {
+    console.error("Error updating deal:", error)
+    return NextResponse.json(
+      { error: "Failed to update deal" },
+      { status: 500 }
+    )
+  }
+}
+
 // DELETE - Delete a specific deal
 export async function DELETE(
   req: NextRequest,

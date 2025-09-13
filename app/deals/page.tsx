@@ -1,5 +1,5 @@
-import { DealsDashboard } from "@/components/deals-dashboard"
+import { DealsKanbanBoard } from "@/components/deals-kanban-board"
 
 export default function DealsPage() {
-  return <DealsDashboard />
+  return <DealsKanbanBoard />
 }
