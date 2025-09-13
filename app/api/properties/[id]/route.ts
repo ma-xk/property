@@ -26,10 +26,6 @@ export async function GET(
         userId: session.user.id
       },
       include: {
-        sellerPerson: true,
-        sellerAgentPerson: true,
-        buyerAgentPerson: true,
-        titleCompanyPerson: true,
         place: {
           include: {
             millRateHistories: {
@@ -49,6 +45,7 @@ export async function GET(
             year: 'desc'
           }
         },
+        originalDeal: true,
       }
     })
 
@@ -112,10 +109,6 @@ export async function PUT(
         userId: session.user.id
       },
       include: {
-        sellerPerson: true,
-        sellerAgentPerson: true,
-        buyerAgentPerson: true,
-        titleCompanyPerson: true,
         place: {
           include: {
             millRateHistories: {
@@ -135,6 +128,7 @@ export async function PUT(
             year: 'desc'
           }
         },
+        originalDeal: true,
       }
     })
 

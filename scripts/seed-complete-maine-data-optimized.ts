@@ -7,11 +7,6 @@ import * as path from 'path'
 dotenv.config({ path: '.env.local' })
 
 const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL
-    }
-  },
   // Optimize for bulk operations
   log: ['error', 'warn'],
 })

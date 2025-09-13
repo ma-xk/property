@@ -82,13 +82,15 @@ interface Property {
 }
 
 interface PropertyTaxInfoProps {
-  place?: Place | null
+  effectivePlace?: Place | null
   property?: Property | null
   propertyName?: string
   onPropertyUpdate?: (updatedProperty: Partial<Property>) => Promise<void>
 }
 
-export function PropertyTaxInfo({ place, property, propertyName, onPropertyUpdate }: PropertyTaxInfoProps) {
+export function PropertyTaxInfo({ effectivePlace, property, propertyName, onPropertyUpdate }: PropertyTaxInfoProps) {
+  // Use place from property if not provided directly
+  const place = effectivePlace
   const [isEditingValuation, setIsEditingValuation] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [valuationFormData, setValuationFormData] = useState({
@@ -172,7 +174,7 @@ export function PropertyTaxInfo({ place, property, propertyName, onPropertyUpdat
     return `${rate}%`
   }
 
-  if (!place) {
+  if (!effectivePlace) {
     return (
       <Card>
         <CardHeader>
@@ -186,8 +188,8 @@ export function PropertyTaxInfo({ place, property, propertyName, onPropertyUpdat
             <Building2 className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
             <h3 className="text-lg font-semibold mb-2 text-muted-foreground">No location assigned</h3>
             <p className="text-muted-foreground text-sm">
-              {propertyName ? `${propertyName} is` : "This property is"} not associated with a place. 
-              Assign a place to view municipal tax information.
+              {propertyName ? `${propertyName} is` : "This property is"} not associated with a effectivePlace. 
+              Assign a effectivePlace to view municipal tax information.
             </p>
           </div>
         </CardContent>
@@ -195,14 +197,14 @@ export function PropertyTaxInfo({ place, property, propertyName, onPropertyUpdat
     )
   }
 
-  const hasTaxInfo = place.taxPaymentAddress || 
-                     place.taxPaymentWebsite || 
-                     place.taxOfficePhone || 
-                     place.taxDueMonth || 
-                     place.assessmentMonth || 
-                     place.lateInterestRate || 
-                     place.millRate || 
-                     place.taxNotes
+  const hasTaxInfo = effectivePlace.taxPaymentAddress || 
+                     effectivePlace.taxPaymentWebsite || 
+                     effectivePlace.taxOfficePhone || 
+                     effectivePlace.taxDueMonth || 
+                     effectivePlace.assessmentMonth || 
+                     effectivePlace.lateInterestRate || 
+                     effectivePlace.millRate || 
+                     effectivePlace.taxNotes
 
   return (
     <Card>
@@ -211,7 +213,7 @@ export function PropertyTaxInfo({ place, property, propertyName, onPropertyUpdat
           <Receipt className="h-5 w-5" />
           Municipal Tax Information
           <span className="text-sm font-normal text-muted-foreground">
-            • {place.name}{place.state && `, ${place.state}`}
+            • {effectivePlace.name}{effectivePlace.state && `, ${effectivePlace.state}`}
           </span>
         </CardTitle>
       </CardHeader>
@@ -219,36 +221,36 @@ export function PropertyTaxInfo({ place, property, propertyName, onPropertyUpdat
         {hasTaxInfo ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Payment Information */}
-            {(place.taxPaymentAddress || place.taxPaymentWebsite || place.taxOfficePhone) && (
+            {(effectivePlace.taxPaymentAddress || effectivePlace.taxPaymentWebsite || effectivePlace.taxOfficePhone) && (
               <div className="space-y-4">
                 <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">Payment Details</h4>
                 
                 <div className="space-y-3">
-                  {place.taxPaymentAddress && (
+                  {effectivePlace.taxPaymentAddress && (
                     <div className="flex items-start gap-3">
                       <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
                       <div className="min-w-0 flex-1">
                         <div className="text-sm font-medium">Payment Address</div>
                         <div className="text-sm text-muted-foreground break-words">
-                          {place.taxPaymentAddress}
+                          {effectivePlace.taxPaymentAddress}
                         </div>
                       </div>
                     </div>
                   )}
 
-                  {place.taxPaymentWebsite && (
+                  {effectivePlace.taxPaymentWebsite && (
                     <div className="flex items-center gap-3">
                       <Globe className="h-4 w-4 text-muted-foreground shrink-0" />
                       <div className="min-w-0 flex-1">
                         <div className="text-sm font-medium">Payment Website</div>
                         <div className="text-sm text-muted-foreground">
                           <a 
-                            href={place.taxPaymentWebsite} 
+                            href={effectivePlace.taxPaymentWebsite} 
                             target="_blank" 
                             rel="noopener noreferrer"
                             className="text-blue-600 hover:text-blue-800 underline flex items-center gap-1 break-all"
                           >
-                            {place.taxPaymentWebsite.replace(/^https?:\/\//, '')}
+                            {effectivePlace.taxPaymentWebsite.replace(/^https?:\/\//, '')}
                             <ExternalLink className="h-3 w-3 shrink-0" />
                           </a>
                         </div>
@@ -256,14 +258,14 @@ export function PropertyTaxInfo({ place, property, propertyName, onPropertyUpdat
                     </div>
                   )}
 
-                  {place.taxOfficePhone && (
+                  {effectivePlace.taxOfficePhone && (
                     <div className="flex items-center gap-3">
                       <Phone className="h-4 w-4 text-muted-foreground shrink-0" />
                       <div className="min-w-0 flex-1">
                         <div className="text-sm font-medium">Office Phone</div>
                         <div className="text-sm text-muted-foreground">
-                          <a href={`tel:${place.taxOfficePhone}`} className="text-blue-600 hover:text-blue-800">
-                            {place.taxOfficePhone}
+                          <a href={`tel:${effectivePlace.taxOfficePhone}`} className="text-blue-600 hover:text-blue-800">
+                            {effectivePlace.taxOfficePhone}
                           </a>
                         </div>
                       </div>
@@ -274,54 +276,54 @@ export function PropertyTaxInfo({ place, property, propertyName, onPropertyUpdat
             )}
 
             {/* Important Dates */}
-            {(place.taxDueMonth || place.assessmentMonth || place.lateInterestRate) && (
+            {(effectivePlace.taxDueMonth || effectivePlace.assessmentMonth || effectivePlace.lateInterestRate) && (
               <div className="space-y-4">
                 <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">Important Dates</h4>
                 
                 <div className="space-y-3">
-                  {place.taxDueMonth && (
+                  {effectivePlace.taxDueMonth && (
                     <div className="flex items-center gap-3">
                       <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
                       <div className="min-w-0 flex-1">
                         <div className="text-sm font-medium">Tax Due Date</div>
                         <div className="text-sm text-muted-foreground">
-                          {formatTaxDate(place.taxDueMonth, place.taxDueDay)}
+                          {formatTaxDate(effectivePlace.taxDueMonth, effectivePlace.taxDueDay)}
                         </div>
                       </div>
                     </div>
                   )}
 
-                  {place.assessmentMonth && (
+                  {effectivePlace.assessmentMonth && (
                     <div className="flex items-center gap-3">
                       <Clock className="h-4 w-4 text-muted-foreground shrink-0" />
                       <div className="min-w-0 flex-1">
                         <div className="text-sm font-medium">Assessment Date</div>
                         <div className="text-sm text-muted-foreground">
-                          {formatTaxDate(place.assessmentMonth, place.assessmentDay)}
+                          {formatTaxDate(effectivePlace.assessmentMonth, effectivePlace.assessmentDay)}
                         </div>
                       </div>
                     </div>
                   )}
 
-                  {place.lateInterestRate && (
+                  {effectivePlace.lateInterestRate && (
                     <div className="flex items-center gap-3">
                       <Percent className="h-4 w-4 text-muted-foreground shrink-0" />
                       <div className="min-w-0 flex-1">
                         <div className="text-sm font-medium">Late Interest Rate</div>
                         <div className="text-sm text-muted-foreground">
-                          {formatPercentage(Number(place.lateInterestRate))}
+                          {formatPercentage(Number(effectivePlace.lateInterestRate))}
                         </div>
                       </div>
                     </div>
                   )}
 
-                  {place.millRate && (
+                  {effectivePlace.millRate && (
                     <div className="flex items-center gap-3">
                       <DollarSign className="h-4 w-4 text-muted-foreground shrink-0" />
                       <div className="min-w-0 flex-1">
                         <div className="text-sm font-medium">Mill Rate</div>
                         <div className="text-sm text-muted-foreground">
-                          {place.millRate} mills
+                          {effectivePlace.millRate} mills
                         </div>
                       </div>
                     </div>
@@ -331,7 +333,7 @@ export function PropertyTaxInfo({ place, property, propertyName, onPropertyUpdat
             )}
 
             {/* Notes */}
-            {place.taxNotes && (
+            {effectivePlace.taxNotes && (
               <div className="space-y-4 md:col-span-2 lg:col-span-1">
                 <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">Additional Notes</h4>
                 
@@ -340,7 +342,7 @@ export function PropertyTaxInfo({ place, property, propertyName, onPropertyUpdat
                   <div className="min-w-0 flex-1">
                     <div className="text-sm font-medium">Tax Notes</div>
                     <div className="text-sm text-muted-foreground whitespace-pre-wrap break-words">
-                      {place.taxNotes}
+                      {effectivePlace.taxNotes}
                     </div>
                   </div>
                 </div>
@@ -352,7 +354,7 @@ export function PropertyTaxInfo({ place, property, propertyName, onPropertyUpdat
             <Receipt className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
             <h3 className="text-lg font-semibold mb-2 text-muted-foreground">No tax information available</h3>
             <p className="text-muted-foreground text-sm">
-              Tax information for {place.name} has not been added yet.
+              Tax information for {effectivePlace.name} has not been added yet.
             </p>
           </div>
         )}
@@ -500,45 +502,45 @@ export function PropertyTaxInfo({ place, property, propertyName, onPropertyUpdat
 
 
             {/* Tax Calculation Section */}
-            {property && place && (property.assessedValue || property.marketValue) && place.millRate && (
+            {property && effectivePlace && (property.assessedValue || property.marketValue) && effectivePlace.millRate && (
               <div className="mt-6 pt-6 border-t border-border">
                 <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wide mb-4">Tax Calculation</h4>
                 
                 <div className="space-y-3">
-                  {property.assessedValue && place.millRate && (
+                  {property.assessedValue && effectivePlace.millRate && (
                     <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                       <div className="flex items-center gap-3">
                         <DollarSign className="h-4 w-4 text-muted-foreground shrink-0" />
                         <div>
                           <div className="text-sm font-medium">Estimated Taxes (Assessed Value)</div>
                           <div className="text-xs text-muted-foreground">
-                            ${property.assessedValue.toLocaleString()} × {place.millRate} mills
+                            ${property.assessedValue.toLocaleString()} × {effectivePlace.millRate} mills
                           </div>
                         </div>
                       </div>
                       <div className="text-right">
                         <div className="font-semibold">
-                          ${((property.assessedValue * place.millRate) / 1000).toFixed(2)}
+                          ${((property.assessedValue * effectivePlace.millRate) / 1000).toFixed(2)}
                         </div>
                         <div className="text-xs text-muted-foreground">per year</div>
                       </div>
                     </div>
                   )}
 
-                  {property.marketValue && place.millRate && (
+                  {property.marketValue && effectivePlace.millRate && (
                     <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                       <div className="flex items-center gap-3">
                         <TrendingUp className="h-4 w-4 text-muted-foreground shrink-0" />
                         <div>
                           <div className="text-sm font-medium">Estimated Taxes (Market Value)</div>
                           <div className="text-xs text-muted-foreground">
-                            ${property.marketValue.toLocaleString()} × {place.millRate} mills
+                            ${property.marketValue.toLocaleString()} × {effectivePlace.millRate} mills
                           </div>
                         </div>
                       </div>
                       <div className="text-right">
                         <div className="font-semibold">
-                          ${((property.marketValue * place.millRate) / 1000).toFixed(2)}
+                          ${((property.marketValue * effectivePlace.millRate) / 1000).toFixed(2)}
                         </div>
                         <div className="text-xs text-muted-foreground">per year</div>
                       </div>

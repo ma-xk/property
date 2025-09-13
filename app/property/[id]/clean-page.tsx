@@ -558,7 +558,6 @@ export default function PropertyDetailsPage() {
             </CardHeader>
             <CardContent>
               <UnifiedMap 
-                propertyId={propertyId}
                 properties={[{
                   id: property.id,
                   name: property.name || null,

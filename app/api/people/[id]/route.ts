@@ -36,59 +36,63 @@ export async function GET(
         userId: session.user.id
       },
       include: {
-        propertiesAsSeller: {
+        dealsAsSeller: {
           select: {
             id: true,
+            name: true,
+            dealStage: true,
+            dealStatus: true,
             streetAddress: true,
             city: true,
             state: true,
             zipCode: true,
-            name: true,
             purchasePrice: true,
             acres: true,
-            type: true,
             createdAt: true,
           }
         },
-        propertiesAsSellerAgent: {
+        dealsAsSellerAgent: {
           select: {
             id: true,
+            name: true,
+            dealStage: true,
+            dealStatus: true,
             streetAddress: true,
             city: true,
             state: true,
             zipCode: true,
-            name: true,
             purchasePrice: true,
             acres: true,
-            type: true,
             createdAt: true,
           }
         },
-        propertiesAsBuyerAgent: {
+        dealsAsBuyerAgent: {
           select: {
             id: true,
+            name: true,
+            dealStage: true,
+            dealStatus: true,
             streetAddress: true,
             city: true,
             state: true,
             zipCode: true,
-            name: true,
             purchasePrice: true,
             acres: true,
-            type: true,
             createdAt: true,
           }
         },
-        propertiesAsTitleCompany: {
+        dealsAsTitleCompany: {
           select: {
             id: true,
+            name: true,
+            dealStage: true,
+            dealStatus: true,
             streetAddress: true,
             city: true,
             state: true,
             zipCode: true,
-            name: true,
             purchasePrice: true,
             acres: true,
-            type: true,
             createdAt: true,
           }
         },
@@ -169,59 +173,63 @@ export async function PUT(
       },
       data: validatedData,
       include: {
-        propertiesAsSeller: {
+        dealsAsSeller: {
           select: {
             id: true,
+            name: true,
+            dealStage: true,
+            dealStatus: true,
             streetAddress: true,
             city: true,
             state: true,
             zipCode: true,
-            name: true,
             purchasePrice: true,
             acres: true,
-            type: true,
             createdAt: true,
           }
         },
-        propertiesAsSellerAgent: {
+        dealsAsSellerAgent: {
           select: {
             id: true,
+            name: true,
+            dealStage: true,
+            dealStatus: true,
             streetAddress: true,
             city: true,
             state: true,
             zipCode: true,
-            name: true,
             purchasePrice: true,
             acres: true,
-            type: true,
             createdAt: true,
           }
         },
-        propertiesAsBuyerAgent: {
+        dealsAsBuyerAgent: {
           select: {
             id: true,
+            name: true,
+            dealStage: true,
+            dealStatus: true,
             streetAddress: true,
             city: true,
             state: true,
             zipCode: true,
-            name: true,
             purchasePrice: true,
             acres: true,
-            type: true,
             createdAt: true,
           }
         },
-        propertiesAsTitleCompany: {
+        dealsAsTitleCompany: {
           select: {
             id: true,
+            name: true,
+            dealStage: true,
+            dealStatus: true,
             streetAddress: true,
             city: true,
             state: true,
             zipCode: true,
-            name: true,
             purchasePrice: true,
             acres: true,
-            type: true,
             createdAt: true,
           }
         },

@@ -30,7 +30,7 @@ interface CleanPropertyFormProps {
   showCard?: boolean
 }
 
-export function ComprehensivePropertyForm({ onSuccess, onCancel, showCard = true }: CleanPropertyFormProps) {
+export function CleanPropertyForm({ onSuccess, onCancel, showCard = true }: CleanPropertyFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")

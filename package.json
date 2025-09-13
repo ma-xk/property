@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "postinstall": "prisma generate",
-    "seed": "ts-node --esm scripts/seed-properties.ts"
+    "seed": "ts-node --esm scripts/seed-properties.ts",
+    "migrate-properties-to-deals": "ts-node --esm scripts/migrate-properties-to-deals.ts",
+    "fix-property-places": "ts-node --esm scripts/fix-property-places.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.10.0",

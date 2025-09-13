@@ -289,9 +289,20 @@ This project is licensed under the MIT License.
 - ✅ **Smart Property Creation** - Streamlined property creation with state/county/place type dropdowns, automatic hierarchical place creation, and intelligent data validation
 - ✅ **Financial Analytics** - Monitor purchase prices, earnest money, comprehensive closing costs breakdown, and investment totals with professional currency formatting
 
+**💼 Deal Pipeline & Transaction Management**
+- ✅ **Complete Deal Pipeline System** - Full-featured deal tracking from initial lead through closing with comprehensive stage management (Lead → Under Contract → Due Diligence → Closing → Won/Lost)
+- ✅ **Deal-to-Property Promotion** - Seamless workflow to promote successful deals (WON stage) into managed properties with automatic data transfer and relationship linking
+- ✅ **Comprehensive Deal Financials** - Track asking prices, offer prices, earnest money, estimated closing costs, purchase prices, and detailed closing cost breakdowns
+- ✅ **Advanced Deal Relationships** - Automatic creation and linking of sellers, buyer agents, seller agents, and title companies with intelligent person management
+- ✅ **Bulk Deal Promotion** - Efficient bulk promotion of multiple successful deals to properties with progress tracking and error handling
+- ✅ **Deal Stage Analytics** - Visual pipeline analytics showing deal distribution across stages with real-time statistics and progress tracking
+- ✅ **Deal Search & Filtering** - Advanced filtering by deal stage, status, location, and financial criteria with real-time search capabilities
+- ✅ **Deal Promotion Dialog** - Detailed promotion confirmation with comprehensive deal summary, missing data warnings, and clear action items
+
 **👥 Contact & Relationship Management**
 - ✅ **Advanced Contact Management** - Track people (agents, sellers, buyers, title companies) with roles, contact info, companies, and automatic property relationship linking
 - ✅ **Relationship Management** - Advanced linking system connecting properties to people (sellers, agents, title companies) and places with referential integrity
+- ✅ **Automatic Person Creation** - Intelligent person creation from deal data with upsert functionality to prevent duplicates
 
 **🏛️ Municipal & Location Management**
 - ✅ **Hierarchical Place Management** - Manage places with STATE/COUNTY/TOWN-UT-CITY hierarchy, comprehensive municipal information including tax office details, zoning office contacts, code enforcement officers, and plumbing inspector information
@@ -317,7 +328,10 @@ This project is licensed under the MIT License.
 - ✅ **Multi-Layer Data Visualization** - Toggleable layers for property markers, parcel boundaries, LUPC zoning overlays, and wetlands data with real-time loading states and feature counts
 - ✅ **Advanced Parcel Data Integration** - Live integration with Maine GeoLibrary services providing accurate parcel boundaries, detailed property information (Map/Lot, State ID, Town, County, area, perimeter), and automatic geocoding
 - ✅ **LUPC Zoning Overlays** - Specialized zoning visualization for unorganized territories with distinct styling, detailed popup information, and zone classification data
-- ✅ **National Wetlands Inventory Integration** - Real-time wetlands data from USFWS with comprehensive wetland classification, area calculations, and official NWI styling matching government standards
+- ✅ **Enhanced National Wetlands Inventory Integration** - Advanced wetlands mapping with comprehensive USFWS integration, detailed classification system, and sophisticated subsystem differentiation
+- ✅ **Advanced Wetlands Classification System** - Detailed wetland type classification with subsystem-specific styling (PEM1/PEM2, PFO1/PFO2/PFO3, PSS1/PSS2, PUB1/PUB2, PUS1/PUS2, E1/E2, M1/M2, R1/R2/R3/R4/R5)
+- ✅ **Comprehensive Wetlands Popups** - Rich wetland information including classification codes, subsystem descriptions, area calculations, regulatory notes, and detailed ecosystem characteristics
+- ✅ **Enhanced Wetlands Legend** - Complete visual legend showing all wetland subsystem classifications with color coding and detailed descriptions
 - ✅ **Intelligent Map Bounds** - Automatic bounds calculation that adapts to single property (detailed view) vs. multi-property (overview) scenarios with appropriate zoom levels and padding
 - ✅ **Interactive Popups & Details** - Rich popup information for properties (address, purchase price, status, parcel count), parcels (boundary details, measurements), and wetlands (classification codes, area, system types)
 - ✅ **Responsive Layer Controls** - User-friendly layer toggle system with loading states, feature counts, and disabled states for unavailable data
@@ -331,8 +345,8 @@ This project is licensed under the MIT License.
 - ✅ **Municipality-Level Insights** - Granular analysis of municipal tax rates with automatic mill rate population for new properties
 
 **🔍 Search & Navigation**
-- ✅ **Global Search & Navigation** - Real-time search across all properties, people, and places with intelligent filtering and quick navigation
-- ✅ **Multi-Dashboard Analytics** - Overview dashboard plus specialized dashboards for properties, people, places, taxes, and analytics with detailed statistics and visual summaries
+- ✅ **Global Search & Navigation** - Real-time search across all properties, people, places, and deals with intelligent filtering and quick navigation
+- ✅ **Multi-Dashboard Analytics** - Overview dashboard plus specialized dashboards for properties, people, places, taxes, deals, and analytics with detailed statistics and visual summaries
 
 **🌱 Data Management & Seeding**
 - ✅ **Comprehensive Maine Data Seeding** - Automated scripts to populate the database with complete Maine municipal data including all counties, municipalities, and historical mill rates

@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import * as dotenv from 'dotenv'
+import bcrypt from 'bcryptjs'
 
 // Load environment variables from .env.local
 dotenv.config({ path: '.env.local' })
@@ -143,26 +144,9 @@ const properties = [
     description: "Driveway, utilities, foundation (unknown state)",
     acres: 0.1,
     zoning: "High Density Residential",
-    purchasePrice: 5000,
-    earnestMoney: 500,
-    closingDate: new Date("2025-03-31"),
-    financingType: "Cash",
-    financingTerms: "n/a",
     balloonDueDate: null,
-    titleSettlementFee: 325,
-    titleExamination: 275,
-    ownersPolicyPremium: 100,
-    recordingFeesDeed: 24,
-    stateTaxStamps: 11,
-    eRecordingFee: 2.5,
     propertyTaxProration: 32.03,
-    realEstateCommission: 0,
-    // Legacy string fields (keeping for backward compatibility)
-    seller: "",
-    sellerAgent: "Mindy Braley",
-    buyerAgent: "Mindy Braley", 
-    titleCompany: "Gateway Title of Maine",
-    // New tax assessment fields
+    // Tax assessment fields
     assessedValue: 8200,
     marketValue: 8500,
     lastAssessmentDate: new Date("2024-04-01"),
@@ -177,25 +161,9 @@ const properties = [
     description: "Internal N Perley Brook frontage and direct ITS85 access",
     acres: 11,
     zoning: "Rural",
-    purchasePrice: 13500,
-    earnestMoney: 1000,
-    closingDate: new Date("2025-08-18"),
-    financingType: "Cash",
-    financingTerms: "n/a",
     balloonDueDate: null,
-    titleSettlementFee: 325,
-    titleExamination: 275,
-    ownersPolicyPremium: 100,
-    recordingFeesDeed: 24,
-    stateTaxStamps: 11,
-    eRecordingFee: 2.5,
     propertyTaxProration: null,
-    realEstateCommission: 0,
-    seller: "",
-    sellerAgent: "Sydney Dummond",
-    buyerAgent: "Sydney Dummond",
-    titleCompany: "Gateway Title of Maine",
-    // New tax assessment fields
+    // Tax assessment fields
     assessedValue: 27400,
     marketValue: 28000,
     lastAssessmentDate: new Date("2024-03-01"),
@@ -210,25 +178,9 @@ const properties = [
     description: "2fr variance, dual road frontage, directly across from four seasons trail association",
     acres: 0.5,
     zoning: "High Density Residential",
-    purchasePrice: 12500,
-    earnestMoney: 1000,
-    closingDate: new Date("2025-08-20"),
-    financingType: "Cash",
-    financingTerms: "n/a",
     balloonDueDate: null,
-    titleSettlementFee: 325,
-    titleExamination: 275,
-    ownersPolicyPremium: 100,
-    recordingFeesDeed: 24,
-    stateTaxStamps: 11,
-    eRecordingFee: 2.5,
     propertyTaxProration: null,
-    realEstateCommission: 0,
-    seller: "",
-    sellerAgent: "Robert Kieffer",
-    buyerAgent: "Mindy Braley",
-    titleCompany: "Gateway Title of Maine",
-    // New tax assessment fields
+    // Tax assessment fields
     assessedValue: 20500,
     marketValue: 21000,
     lastAssessmentDate: new Date("2024-04-01"),
@@ -243,29 +195,113 @@ const properties = [
     description: "End of winter street across from 94, whole culdesac control",
     acres: 2,
     zoning: "High Density Residential",
-    purchasePrice: 30000,
-    earnestMoney: 0,
-    closingDate: new Date("2025-08-21"),
-    financingType: "Seller Financing",
-    financingTerms: "$10K down, $20K financed at 6% interest, $250/month (P+I), 18-month term, ~$17.2K balloon at maturity",
     balloonDueDate: new Date("2027-02-21"),
+    propertyTaxProration: null,
+    // Tax assessment fields
+    assessedValue: 21100,
+    marketValue: 22000,
+    lastAssessmentDate: new Date("2024-04-01"),
+    assessmentNotes: "Large residential lot with cul-de-sac control premium"
+  }
+]
+
+// Deal data for the properties (transaction information moved to deals)
+const propertyDeals = [
+  {
+    propertyIndex: 0, // 5th Avenue Lot
+    name: "5th Avenue Lot Purchase",
+    description: "Purchase of residential lot with driveway and utilities",
+    dealStage: "WON",
+    dealStatus: "ACTIVE",
+    targetClosingDate: new Date("2025-03-31"),
+    dealNotes: "Cash purchase completed",
+    purchasePrice: 5000,
+    closingDate: new Date("2025-03-31"),
+    financingType: "Cash",
+    financingTerms: "n/a",
     titleSettlementFee: 325,
     titleExamination: 275,
     ownersPolicyPremium: 100,
     recordingFeesDeed: 24,
     stateTaxStamps: 11,
     eRecordingFee: 2.5,
-    propertyTaxProration: null,
+    realEstateCommission: 0,
+    seller: "",
+    sellerAgent: "Mindy Braley",
+    buyerAgent: "Mindy Braley", 
+    titleCompany: "Gateway Title of Maine"
+  },
+  {
+    propertyIndex: 1, // Perley Brook Land
+    name: "Perley Brook Land Purchase",
+    description: "Purchase of rural land with road frontage",
+    dealStage: "WON",
+    dealStatus: "ACTIVE",
+    targetClosingDate: new Date("2025-08-18"),
+    dealNotes: "Cash purchase completed",
+    purchasePrice: 13500,
+    closingDate: new Date("2025-08-18"),
+    financingType: "Cash",
+    financingTerms: "n/a",
+    titleSettlementFee: 325,
+    titleExamination: 275,
+    ownersPolicyPremium: 100,
+    recordingFeesDeed: 24,
+    stateTaxStamps: 11,
+    eRecordingFee: 2.5,
+    realEstateCommission: 0,
+    seller: "",
+    sellerAgent: "Sydney Dummond",
+    buyerAgent: "Sydney Dummond",
+    titleCompany: "Gateway Title of Maine"
+  },
+  {
+    propertyIndex: 2, // Winter Street Lot 94
+    name: "Winter Street Lot 94 Purchase",
+    description: "Purchase of residential lot with dual road frontage",
+    dealStage: "WON",
+    dealStatus: "ACTIVE",
+    targetClosingDate: new Date("2025-08-20"),
+    dealNotes: "Cash purchase completed",
+    purchasePrice: 12500,
+    closingDate: new Date("2025-08-20"),
+    financingType: "Cash",
+    financingTerms: "n/a",
+    titleSettlementFee: 325,
+    titleExamination: 275,
+    ownersPolicyPremium: 100,
+    recordingFeesDeed: 24,
+    stateTaxStamps: 11,
+    eRecordingFee: 2.5,
+    realEstateCommission: 0,
+    seller: "",
+    sellerAgent: "Robert Kieffer",
+    buyerAgent: "Mindy Braley",
+    titleCompany: "Gateway Title of Maine"
+  },
+  {
+    propertyIndex: 3, // Winter Street Lot 45
+    name: "Winter Street Lot 45 Purchase",
+    description: "Purchase of large residential lot with seller financing",
+    dealStage: "WON",
+    dealStatus: "ACTIVE",
+    targetClosingDate: new Date("2025-08-21"),
+    dealNotes: "Seller financing deal completed",
+    purchasePrice: 30000,
+    closingDate: new Date("2025-08-21"),
+    financingType: "Seller Financing",
+    financingTerms: "$10K down, $20K financed at 6% interest, $250/month (P+I), 18-month term, ~$17.2K balloon at maturity",
+    titleSettlementFee: 325,
+    titleExamination: 275,
+    ownersPolicyPremium: 100,
+    recordingFeesDeed: 24,
+    stateTaxStamps: 11,
+    eRecordingFee: 2.5,
     realEstateCommission: 900,
     seller: "FSBO (Joseph James Pelletier)",
     sellerAgent: "",
     buyerAgent: "Mindy Braley",
-    titleCompany: "Gateway Title of Maine",
-    // New tax assessment fields
-    assessedValue: 21100,
-    marketValue: 22000,
-    lastAssessmentDate: new Date("2024-04-01"),
-    assessmentNotes: "Large residential lot with cul-de-sac control premium"
+    titleCompany: "Gateway Title of Maine"
   }
 ]
 
@@ -624,6 +660,193 @@ const millRateHistories = [
   }
 ]
 
+// Sample deals data
+const deals = [
+  {
+    name: "Riverside Development Opportunity",
+    description: "Prime waterfront lot with development potential",
+    dealStage: "LEAD",
+    dealStatus: "ACTIVE",
+    targetClosingDate: new Date("2025-06-15"),
+    dealNotes: "Seller motivated, needs quick closing",
+    streetAddress: "123 River Road",
+    city: "Madawaska",
+    state: "ME",
+    zipCode: "04756",
+    county: "Aroostook",
+    placeType: "TOWN",
+    acres: 2.5,
+    zoning: "Commercial",
+    askingPrice: 45000,
+    offerPrice: 40000,
+    earnestMoney: 2000,
+    estimatedClosingCosts: 2500,
+    financingTerms: "Cash offer preferred",
+    financingType: "Cash",
+    seller: "Riverside Development LLC",
+    sellerAgent: "Sydney Dummond",
+    buyerAgent: "Mindy Braley",
+    titleCompany: "Gateway Title of Maine"
+  },
+  {
+    name: "Downtown Office Building",
+    description: "Historic downtown building with rental income potential",
+    dealStage: "UNDER_CONTRACT",
+    dealStatus: "ACTIVE",
+    targetClosingDate: new Date("2025-04-30"),
+    dealNotes: "Under contract, inspection period ending soon",
+    streetAddress: "456 Main Street",
+    city: "Fort Kent",
+    state: "ME",
+    zipCode: "04743",
+    county: "Aroostook",
+    placeType: "TOWN",
+    acres: 0.3,
+    zoning: "Commercial",
+    askingPrice: 125000,
+    offerPrice: 115000,
+    earnestMoney: 5000,
+    estimatedClosingCosts: 3500,
+    purchasePrice: 115000,
+    closingDate: new Date("2025-04-30"),
+    financingTerms: "Conventional loan, 20% down",
+    financingType: "Conventional",
+    titleSettlementFee: 325,
+    titleExamination: 275,
+    ownersPolicyPremium: 100,
+    recordingFeesDeed: 24,
+    stateTaxStamps: 11,
+    eRecordingFee: 2.5,
+    realEstateCommission: 3450,
+    seller: "Downtown Properties Inc",
+    sellerAgent: "Robert Kieffer",
+    buyerAgent: "Mindy Braley",
+    titleCompany: "Gateway Title of Maine"
+  },
+  {
+    name: "Rural Farm Land",
+    description: "Large agricultural parcel with barn and outbuildings",
+    dealStage: "DUE_DILIGENCE",
+    dealStatus: "ACTIVE",
+    targetClosingDate: new Date("2025-05-20"),
+    dealNotes: "Environmental assessment in progress",
+    streetAddress: "789 Farm Road",
+    city: "Madawaska",
+    state: "ME",
+    zipCode: "04756",
+    county: "Aroostook",
+    placeType: "TOWN",
+    acres: 25,
+    zoning: "Agricultural",
+    askingPrice: 85000,
+    offerPrice: 75000,
+    earnestMoney: 3000,
+    estimatedClosingCosts: 4000,
+    financingTerms: "Seller financing available",
+    financingType: "Seller Financing",
+    seller: "Johnson Family Trust",
+    sellerAgent: "Sydney Dummond",
+    buyerAgent: "Mindy Braley",
+    titleCompany: "Gateway Title of Maine"
+  },
+  {
+    name: "Residential Development Lot",
+    description: "Subdivision lot ready for single family home",
+    dealStage: "CLOSING",
+    dealStatus: "ACTIVE",
+    targetClosingDate: new Date("2025-03-15"),
+    dealNotes: "Closing scheduled, all contingencies met",
+    streetAddress: "321 Subdivision Lane",
+    city: "Fort Kent",
+    state: "ME",
+    zipCode: "04743",
+    county: "Aroostook",
+    placeType: "TOWN",
+    acres: 0.75,
+    zoning: "Residential",
+    askingPrice: 35000,
+    offerPrice: 32000,
+    earnestMoney: 1500,
+    estimatedClosingCosts: 2000,
+    purchasePrice: 32000,
+    closingDate: new Date("2025-03-15"),
+    financingTerms: "Cash purchase",
+    financingType: "Cash",
+    titleSettlementFee: 325,
+    titleExamination: 275,
+    ownersPolicyPremium: 100,
+    recordingFeesDeed: 24,
+    stateTaxStamps: 11,
+    eRecordingFee: 2.5,
+    realEstateCommission: 960,
+    seller: "Subdivision Developers LLC",
+    sellerAgent: "Robert Kieffer",
+    buyerAgent: "Mindy Braley",
+    titleCompany: "Gateway Title of Maine"
+  },
+  {
+    name: "Commercial Strip Mall",
+    description: "Income-producing commercial property with multiple tenants",
+    dealStage: "WON",
+    dealStatus: "ACTIVE",
+    targetClosingDate: new Date("2025-01-15"),
+    dealNotes: "Successfully closed, now owned property",
+    streetAddress: "555 Business Boulevard",
+    city: "Madawaska",
+    state: "ME",
+    zipCode: "04756",
+    county: "Aroostook",
+    placeType: "TOWN",
+    acres: 1.2,
+    zoning: "Commercial",
+    askingPrice: 180000,
+    offerPrice: 165000,
+    earnestMoney: 8000,
+    estimatedClosingCosts: 5000,
+    purchasePrice: 165000,
+    closingDate: new Date("2025-01-15"),
+    financingTerms: "Commercial loan, 25% down",
+    financingType: "Commercial",
+    titleSettlementFee: 325,
+    titleExamination: 275,
+    ownersPolicyPremium: 100,
+    recordingFeesDeed: 24,
+    stateTaxStamps: 11,
+    eRecordingFee: 2.5,
+    realEstateCommission: 4950,
+    seller: "Commercial Realty Group",
+    sellerAgent: "Sydney Dummond",
+    buyerAgent: "Mindy Braley",
+    titleCompany: "Gateway Title of Maine"
+  },
+  {
+    name: "Waterfront Vacation Rental",
+    description: "Lakeside property with rental income potential",
+    dealStage: "LOST",
+    dealStatus: "CANCELLED",
+    targetClosingDate: new Date("2024-12-01"),
+    dealNotes: "Deal fell through due to financing issues",
+    streetAddress: "888 Lakeview Drive",
+    city: "Fort Kent",
+    state: "ME",
+    zipCode: "04743",
+    county: "Aroostook",
+    placeType: "TOWN",
+    acres: 1.5,
+    zoning: "Residential",
+    askingPrice: 95000,
+    offerPrice: 90000,
+    earnestMoney: 4000,
+    estimatedClosingCosts: 3000,
+    financingTerms: "Conventional loan, 15% down",
+    financingType: "Conventional",
+    seller: "Lake Properties LLC",
+    sellerAgent: "Robert Kieffer",
+    buyerAgent: "Mindy Braley",
+    titleCompany: "Gateway Title of Maine"
+  }
+]
+
 // Sample property valuation history data
 const propertyValuationHistories = [
   // 5th Avenue Lot valuation history
@@ -732,24 +955,44 @@ async function main() {
   console.log("🌱 Starting comprehensive seeding...")
 
   try {
-    // Find the specific user by email
-    const user = await prisma.user.findUnique({
+    // Find or create the specific user by email
+    let user = await prisma.user.findUnique({
       where: {
         email: "m@m.com"
       }
     })
 
     if (!user) {
-      throw new Error("No user found with email 'm@m.com'. Please make sure you have created an account with this email first.")
+      console.log("👤 Creating user with email 'm@m.com'...")
+      const hashedPassword = await bcrypt.hash("password123", 12)
+      user = await prisma.user.create({
+        data: {
+          email: "m@m.com",
+          name: "Demo User",
+          password: hashedPassword
+        }
+      })
+      console.log(`✅ Created user: ${user.email}`)
+    } else {
+      console.log(`📝 Found existing user: ${user.email}`)
+      // Update password if it's not hashed (for existing users)
+      if (user.password && !user.password.startsWith('$2')) {
+        console.log("🔐 Updating password hash for existing user...")
+        const hashedPassword = await bcrypt.hash("password123", 12)
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { password: hashedPassword }
+        })
+        console.log(`✅ Updated password hash for user: ${user.email}`)
+      }
     }
-
-    console.log(`📝 Found user: ${user.email}`)
 
     // Clean up existing sample data to avoid duplicates
     console.log("🗑️  Cleaning up existing sample data...")
     await prisma.propertyValuationHistory.deleteMany({ where: { userId: user.id } })
     await prisma.taxPayment.deleteMany({ where: { userId: user.id } })
     await prisma.property.deleteMany({ where: { userId: user.id } })
+    await prisma.deal.deleteMany({ where: { userId: user.id } })
     await prisma.person.deleteMany({ where: { userId: user.id } })
     // Note: We don't delete places here to preserve the comprehensive Maine data
 
@@ -872,39 +1115,104 @@ async function main() {
       console.log(`✅ Created person: ${person.name} (${person.role})`)
     }
 
-    // Create properties with relationships
+    // Create properties (simplified model)
     console.log(`🏠 Creating ${properties.length} properties...`)
     const createdProperties = new Map<string, any>()
     
     for (const propertyData of properties) {
-      // Find related place and people
+      // Find related place
       const place = createdPlaces.get(`${propertyData.city}-TOWN`)
-      const buyerAgent = createdPeople.get(propertyData.buyerAgent)
-      const sellerAgent = propertyData.sellerAgent ? createdPeople.get(propertyData.sellerAgent) : null
-      const titleCompany = createdPeople.get(propertyData.titleCompany)
-      
-      // Handle seller (special case for FSBO)
-      let seller = null
-      if (propertyData.seller && propertyData.seller.includes("Joseph James Pelletier")) {
-        seller = createdPeople.get("Joseph James Pelletier")
-      }
 
       const property = await prisma.property.create({
         data: {
           ...propertyData,
           userId: user.id,
           available: true,
-          // New relationship fields
           placeId: place?.id,
-          sellerId: seller?.id,
-          sellerAgentId: sellerAgent?.id,
-          buyerAgentId: buyerAgent?.id,
-          titleCompanyId: titleCompany?.id,
         }
       })
       const addressKey = `${property.streetAddress}, ${property.city}, ${property.state}`
       createdProperties.set(addressKey, property)
       console.log(`✅ Created property: ${addressKey} (Assessed: $${property.assessedValue}, Market: $${property.marketValue})`)
+    }
+
+    // Create deals for the properties (transaction data)
+    console.log(`🤝 Creating ${propertyDeals.length} property purchase deals...`)
+    const createdDeals = new Map<string, any>()
+    
+    for (const dealData of propertyDeals) {
+      // Get the corresponding property
+      const property = Array.from(createdProperties.values())[dealData.propertyIndex]
+      if (!property) {
+        console.log(`⚠️  Property not found for deal index ${dealData.propertyIndex}`)
+        continue
+      }
+      
+      // Find related place and people
+      const place = createdPlaces.get(`${property.city}-TOWN`)
+      const buyerAgent = createdPeople.get(dealData.buyerAgent)
+      const sellerAgent = dealData.sellerAgent ? createdPeople.get(dealData.sellerAgent) : null
+      const titleCompany = createdPeople.get(dealData.titleCompany)
+      
+      // Handle seller (special case for FSBO)
+      let seller = null
+      if (dealData.seller && dealData.seller.includes("Joseph James Pelletier")) {
+        seller = createdPeople.get("Joseph James Pelletier")
+      }
+
+      const deal = await prisma.deal.create({
+        data: {
+          name: dealData.name,
+          description: dealData.description,
+          dealStage: dealData.dealStage as any,
+          dealStatus: dealData.dealStatus as any,
+          targetClosingDate: dealData.targetClosingDate,
+          dealNotes: dealData.dealNotes,
+          
+          // Address fields (copy from property)
+          streetAddress: property.streetAddress,
+          city: property.city,
+          state: property.state,
+          zipCode: property.zipCode,
+          
+          // Property information (copy from property)
+          acres: property.acres,
+          zoning: property.zoning,
+          
+          // Deal financials
+          purchasePrice: dealData.purchasePrice,
+          closingDate: dealData.closingDate,
+          
+          // Financing details
+          financingTerms: dealData.financingTerms,
+          financingType: dealData.financingType,
+          
+          // Closing costs
+          titleSettlementFee: dealData.titleSettlementFee,
+          titleExamination: dealData.titleExamination,
+          ownersPolicyPremium: dealData.ownersPolicyPremium,
+          recordingFeesDeed: dealData.recordingFeesDeed,
+          stateTaxStamps: dealData.stateTaxStamps,
+          eRecordingFee: dealData.eRecordingFee,
+          realEstateCommission: dealData.realEstateCommission,
+          
+          // Relationships
+          sellerId: seller?.id,
+          sellerAgentId: sellerAgent?.id,
+          buyerAgentId: buyerAgent?.id,
+          titleCompanyId: titleCompany?.id,
+          placeId: place?.id,
+          
+          // Link to property (promoted deal)
+          promotedToPropertyId: property.id,
+          promotedAt: new Date(),
+          
+          userId: user.id
+        }
+      })
+      const dealKey = `${deal.name} - ${deal.dealStage}`
+      createdDeals.set(dealKey, deal)
+      console.log(`✅ Created deal: ${dealKey} (${deal.dealStatus}) - Promoted to property: ${property.name}`)
     }
 
     // Create tax payments
@@ -989,13 +1297,125 @@ async function main() {
       }
     }
 
+    // Create additional deals with relationships
+    console.log(`🤝 Creating ${deals.length} additional deals...`)
+    const additionalDeals = new Map<string, any>()
+    
+    for (const dealData of deals) {
+      // Find related place and people
+      const place = createdPlaces.get(`${dealData.city}-TOWN`)
+      const buyerAgent = createdPeople.get(dealData.buyerAgent)
+      const sellerAgent = dealData.sellerAgent ? createdPeople.get(dealData.sellerAgent) : null
+      const titleCompany = createdPeople.get(dealData.titleCompany)
+      
+      // Handle seller (create if not exists)
+      let seller = null
+      if (dealData.seller) {
+        seller = await prisma.person.upsert({
+          where: {
+            name_userId: {
+              name: dealData.seller,
+              userId: user.id
+            }
+          },
+          update: {},
+          create: {
+            name: dealData.seller,
+            userId: user.id
+          }
+        })
+      }
+
+      const deal = await prisma.deal.create({
+        data: {
+          name: dealData.name,
+          description: dealData.description,
+          dealStage: dealData.dealStage as any,
+          dealStatus: dealData.dealStatus as any,
+          targetClosingDate: dealData.targetClosingDate,
+          dealNotes: dealData.dealNotes,
+          
+          // Address fields
+          streetAddress: dealData.streetAddress,
+          city: dealData.city,
+          state: dealData.state,
+          zipCode: dealData.zipCode,
+          
+          // Property information
+          acres: dealData.acres,
+          zoning: dealData.zoning,
+          
+          // Deal financials
+          askingPrice: dealData.askingPrice,
+          offerPrice: dealData.offerPrice,
+          earnestMoney: dealData.earnestMoney,
+          estimatedClosingCosts: dealData.estimatedClosingCosts,
+          
+          // Purchase transaction details
+          purchasePrice: dealData.purchasePrice,
+          closingDate: dealData.closingDate,
+          
+          // Financing details
+          financingTerms: dealData.financingTerms,
+          financingType: dealData.financingType,
+          
+          // Closing costs
+          titleSettlementFee: dealData.titleSettlementFee,
+          titleExamination: dealData.titleExamination,
+          ownersPolicyPremium: dealData.ownersPolicyPremium,
+          recordingFeesDeed: dealData.recordingFeesDeed,
+          stateTaxStamps: dealData.stateTaxStamps,
+          eRecordingFee: dealData.eRecordingFee,
+          realEstateCommission: dealData.realEstateCommission,
+          
+          // Relationships
+          sellerId: seller?.id,
+          sellerAgentId: sellerAgent?.id,
+          buyerAgentId: buyerAgent?.id,
+          titleCompanyId: titleCompany?.id,
+          placeId: place?.id,
+          
+          userId: user.id
+        }
+      })
+      const dealKey = `${deal.name} - ${deal.dealStage}`
+      additionalDeals.set(dealKey, deal)
+      console.log(`✅ Created deal: ${dealKey} (${deal.dealStatus})`)
+    }
+
     console.log("🎉 Seeding completed successfully!")
     
     // Show summary
-    const totalInvestment = properties.reduce((sum, p) => sum + p.purchasePrice, 0)
-    const totalAcres = properties.reduce((sum, p) => sum + p.acres, 0)
+    const totalInvestment = propertyDeals.reduce((sum, d) => sum + (d.purchasePrice || 0), 0)
+    const totalAcres = properties.reduce((sum, p) => sum + (p.acres || 0), 0)
     const totalAssessedValue = properties.reduce((sum, p) => sum + (p.assessedValue || 0), 0)
     const totalMarketValue = properties.reduce((sum, p) => sum + (p.marketValue || 0), 0)
+    
+    // Deal statistics
+    const propertyDealStages = propertyDeals.reduce((acc, deal) => {
+      acc[deal.dealStage] = (acc[deal.dealStage] || 0) + 1
+      return acc
+    }, {} as Record<string, number>)
+    const propertyDealStatuses = propertyDeals.reduce((acc, deal) => {
+      acc[deal.dealStatus] = (acc[deal.dealStatus] || 0) + 1
+      return acc
+    }, {} as Record<string, number>)
+    const additionalDealStages = deals.reduce((acc, deal) => {
+      acc[deal.dealStage] = (acc[deal.dealStage] || 0) + 1
+      return acc
+    }, {} as Record<string, number>)
+    const additionalDealStatuses = deals.reduce((acc, deal) => {
+      acc[deal.dealStatus] = (acc[deal.dealStatus] || 0) + 1
+      return acc
+    }, {} as Record<string, number>)
+    
+    // Combine all deal stages and statuses
+    const allDealStages = { ...propertyDealStages, ...additionalDealStages }
+    const allDealStatuses = { ...propertyDealStatuses, ...additionalDealStatuses }
+    
+    const totalDealValue = deals.reduce((sum, d) => sum + (d.offerPrice || d.askingPrice || 0), 0)
+    const totalDealAcres = deals.reduce((sum, d) => sum + (d.acres || 0), 0)
+    
     console.log(`📊 Summary:`)
     console.log(`   👥 People created: ${people.length}`)
     console.log(`   🏘️  Places found: 4 (Maine, Aroostook, Madawaska, Fort Kent)`)
@@ -1005,6 +1425,13 @@ async function main() {
     console.log(`   🏞️  Total Acres: ${totalAcres} acres`)
     console.log(`   📈 Total Assessed Value: $${totalAssessedValue.toLocaleString()}`)
     console.log(`   📊 Total Market Value: $${totalMarketValue.toLocaleString()}`)
+    console.log(`   🤝 Deals created: ${propertyDeals.length + deals.length}`)
+    console.log(`      - Property Purchase Deals: ${propertyDeals.length} (promoted to properties)`)
+    console.log(`      - Active Deals: ${deals.length}`)
+    console.log(`      - Deal Stages: ${Object.entries(allDealStages).map(([stage, count]) => `${stage}: ${count}`).join(', ')}`)
+    console.log(`      - Deal Status: ${Object.entries(allDealStatuses).map(([status, count]) => `${status}: ${count}`).join(', ')}`)
+    console.log(`      - Total Deal Value: $${totalDealValue.toLocaleString()}`)
+    console.log(`      - Total Deal Acres: ${totalDealAcres} acres`)
     console.log(`   💸 Tax Payments created: ${taxPayments.length}`)
     console.log(`   📊 Mill Rate Histories created: ${millRateHistories.filter(m => m.placeKind !== 'COUNTY').length}`)
     console.log(`      - County mill rates: Skipped (already exist in comprehensive data)`)

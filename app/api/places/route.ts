@@ -73,9 +73,20 @@ export async function GET() {
             state: true,
             zipCode: true,
             name: true,
-            purchasePrice: true,
             acres: true,
             type: true,
+          }
+        },
+        deals: {
+          select: {
+            id: true,
+            name: true,
+            streetAddress: true,
+            city: true,
+            state: true,
+            zipCode: true,
+            purchasePrice: true,
+            acres: true,
           }
         },
         parent: {
@@ -109,7 +120,8 @@ export async function GET() {
         _count: {
           select: {
             properties: true,
-            children: true
+            children: true,
+            deals: true
           }
         }
       },
@@ -174,7 +186,6 @@ export async function POST(req: NextRequest) {
             state: true,
             zipCode: true,
             name: true,
-            purchasePrice: true,
             acres: true,
             type: true,
           }

@@ -23,16 +23,17 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatPropertyAddress } from "@/lib/utils"
 
-interface Property {
+interface Deal {
   id: string
+  name: string
+  dealStage: string
+  dealStatus: string
   streetAddress?: string
   city?: string
   state?: string
   zipCode?: string
-  name?: string
   purchasePrice?: number
   acres?: number
-  type?: string
   createdAt: string
 }
 
@@ -46,10 +47,10 @@ interface Person {
   notes?: string
   createdAt: string
   updatedAt: string
-  propertiesAsSeller: Property[]
-  propertiesAsSellerAgent: Property[]
-  propertiesAsBuyerAgent: Property[]
-  propertiesAsTitleCompany: Property[]
+  dealsAsSeller: Deal[]
+  dealsAsSellerAgent: Deal[]
+  dealsAsBuyerAgent: Deal[]
+  dealsAsTitleCompany: Deal[]
 }
 
 export default function PersonDetailPage() {
@@ -97,19 +98,19 @@ export default function PersonDetailPage() {
     })
   }
 
-  const getAllProperties = () => {
+  const getAllDeals = () => {
     if (!person) return []
     return [
-      ...person.propertiesAsSeller.map(p => ({ ...p, role: 'Seller' })),
-      ...person.propertiesAsSellerAgent.map(p => ({ ...p, role: 'Seller Agent' })),
-      ...person.propertiesAsBuyerAgent.map(p => ({ ...p, role: 'Buyer Agent' })),
-      ...person.propertiesAsTitleCompany.map(p => ({ ...p, role: 'Title Company' })),
+      ...person.dealsAsSeller.map(d => ({ ...d, role: 'Seller' })),
+      ...person.dealsAsSellerAgent.map(d => ({ ...d, role: 'Seller Agent' })),
+      ...person.dealsAsBuyerAgent.map(d => ({ ...d, role: 'Buyer Agent' })),
+      ...person.dealsAsTitleCompany.map(d => ({ ...d, role: 'Title Company' })),
     ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
   }
 
   const getTotalInvestment = () => {
-    return getAllProperties().reduce((total, property) => 
-      total + (Number(property.purchasePrice) || 0), 0
+    return getAllDeals().reduce((total, deal) => 
+      total + (Number(deal.purchasePrice) || 0), 0
     )
   }
 
@@ -139,7 +140,7 @@ export default function PersonDetailPage() {
     )
   }
 
-  const allProperties = getAllProperties()
+  const allDeals = getAllDeals()
 
   return (
     <div className="space-y-8">
@@ -157,7 +158,7 @@ export default function PersonDetailPage() {
               </h1>
               <div className="flex items-center text-muted-foreground mt-2">
                 <User className="h-5 w-5 mr-2" />
-                <span>{person.role || 'Contact'} • {allProperties.length} property relationship{allProperties.length !== 1 ? 's' : ''}</span>
+                <span>{person.role || 'Contact'} • {allDeals.length} deal relationship{allDeals.length !== 1 ? 's' : ''}</span>
               </div>
             </div>
             
@@ -259,10 +260,10 @@ export default function PersonDetailPage() {
         >
           <Card className="">
             <CardHeader className="pb-2">
-              <CardTitle className=" text-sm font-medium">Total Properties</CardTitle>
+              <CardTitle className=" text-sm font-medium">Total Deals</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold ">{allProperties.length}</div>
+              <div className="text-2xl font-bold ">{allDeals.length}</div>
             </CardContent>
           </Card>
 
@@ -271,7 +272,7 @@ export default function PersonDetailPage() {
               <CardTitle className=" text-sm font-medium">As Seller</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold ">{person.propertiesAsSeller.length}</div>
+              <div className="text-2xl font-bold ">{person.dealsAsSeller.length}</div>
             </CardContent>
           </Card>
 
@@ -281,7 +282,7 @@ export default function PersonDetailPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold ">
-                {person.propertiesAsSellerAgent.length + person.propertiesAsBuyerAgent.length}
+                {person.dealsAsSellerAgent.length + person.dealsAsBuyerAgent.length}
               </div>
             </CardContent>
           </Card>
@@ -304,50 +305,47 @@ export default function PersonDetailPage() {
         >
           <Card className="">
             <CardHeader>
-              <CardTitle className="">Related Properties</CardTitle>
+              <CardTitle className="">Related Deals</CardTitle>
             </CardHeader>
             <CardContent>
-              {allProperties.length === 0 ? (
+              {allDeals.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
-                  This person is not associated with any properties yet.
+                  This person is not associated with any deals yet.
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {allProperties.map((property) => (
+                  {allDeals.map((deal) => (
                     <div
-                      key={`${property.id}-${property.role}`}
+                      key={`${deal.id}-${deal.role}`}
                       className="flex items-center justify-between p-4 bg-muted rounded-lg hover:bg-accent transition-colors group cursor-pointer"
-                      onClick={() => router.push(`/property/${property.id}`)}
+                      onClick={() => router.push(`/deal/${deal.id}`)}
                     >
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
                           <h3 className=" font-semibold">
-                            {property.name || formatPropertyAddress(property)}
+                            {deal.name || formatPropertyAddress(deal)}
                           </h3>
                           <span className="px-2 py-1 bg-blue-500/20 text-blue-300 text-xs rounded-full">
-                            {property.role}
+                            {deal.role}
                           </span>
                         </div>
                         <div className="flex items-center gap-4 text-sm text-muted-foreground">
                           <div className="flex items-center gap-1">
                             <MapPin className="h-3 w-3" />
-                            {formatPropertyAddress(property)}
+                            {formatPropertyAddress(deal)}
                           </div>
-                          {property.type && (
-                            <div>{property.type}</div>
-                          )}
-                          {property.acres && (
-                            <div>{Number(property.acres)} acres</div>
+                          {deal.acres && (
+                            <div>{Number(deal.acres)} acres</div>
                           )}
                         </div>
                       </div>
                       <div className="flex items-center gap-4 text-right">
                         <div>
                           <div className=" font-semibold">
-                            {formatCurrency(property.purchasePrice)}
+                            {formatCurrency(deal.purchasePrice)}
                           </div>
                           <div className="text-xs text-muted-foreground">
-                            {formatDate(property.createdAt)}
+                            {formatDate(deal.createdAt)}
                           </div>
                         </div>
                         <Button
@@ -356,7 +354,7 @@ export default function PersonDetailPage() {
                           className="opacity-0 group-hover:opacity-100 transition-opacity border-blue-400 text-blue-400 hover:bg-blue-400 hover:"
                           onClick={(e) => {
                             e.stopPropagation()
-                            router.push(`/property/${property.id}`)
+                            router.push(`/deal/${deal.id}`)
                           }}
                         >
                           <Eye className="h-4 w-4" />

@@ -15,7 +15,8 @@ import {
   ChevronUp,
   Receipt,
   BarChart3,
-  Map
+  Map,
+  TrendingUp
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -49,6 +50,7 @@ import {
 import { CreatePropertyForm } from "@/components/create-property-form"
 import { CreatePersonForm } from "@/components/create-person-form"
 import { CreatePlaceForm } from "@/components/create-place-form"
+import { CreateDealForm } from "@/components/create-deal-form"
 import { Breadcrumb } from "@/components/breadcrumb"
 
 // Menu items for the main navigation
@@ -57,6 +59,11 @@ const items = [
     title: "Dashboard",
     url: "/",
     icon: Home,
+  },
+  {
+    title: "Deals",
+    url: "/deals",
+    icon: TrendingUp,
   },
   {
     title: "Properties",
@@ -93,9 +100,14 @@ const items = [
 // Quick action items
 const quickActions = [
   {
+    title: "Add Deal",
+    action: "deal",
+    icon: TrendingUp,
+  },
+  {
     title: "Add Property",
     action: "property",
-    icon: Plus,
+    icon: Building2,
   },
   {
     title: "Add Person",
@@ -249,6 +261,15 @@ function AppSidebar() {
             <DialogTitle>Add New Place</DialogTitle>
           </DialogHeader>
           <CreatePlaceForm onSuccess={handleFormSuccess} onCancel={handleModalClose} showCard={false} />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={openModal === "deal"} onOpenChange={(open) => !open && handleModalClose()}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Add New Deal</DialogTitle>
+          </DialogHeader>
+          <CreateDealForm onSuccess={handleFormSuccess} onCancel={handleModalClose} showCard={false} />
         </DialogContent>
       </Dialog>
     </Sidebar>

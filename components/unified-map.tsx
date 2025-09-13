@@ -104,6 +104,7 @@ interface LayerConfig {
 
 interface UnifiedMapProps {
   propertyId?: string
+  properties?: Property[]
   showAllProperties?: boolean
   layers?: Partial<LayerConfig>
   height?: string
@@ -116,6 +117,7 @@ interface UnifiedMapProps {
 
 export function UnifiedMap({ 
   propertyId, 
+  properties: externalProperties,
   showAllProperties = false, 
   layers: initialLayers = {},
   height = "400px",
@@ -175,11 +177,27 @@ export function UnifiedMap({
         
         const promises = []
         
-        // Always fetch properties data for layer toggling capability
-        promises.push(fetchPropertiesWithLocations())
+        // Use external properties if provided, otherwise fetch them
+        if (externalProperties && externalProperties.length > 0) {
+          // Convert external properties to PropertyWithLocation format
+          const propertiesWithLocations: PropertyWithLocation[] = externalProperties.map(prop => ({
+            ...prop,
+            coordinates: null, // Will be populated if parcel data is available
+            parcelData: null
+          }))
+          setProperties(propertiesWithLocations)
+          
+          // If we have a propertyId, fetch parcel data which will provide coordinates
+          if (propertyId) {
+            promises.push(fetchParcelData(propertyId))
+          }
+        } else {
+          // Fetch properties data for layer toggling capability
+          promises.push(fetchPropertiesWithLocations())
+        }
         
-        // Fetch parcel data if property ID provided
-        if (propertyId) {
+        // Fetch parcel data if property ID provided (only if not already fetched above)
+        if (propertyId && (!externalProperties || externalProperties.length === 0)) {
           promises.push(fetchParcelData(propertyId))
         }
         
@@ -193,7 +211,7 @@ export function UnifiedMap({
     }
 
     fetchInitialData()
-  }, [propertyId, showAllProperties])
+  }, [propertyId, showAllProperties, externalProperties])
 
   // Fetch parcel data for dashboard after properties are loaded
   useEffect(() => {

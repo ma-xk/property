@@ -27,10 +27,6 @@ export async function GET() {
         state: true,
         zipCode: true,
         name: true,
-        purchasePrice: true,
-        closingDate: true,
-
-        stateTaxStamps: true,
         propertyTaxProration: true,
         assessedValue: true,
         marketValue: true,
@@ -43,6 +39,28 @@ export async function GET() {
             millRate: true,
           }
         },
+        createdAt: true,
+        updatedAt: true,
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    })
+
+    // Fetch all deals with tax-related fields for the same user
+    const deals = await prisma.deal.findMany({
+      where: {
+        userId: session.user.id
+      },
+      select: {
+        id: true,
+        name: true,
+        streetAddress: true,
+        city: true,
+        state: true,
+        zipCode: true,
+        stateTaxStamps: true,
+        promotedToPropertyId: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -70,17 +88,17 @@ export async function GET() {
       .filter(p => p.estimatedAnnualTaxes)
       .reduce((sum, p) => sum + Number(p.estimatedAnnualTaxes || 0), 0)
     
-    const totalStateTaxStamps = properties
-      .filter(p => p.stateTaxStamps)
-      .reduce((sum, p) => sum + Number(p.stateTaxStamps || 0), 0)
+    const totalStateTaxStamps = deals
+      .filter(d => d.stateTaxStamps)
+      .reduce((sum, d) => sum + Number(d.stateTaxStamps || 0), 0)
     
     const totalPropertyTaxProration = properties
       .filter(p => p.propertyTaxProration)
       .reduce((sum, p) => sum + Number(p.propertyTaxProration || 0), 0)
 
     const propertiesWithTaxData = propertiesWithEstimatedTaxes.filter(p => 
-      p.estimatedAnnualTaxes || p.stateTaxStamps || p.propertyTaxProration
-    ).length
+      p.estimatedAnnualTaxes || p.propertyTaxProration
+    ).length + deals.filter(d => d.stateTaxStamps).length
 
     // Group properties by state and place for regional analysis
     const propertiesByState = propertiesWithEstimatedTaxes.reduce((acc, property) => {
@@ -110,17 +128,47 @@ export async function GET() {
       
       acc[state].count++
       acc[state].totalEstimatedTaxes += Number(property.estimatedAnnualTaxes || 0)
-      acc[state].totalStateTaxStamps += Number(property.stateTaxStamps || 0)
       acc[state].totalPropertyTaxProration += Number(property.propertyTaxProration || 0)
       
       acc[state].places[placeName].count++
       acc[state].places[placeName].totalEstimatedTaxes += Number(property.estimatedAnnualTaxes || 0)
-      acc[state].places[placeName].totalStateTaxStamps += Number(property.stateTaxStamps || 0)
       acc[state].places[placeName].totalPropertyTaxProration += Number(property.propertyTaxProration || 0)
       acc[state].places[placeName].properties.push(property)
       
       return acc
     }, {} as Record<string, any>)
+
+    // Add state tax stamps from deals to the regional analysis
+    deals.forEach(deal => {
+      if (deal.stateTaxStamps) {
+        const state = deal.state || 'Unknown'
+        const placeName = deal.city || 'Unknown Place'
+        
+        if (!propertiesByState[state]) {
+          propertiesByState[state] = {
+            count: 0,
+            totalEstimatedTaxes: 0,
+            totalStateTaxStamps: 0,
+            totalPropertyTaxProration: 0,
+            places: {}
+          }
+        }
+        
+        if (!propertiesByState[state].places[placeName]) {
+          propertiesByState[state].places[placeName] = {
+            count: 0,
+            totalEstimatedTaxes: 0,
+            totalStateTaxStamps: 0,
+            totalPropertyTaxProration: 0,
+            millRate: null,
+            properties: []
+          }
+        }
+        
+        propertiesByState[state].totalStateTaxStamps += Number(deal.stateTaxStamps)
+        propertiesByState[state].places[placeName].totalStateTaxStamps += Number(deal.stateTaxStamps)
+      }
+    })
 
     return NextResponse.json({
       summary: {

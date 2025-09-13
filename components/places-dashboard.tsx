@@ -35,6 +35,17 @@ interface Property {
   createdAt: string
 }
 
+interface Deal {
+  id: string
+  name: string
+  streetAddress?: string
+  city?: string
+  state?: string
+  zipCode?: string
+  purchasePrice?: number
+  acres?: number
+}
+
 interface Place {
   id: string
   name: string
@@ -45,6 +56,7 @@ interface Place {
   createdAt: string
   updatedAt: string
   properties: Property[]
+  deals: Deal[]
   parent?: {
     id: string
     name: string
@@ -68,6 +80,7 @@ interface Place {
   _count: {
     properties: number
     children: number
+    deals: number
   }
 }
 
@@ -109,16 +122,16 @@ export function PlacesDashboard() {
   // Group places by hierarchy level
   const states = filteredPlaces.filter(place => place.kind === "STATE")
   
-  // Get towns/cities with properties first
+  // Get towns/cities with properties or deals first
   const townsCities = filteredPlaces.filter(place => 
-    ["TOWN", "UT", "CITY"].includes(place.kind) && place._count.properties > 0
+    ["TOWN", "UT", "CITY"].includes(place.kind) && (place._count.properties > 0 || place._count.deals > 0)
   )
   
-  // Only show counties that have towns/cities with properties
+  // Only show counties that have towns/cities with properties or deals
   const counties = filteredPlaces.filter(place => {
     if (place.kind !== "COUNTY") return false
     
-    // Check if any towns/cities with properties belong to this county
+    // Check if any towns/cities with properties or deals belong to this county
     return townsCities.some(town => town.county?.id === place.id)
   })
 
@@ -140,15 +153,23 @@ export function PlacesDashboard() {
   }
 
   const getTotalInvestment = (place: Place) => {
-    return place.properties.reduce((total, property) => 
+    const propertyInvestment = place.properties.reduce((total, property) => 
       total + (Number(property.purchasePrice) || 0), 0
     )
+    const dealInvestment = place.deals.reduce((total, deal) => 
+      total + (Number(deal.purchasePrice) || 0), 0
+    )
+    return propertyInvestment + dealInvestment
   }
 
   const getTotalAcres = (place: Place) => {
-    return place.properties.reduce((total, property) => 
+    const propertyAcres = place.properties.reduce((total, property) => 
       total + (Number(property.acres) || 0), 0
     )
+    const dealAcres = place.deals.reduce((total, deal) => 
+      total + (Number(deal.acres) || 0), 0
+    )
+    return propertyAcres + dealAcres
   }
 
   const getPlaceTypeLabel = (kind: string) => {
@@ -209,11 +230,11 @@ export function PlacesDashboard() {
 
         <Card className="">
           <CardHeader className="pb-2">
-            <CardTitle className=" text-sm font-medium">Total Properties</CardTitle>
+            <CardTitle className=" text-sm font-medium">Total Properties & Deals</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold ">
-              {places.reduce((total, place) => total + place._count.properties, 0)}
+              {places.reduce((total, place) => total + place._count.properties + place._count.deals, 0)}
             </div>
           </CardContent>
         </Card>
@@ -477,7 +498,7 @@ export function PlacesDashboard() {
                           )}
 
                           {/* Stats */}
-                          {place.properties.length > 0 && (
+                          {(place.properties.length > 0 || place._count.deals > 0) && (
                             <div className="grid grid-cols-2 gap-4 text-sm">
                               <div className="space-y-1">
                                 <div className="text-muted-foreground400">Total Investment</div>
@@ -495,7 +516,7 @@ export function PlacesDashboard() {
                           )}
 
                           {/* Property Types */}
-                          {place.properties.length > 0 && (
+                          {(place.properties.length > 0 || place._count.deals > 0) && (
                             <div className="space-y-1">
                               <div className="text-muted-foreground400 text-xs">Property Types</div>
                               <div className="flex flex-wrap gap-1">

@@ -21,16 +21,17 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 
-interface Property {
+interface Deal {
   id: string
+  name: string
+  dealStage: string
+  dealStatus: string
   streetAddress?: string
   city?: string
   state?: string
   zipCode?: string
-  name?: string
   purchasePrice?: number
   acres?: number
-  type?: string
   createdAt: string
 }
 
@@ -44,10 +45,10 @@ interface Person {
   notes?: string
   createdAt: string
   updatedAt: string
-  propertiesAsSeller: Property[]
-  propertiesAsSellerAgent: Property[]
-  propertiesAsBuyerAgent: Property[]
-  propertiesAsTitleCompany: Property[]
+  dealsAsSeller: Deal[]
+  dealsAsSellerAgent: Deal[]
+  dealsAsBuyerAgent: Deal[]
+  dealsAsTitleCompany: Deal[]
 }
 
 export function PeopleDashboard() {
@@ -91,21 +92,21 @@ export function PeopleDashboard() {
     })
   }
 
-  const getTotalPropertiesCount = (person: Person) => {
-    return person.propertiesAsSeller.length + 
-           person.propertiesAsSellerAgent.length + 
-           person.propertiesAsBuyerAgent.length + 
-           person.propertiesAsTitleCompany.length
+  const getTotalDealsCount = (person: Person) => {
+    return person.dealsAsSeller.length + 
+           person.dealsAsSellerAgent.length + 
+           person.dealsAsBuyerAgent.length + 
+           person.dealsAsTitleCompany.length
   }
 
   const getPrimaryRole = (person: Person) => {
     if (person.role) return person.role
     
-    // Infer role from property relationships
-    if (person.propertiesAsSeller.length > 0) return "Seller"
-    if (person.propertiesAsSellerAgent.length > 0) return "Seller Agent"
-    if (person.propertiesAsBuyerAgent.length > 0) return "Buyer Agent"
-    if (person.propertiesAsTitleCompany.length > 0) return "Title Company"
+    // Infer role from deal relationships
+    if (person.dealsAsSeller.length > 0) return "Seller"
+    if (person.dealsAsSellerAgent.length > 0) return "Seller Agent"
+    if (person.dealsAsBuyerAgent.length > 0) return "Buyer Agent"
+    if (person.dealsAsTitleCompany.length > 0) return "Title Company"
     
     return "Contact"
   }
@@ -151,8 +152,8 @@ export function PeopleDashboard() {
           <CardContent>
             <div className="text-2xl font-bold ">
               {people.filter(p => p.role?.toLowerCase().includes('agent') || 
-                p.propertiesAsSellerAgent.length > 0 || 
-                p.propertiesAsBuyerAgent.length > 0).length}
+                p.dealsAsSellerAgent.length > 0 || 
+                p.dealsAsBuyerAgent.length > 0).length}
             </div>
           </CardContent>
         </Card>
@@ -163,7 +164,7 @@ export function PeopleDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold ">
-              {people.filter(p => p.propertiesAsSeller.length > 0).length}
+              {people.filter(p => p.dealsAsSeller.length > 0).length}
             </div>
           </CardContent>
         </Card>
@@ -239,7 +240,7 @@ export function PeopleDashboard() {
                         </div>
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        {getTotalPropertiesCount(person)} properties
+                        {getTotalDealsCount(person)} deals
                       </div>
                     </div>
                   </CardHeader>
@@ -266,26 +267,26 @@ export function PeopleDashboard() {
                       )}
                     </div>
 
-                    {/* Property Involvement Summary */}
+                    {/* Deal Involvement Summary */}
                     <div className="space-y-1 text-xs">
-                      {person.propertiesAsSeller.length > 0 && (
+                      {person.dealsAsSeller.length > 0 && (
                         <div className="text-muted-foreground">
-                          Seller in {person.propertiesAsSeller.length} transaction{person.propertiesAsSeller.length !== 1 ? 's' : ''}
+                          Seller in {person.dealsAsSeller.length} deal{person.dealsAsSeller.length !== 1 ? 's' : ''}
                         </div>
                       )}
-                      {person.propertiesAsSellerAgent.length > 0 && (
+                      {person.dealsAsSellerAgent.length > 0 && (
                         <div className="text-muted-foreground">
-                          Seller agent for {person.propertiesAsSellerAgent.length} property{person.propertiesAsSellerAgent.length !== 1 ? 'ies' : 'y'}
+                          Seller agent for {person.dealsAsSellerAgent.length} deal{person.dealsAsSellerAgent.length !== 1 ? 's' : ''}
                         </div>
                       )}
-                      {person.propertiesAsBuyerAgent.length > 0 && (
+                      {person.dealsAsBuyerAgent.length > 0 && (
                         <div className="text-muted-foreground">
-                          Buyer agent for {person.propertiesAsBuyerAgent.length} property{person.propertiesAsBuyerAgent.length !== 1 ? 'ies' : 'y'}
+                          Buyer agent for {person.dealsAsBuyerAgent.length} deal{person.dealsAsBuyerAgent.length !== 1 ? 's' : ''}
                         </div>
                       )}
-                      {person.propertiesAsTitleCompany.length > 0 && (
+                      {person.dealsAsTitleCompany.length > 0 && (
                         <div className="text-muted-foreground">
-                          Title company for {person.propertiesAsTitleCompany.length} property{person.propertiesAsTitleCompany.length !== 1 ? 'ies' : 'y'}
+                          Title company for {person.dealsAsTitleCompany.length} deal{person.dealsAsTitleCompany.length !== 1 ? 's' : ''}
                         </div>
                       )}
                     </div>

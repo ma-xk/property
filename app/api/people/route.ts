@@ -35,44 +35,52 @@ export async function GET() {
         userId: session.user.id
       },
       include: {
-        propertiesAsSeller: {
+        dealsAsSeller: {
           select: {
             id: true,
+            name: true,
+            dealStage: true,
+            dealStatus: true,
             streetAddress: true,
             city: true,
             state: true,
             zipCode: true,
-            name: true,
           }
         },
-        propertiesAsSellerAgent: {
+        dealsAsSellerAgent: {
           select: {
             id: true,
+            name: true,
+            dealStage: true,
+            dealStatus: true,
             streetAddress: true,
             city: true,
             state: true,
             zipCode: true,
-            name: true,
           }
         },
-        propertiesAsBuyerAgent: {
+        dealsAsBuyerAgent: {
           select: {
             id: true,
+            name: true,
+            dealStage: true,
+            dealStatus: true,
             streetAddress: true,
             city: true,
             state: true,
             zipCode: true,
-            name: true,
           }
         },
-        propertiesAsTitleCompany: {
+        dealsAsTitleCompany: {
           select: {
             id: true,
+            name: true,
+            dealStage: true,
+            dealStatus: true,
             streetAddress: true,
             city: true,
             state: true,
             zipCode: true,
-            name: true,
           }
         },
       },
@@ -126,44 +134,52 @@ export async function POST(req: NextRequest) {
         userId: session.user.id,
       },
       include: {
-        propertiesAsSeller: {
+        dealsAsSeller: {
           select: {
             id: true,
+            name: true,
+            dealStage: true,
+            dealStatus: true,
             streetAddress: true,
             city: true,
             state: true,
             zipCode: true,
-            name: true,
           }
         },
-        propertiesAsSellerAgent: {
+        dealsAsSellerAgent: {
           select: {
             id: true,
+            name: true,
+            dealStage: true,
+            dealStatus: true,
             streetAddress: true,
             city: true,
             state: true,
             zipCode: true,
-            name: true,
           }
         },
-        propertiesAsBuyerAgent: {
+        dealsAsBuyerAgent: {
           select: {
             id: true,
+            name: true,
+            dealStage: true,
+            dealStatus: true,
             streetAddress: true,
             city: true,
             state: true,
             zipCode: true,
-            name: true,
           }
         },
-        propertiesAsTitleCompany: {
+        dealsAsTitleCompany: {
           select: {
             id: true,
+            name: true,
+            dealStage: true,
+            dealStatus: true,
             streetAddress: true,
             city: true,
             state: true,
             zipCode: true,
-            name: true,
           }
         },
       }

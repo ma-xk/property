@@ -46,6 +46,7 @@ model User {
   people        Person[]
   places        Place[]
   properties    Property[]
+  deals         Deal[]
   sessions      Session[]
   taxPayments   TaxPayment[]
   millRateHistories MillRateHistory[]
@@ -66,6 +67,21 @@ enum PlaceKind {
   TOWN
   UT
   CITY
+}
+
+enum DealStage {
+  LEAD
+  UNDER_CONTRACT
+  DUE_DILIGENCE
+  CLOSING
+  WON
+  LOST
+}
+
+enum DealStatus {
+  ACTIVE
+  ON_HOLD
+  CANCELLED
 }
 
 model Place {
@@ -116,6 +132,7 @@ model Place {
   
   user                   User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   properties             Property[]
+  deals                  Deal[]
   millRateHistories      MillRateHistory[]
 
   @@unique([name, kind, parentId, userId])
@@ -137,13 +154,88 @@ model Person {
   createdAt                DateTime   @default(now())
   updatedAt                DateTime   @updatedAt
   user                     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  propertiesAsBuyerAgent   Property[] @relation("PropertyBuyerAgent")
-  propertiesAsSellerAgent  Property[] @relation("PropertySellerAgent")
-  propertiesAsSeller       Property[] @relation("PropertySeller")
-  propertiesAsTitleCompany Property[] @relation("PropertyTitleCompany")
+  dealsAsBuyerAgent        Deal[]     @relation("DealBuyerAgent")
+  dealsAsSellerAgent       Deal[]     @relation("DealSellerAgent")
+  dealsAsSeller            Deal[]     @relation("DealSeller")
+  dealsAsTitleCompany      Deal[]     @relation("DealTitleCompany")
 
   @@unique([name, userId])
   @@index([userId])
+}
+
+model Deal {
+  id                   String     @id @default(cuid())
+  name                 String
+  description          String?
+  dealStage            DealStage  @default(LEAD)
+  dealStatus           DealStatus @default(ACTIVE)
+  targetClosingDate    DateTime?
+  dealNotes            String?
+  
+  // Property information
+  streetAddress        String?
+  city                 String?
+  state                String?
+  zipCode              String?
+  acres                Decimal?
+  zoning               String?
+  
+  // Deal financials
+  askingPrice          Decimal?
+  offerPrice           Decimal?
+  earnestMoney         Decimal?
+  estimatedClosingCosts Decimal?
+  
+  // Purchase transaction details
+  purchasePrice        Decimal?
+  closingDate          DateTime?
+  
+  // Financing details
+  financingTerms       String?
+  financingType        String?
+  
+  // Closing costs
+  titleSettlementFee   Decimal?
+  titleExamination     Decimal?
+  ownersPolicyPremium  Decimal?
+  recordingFeesDeed    Decimal?
+  stateTaxStamps       Decimal?
+  eRecordingFee        Decimal?
+  realEstateCommission Decimal?
+  
+  // Relationships
+  sellerId             String?
+  sellerAgentId        String?
+  buyerAgentId         String?
+  titleCompanyId       String?
+  placeId              String?
+  
+  // Promotion tracking
+  promotedToPropertyId String? @unique
+  promotedAt           DateTime?
+  
+  userId               String
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  
+  // Relations
+  seller               Person?   @relation("DealSeller", fields: [sellerId], references: [id])
+  sellerAgent          Person?   @relation("DealSellerAgent", fields: [sellerAgentId], references: [id])
+  buyerAgent           Person?   @relation("DealBuyerAgent", fields: [buyerAgentId], references: [id])
+  titleCompany         Person?   @relation("DealTitleCompany", fields: [titleCompanyId], references: [id])
+  place                Place?    @relation(fields: [placeId], references: [id])
+  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  promotedProperty     Property? @relation("DealToProperty", fields: [promotedToPropertyId], references: [id])
+  
+  @@index([userId])
+  @@index([dealStage])
+  @@index([dealStatus])
+  @@index([placeId])
+  @@index([sellerId])
+  @@index([sellerAgentId])
+  @@index([buyerAgentId])
+  @@index([titleCompanyId])
+  @@index([promotedToPropertyId])
 }
 
 model Property {
@@ -160,55 +252,37 @@ model Property {
   userId               String
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
+  
+  // Property characteristics
   acres                Decimal?
-  balloonDueDate       DateTime?
-  buyerAgent           String?
-  closingDate          DateTime?
-  eRecordingFee        Decimal?
-  earnestMoney         Decimal?
-
-  financingTerms       String?
-  financingType        String?
-  ownersPolicyPremium  Decimal?
-  propertyTaxProration Decimal?
-  purchasePrice        Decimal?
-  realEstateCommission Decimal?
-  recordingFeesDeed    Decimal?
-  seller               String?
-  sellerAgent          String?
-  stateTaxStamps       Decimal?
-  titleCompany         String?
-  titleExamination     Decimal?
-  titleSettlementFee   Decimal?
   zoning               String?
-  buyerAgentId         String?
-  placeId              String?
-  sellerAgentId        String?
-  sellerId             String?
-  titleCompanyId       String?
+  
+  // Address
+  streetAddress        String?
   city                 String?
   state                String?
-  streetAddress        String?
   zipCode              String?
+  placeId              String?
+  
+  // Ongoing financial management
+  balloonDueDate       DateTime?
+  propertyTaxProration Decimal?
+  
+  // Valuation information
   assessedValue        Decimal?
   assessmentNotes      String?
   lastAssessmentDate   DateTime?
   marketValue          Decimal?
-  buyerAgentPerson     Person?   @relation("PropertyBuyerAgent", fields: [buyerAgentId], references: [id])
+  
+  // Relationships
   place                Place?    @relation(fields: [placeId], references: [id])
-  sellerAgentPerson    Person?   @relation("PropertySellerAgent", fields: [sellerAgentId], references: [id])
-  sellerPerson         Person?   @relation("PropertySeller", fields: [sellerId], references: [id])
-  titleCompanyPerson   Person?   @relation("PropertyTitleCompany", fields: [titleCompanyId], references: [id])
   user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   taxPayments          TaxPayment[]
   valuationHistories   PropertyValuationHistory[]
+  originalDeal         Deal? @relation("DealToProperty")
 
   @@index([userId])
   @@index([placeId])
-  @@index([sellerId])
-  @@index([sellerAgentId])
-  @@index([buyerAgentId])
-  @@index([titleCompanyId])
 }
 
 model TaxPayment {

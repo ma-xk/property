@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { CreateDealData, DealStage, DealStatus, DEAL_STAGES, DEAL_STATUSES } from "@/types/deal"
 
 const STATES = [
   "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut",
@@ -24,18 +25,26 @@ const MAINE_COUNTIES = [
   "Waldo", "Washington", "York"
 ] as const
 
-interface CleanPropertyFormProps {
+interface CreateDealFormProps {
   onSuccess?: () => void
   onCancel?: () => void
   showCard?: boolean
 }
 
-export function ComprehensivePropertyForm({ onSuccess, onCancel, showCard = true }: CleanPropertyFormProps) {
+export function CreateDealForm({ onSuccess, onCancel, showCard = true }: CreateDealFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<CreateDealData>({
+    // Basic deal info
+    name: "",
+    description: "",
+    dealStage: "LEAD",
+    dealStatus: "ACTIVE",
+    targetClosingDate: "",
+    dealNotes: "",
+    
     // Address fields
     streetAddress: "",
     city: "",
@@ -44,38 +53,45 @@ export function ComprehensivePropertyForm({ onSuccess, onCancel, showCard = true
     county: "",
     placeType: "TOWN",
     
-    // Basic Property Info
-    name: "",
-    description: "",
-    acres: "",
+    // Property information
+    acres: undefined,
     zoning: "",
     
-    // Ongoing financial management
-    balloonDueDate: "",
-    propertyTaxProration: "",
+    // Deal financials
+    askingPrice: undefined,
+    offerPrice: undefined,
+    earnestMoney: undefined,
+    estimatedClosingCosts: undefined,
     
-    // Valuation information
-    assessedValue: "",
-    assessmentNotes: "",
-    lastAssessmentDate: "",
-    marketValue: "",
+    // Purchase transaction details
+    purchasePrice: undefined,
+    closingDate: "",
     
-    // Property characteristics
-    type: "",
-    bedrooms: "",
-    bathrooms: "",
-    squareFeet: "",
-    rent: "",
-    deposit: "",
-    available: true,
+    // Financing details
+    financingTerms: "",
+    financingType: "",
+    
+    // Closing costs
+    titleSettlementFee: undefined,
+    titleExamination: undefined,
+    ownersPolicyPremium: undefined,
+    recordingFeesDeed: undefined,
+    stateTaxStamps: undefined,
+    eRecordingFee: undefined,
+    realEstateCommission: undefined,
+    
+    // People/Companies
+    seller: "",
+    sellerAgent: "",
+    buyerAgent: "",
+    titleCompany: "",
   })
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'number' ? (value === '' ? '' : parseFloat(value)) : 
-              type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
+      [name]: type === 'number' ? (value === '' ? undefined : parseFloat(value)) : value
     }))
   }
 
@@ -86,38 +102,27 @@ export function ComprehensivePropertyForm({ onSuccess, onCancel, showCard = true
 
     try {
       const submitData = {
-        streetAddress: formData.streetAddress || undefined,
-        city: formData.city || undefined,
-        state: formData.state || undefined,
-        zipCode: formData.zipCode || undefined,
-        county: formData.county || undefined,
-        placeType: formData.placeType || undefined,
-        name: formData.name || undefined,
-        description: formData.description || undefined,
-        acres: formData.acres ? parseFloat(formData.acres) : undefined,
-        zoning: formData.zoning || undefined,
-        
-        // Ongoing financial management
-        balloonDueDate: formData.balloonDueDate || undefined,
-        propertyTaxProration: formData.propertyTaxProration ? parseFloat(formData.propertyTaxProration) : undefined,
-        
-        // Valuation information
-        assessedValue: formData.assessedValue ? parseFloat(formData.assessedValue) : undefined,
-        assessmentNotes: formData.assessmentNotes || undefined,
-        lastAssessmentDate: formData.lastAssessmentDate || undefined,
-        marketValue: formData.marketValue ? parseFloat(formData.marketValue) : undefined,
-        
-        // Property characteristics
-        type: formData.type || undefined,
-        bedrooms: formData.bedrooms ? parseInt(formData.bedrooms) : undefined,
-        bathrooms: formData.bathrooms ? parseFloat(formData.bathrooms) : undefined,
-        squareFeet: formData.squareFeet ? parseInt(formData.squareFeet) : undefined,
-        rent: formData.rent ? parseFloat(formData.rent) : undefined,
-        deposit: formData.deposit ? parseFloat(formData.deposit) : undefined,
-        available: formData.available,
+        ...formData,
+        // Convert numeric fields
+        acres: formData.acres || undefined,
+        askingPrice: formData.askingPrice || undefined,
+        offerPrice: formData.offerPrice || undefined,
+        earnestMoney: formData.earnestMoney || undefined,
+        estimatedClosingCosts: formData.estimatedClosingCosts || undefined,
+        purchasePrice: formData.purchasePrice || undefined,
+        titleSettlementFee: formData.titleSettlementFee || undefined,
+        titleExamination: formData.titleExamination || undefined,
+        ownersPolicyPremium: formData.ownersPolicyPremium || undefined,
+        recordingFeesDeed: formData.recordingFeesDeed || undefined,
+        stateTaxStamps: formData.stateTaxStamps || undefined,
+        eRecordingFee: formData.eRecordingFee || undefined,
+        realEstateCommission: formData.realEstateCommission || undefined,
+        // Convert date fields
+        targetClosingDate: formData.targetClosingDate || undefined,
+        closingDate: formData.closingDate || undefined,
       }
 
-      const response = await fetch("/api/properties", {
+      const response = await fetch("/api/deals", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -127,15 +132,15 @@ export function ComprehensivePropertyForm({ onSuccess, onCancel, showCard = true
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.error || "Failed to create property")
+        throw new Error(errorData.error || "Failed to create deal")
       }
 
-      const newProperty = await response.json()
+      const newDeal = await response.json()
       
       if (onSuccess) {
         onSuccess()
       } else {
-        router.push(`/property/${newProperty.id}`)
+        router.push(`/deals/${newDeal.id}`)
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred")
@@ -152,37 +157,68 @@ export function ComprehensivePropertyForm({ onSuccess, onCancel, showCard = true
         </div>
       )}
 
-      {/* Basic Information */}
+      {/* Basic Deal Information */}
       <div className="space-y-4">
-        <h3 className="text-lg font-medium">Basic Information</h3>
+        <h3 className="text-lg font-medium">Basic Deal Information</h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="name">Property Name</Label>
+            <Label htmlFor="name">Deal Name *</Label>
             <Input
               id="name"
               name="name"
               value={formData.name}
               onChange={handleInputChange}
-              placeholder="e.g., 123 Main St Property"
+              placeholder="e.g., 123 Main St Land Deal"
+              required
             />
           </div>
           
           <div>
-            <Label htmlFor="type">Property Type</Label>
+            <Label htmlFor="dealStage">Deal Stage</Label>
             <select
-              id="type"
-              name="type"
-              value={formData.type}
+              id="dealStage"
+              name="dealStage"
+              value={formData.dealStage}
               onChange={handleInputChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">Select Type</option>
-              <option value="Residential">Residential</option>
-              <option value="Commercial">Commercial</option>
-              <option value="Land">Land</option>
-              <option value="Industrial">Industrial</option>
+              {Object.entries(DEAL_STAGES).map(([value, config]) => (
+                <option key={value} value={value}>
+                  {config.label}
+                </option>
+              ))}
             </select>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="dealStatus">Deal Status</Label>
+            <select
+              id="dealStatus"
+              name="dealStatus"
+              value={formData.dealStatus}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              {Object.entries(DEAL_STATUSES).map(([value, config]) => (
+                <option key={value} value={value}>
+                  {config.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          
+          <div>
+            <Label htmlFor="targetClosingDate">Target Closing Date</Label>
+            <Input
+              id="targetClosingDate"
+              name="targetClosingDate"
+              type="date"
+              value={formData.targetClosingDate}
+              onChange={handleInputChange}
+            />
           </div>
         </div>
 
@@ -195,51 +231,61 @@ export function ComprehensivePropertyForm({ onSuccess, onCancel, showCard = true
             onChange={handleInputChange}
             rows={3}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Brief description of the property..."
+            placeholder="Brief description of the deal..."
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="dealNotes">Deal Notes</Label>
+          <textarea
+            id="dealNotes"
+            name="dealNotes"
+            value={formData.dealNotes}
+            onChange={handleInputChange}
+            rows={3}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Additional notes about this deal..."
           />
         </div>
       </div>
 
-      {/* Address Information */}
+      {/* Property Information */}
       <div className="space-y-4">
-        <h3 className="text-lg font-medium">Address Information</h3>
+        <h3 className="text-lg font-medium">Property Information</h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="streetAddress">Street Address *</Label>
+            <Label htmlFor="streetAddress">Street Address</Label>
             <Input
               id="streetAddress"
               name="streetAddress"
               value={formData.streetAddress}
               onChange={handleInputChange}
               placeholder="123 Main Street"
-              required
             />
           </div>
           
           <div>
-            <Label htmlFor="city">City *</Label>
+            <Label htmlFor="city">City</Label>
             <Input
               id="city"
               name="city"
               value={formData.city}
               onChange={handleInputChange}
               placeholder="Portland"
-              required
             />
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <Label htmlFor="state">State *</Label>
+            <Label htmlFor="state">State</Label>
             <select
               id="state"
               name="state"
               value={formData.state}
               onChange={handleInputChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
             >
               <option value="">Select State</option>
               {STATES.map(state => (
@@ -299,7 +345,7 @@ export function ComprehensivePropertyForm({ onSuccess, onCancel, showCard = true
               name="acres"
               type="number"
               step="0.01"
-              value={formData.acres}
+              value={formData.acres || ""}
               onChange={handleInputChange}
               placeholder="5.25"
             />
@@ -318,175 +364,117 @@ export function ComprehensivePropertyForm({ onSuccess, onCancel, showCard = true
         </div>
       </div>
 
-      {/* Property Characteristics */}
+      {/* Deal Financials */}
       <div className="space-y-4">
-        <h3 className="text-lg font-medium">Property Characteristics</h3>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <Label htmlFor="bedrooms">Bedrooms</Label>
-            <Input
-              id="bedrooms"
-              name="bedrooms"
-              type="number"
-              value={formData.bedrooms}
-              onChange={handleInputChange}
-              placeholder="3"
-            />
-          </div>
-          
-          <div>
-            <Label htmlFor="bathrooms">Bathrooms</Label>
-            <Input
-              id="bathrooms"
-              name="bathrooms"
-              type="number"
-              step="0.5"
-              value={formData.bathrooms}
-              onChange={handleInputChange}
-              placeholder="2.5"
-            />
-          </div>
-          
-          <div>
-            <Label htmlFor="squareFeet">Square Feet</Label>
-            <Input
-              id="squareFeet"
-              name="squareFeet"
-              type="number"
-              value={formData.squareFeet}
-              onChange={handleInputChange}
-              placeholder="2000"
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="rent">Monthly Rent</Label>
-            <Input
-              id="rent"
-              name="rent"
-              type="number"
-              step="0.01"
-              value={formData.rent}
-              onChange={handleInputChange}
-              placeholder="1500"
-            />
-          </div>
-          
-          <div>
-            <Label htmlFor="deposit">Security Deposit</Label>
-            <Input
-              id="deposit"
-              name="deposit"
-              type="number"
-              step="0.01"
-              value={formData.deposit}
-              onChange={handleInputChange}
-              placeholder="1500"
-            />
-          </div>
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            id="available"
-            name="available"
-            checked={formData.available}
-            onChange={handleInputChange}
-            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-          />
-          <Label htmlFor="available">Property is available</Label>
-        </div>
-      </div>
-
-      {/* Financial Management */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium">Financial Management</h3>
+        <h3 className="text-lg font-medium">Deal Financials</h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="balloonDueDate">Balloon Payment Due Date</Label>
+            <Label htmlFor="askingPrice">Asking Price</Label>
             <Input
-              id="balloonDueDate"
-              name="balloonDueDate"
-              type="date"
-              value={formData.balloonDueDate}
-              onChange={handleInputChange}
-            />
-          </div>
-          
-          <div>
-            <Label htmlFor="propertyTaxProration">Property Tax Proration</Label>
-            <Input
-              id="propertyTaxProration"
-              name="propertyTaxProration"
+              id="askingPrice"
+              name="askingPrice"
               type="number"
               step="0.01"
-              value={formData.propertyTaxProration}
-              onChange={handleInputChange}
-              placeholder="500"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Valuation Information */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium">Valuation Information</h3>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="assessedValue">Assessed Value</Label>
-            <Input
-              id="assessedValue"
-              name="assessedValue"
-              type="number"
-              step="0.01"
-              value={formData.assessedValue}
+              value={formData.askingPrice || ""}
               onChange={handleInputChange}
               placeholder="150000"
             />
           </div>
           
           <div>
-            <Label htmlFor="marketValue">Market Value</Label>
+            <Label htmlFor="offerPrice">Offer Price</Label>
             <Input
-              id="marketValue"
-              name="marketValue"
+              id="offerPrice"
+              name="offerPrice"
               type="number"
               step="0.01"
-              value={formData.marketValue}
+              value={formData.offerPrice || ""}
               onChange={handleInputChange}
-              placeholder="175000"
+              placeholder="140000"
             />
           </div>
         </div>
 
-        <div>
-          <Label htmlFor="lastAssessmentDate">Last Assessment Date</Label>
-          <Input
-            id="lastAssessmentDate"
-            name="lastAssessmentDate"
-            type="date"
-            value={formData.lastAssessmentDate}
-            onChange={handleInputChange}
-          />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="earnestMoney">Earnest Money</Label>
+            <Input
+              id="earnestMoney"
+              name="earnestMoney"
+              type="number"
+              step="0.01"
+              value={formData.earnestMoney || ""}
+              onChange={handleInputChange}
+              placeholder="5000"
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="estimatedClosingCosts">Estimated Closing Costs</Label>
+            <Input
+              id="estimatedClosingCosts"
+              name="estimatedClosingCosts"
+              type="number"
+              step="0.01"
+              value={formData.estimatedClosingCosts || ""}
+              onChange={handleInputChange}
+              placeholder="3000"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* People & Companies */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-medium">People & Companies</h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="seller">Seller</Label>
+            <Input
+              id="seller"
+              name="seller"
+              value={formData.seller}
+              onChange={handleInputChange}
+              placeholder="John Smith"
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="sellerAgent">Seller Agent</Label>
+            <Input
+              id="sellerAgent"
+              name="sellerAgent"
+              value={formData.sellerAgent}
+              onChange={handleInputChange}
+              placeholder="Jane Doe Realty"
+            />
+          </div>
         </div>
 
-        <div>
-          <Label htmlFor="assessmentNotes">Assessment Notes</Label>
-          <textarea
-            id="assessmentNotes"
-            name="assessmentNotes"
-            value={formData.assessmentNotes}
-            onChange={handleInputChange}
-            rows={3}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Notes about the property assessment..."
-          />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="buyerAgent">Buyer Agent</Label>
+            <Input
+              id="buyerAgent"
+              name="buyerAgent"
+              value={formData.buyerAgent}
+              onChange={handleInputChange}
+              placeholder="Your Agent Name"
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="titleCompany">Title Company</Label>
+            <Input
+              id="titleCompany"
+              name="titleCompany"
+              value={formData.titleCompany}
+              onChange={handleInputChange}
+              placeholder="ABC Title Company"
+            />
+          </div>
         </div>
       </div>
 
@@ -498,7 +486,7 @@ export function ComprehensivePropertyForm({ onSuccess, onCancel, showCard = true
           </Button>
         )}
         <Button type="submit" disabled={isLoading}>
-          {isLoading ? "Creating..." : "Create Property"}
+          {isLoading ? "Creating..." : "Create Deal"}
         </Button>
       </div>
     </form>
@@ -511,9 +499,9 @@ export function ComprehensivePropertyForm({ onSuccess, onCancel, showCard = true
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Create New Property</CardTitle>
+        <CardTitle>Create New Deal</CardTitle>
         <CardDescription>
-          Add a new property for ongoing management. For transaction details, create a deal first and then promote it to a property.
+          Add a new deal to your pipeline. You can update details later as the deal progresses.
         </CardDescription>
       </CardHeader>
       <CardContent>

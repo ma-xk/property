@@ -22,33 +22,17 @@ const createPropertySchema = z.object({
   acres: z.number().min(0).optional(),
   zoning: z.string().optional(),
   
-  // Purchase Information
-  purchasePrice: z.number().min(0).optional(),
-  earnestMoney: z.number().min(0).optional(),
-  closingDate: z.string().optional(),
-  
-  // Financing Details
-  financingType: z.string().optional(),
-  financingTerms: z.string().optional(),
+  // Ongoing financial management
   balloonDueDate: z.string().optional(),
-  
-  // Closing Costs
-  titleSettlementFee: z.number().min(0).optional(),
-  titleExamination: z.number().min(0).optional(),
-  ownersPolicyPremium: z.number().min(0).optional(),
-  recordingFeesDeed: z.number().min(0).optional(),
-  stateTaxStamps: z.number().min(0).optional(),
-  eRecordingFee: z.number().min(0).optional(),
   propertyTaxProration: z.number().min(0).optional(),
-  realEstateCommission: z.number().min(0).optional(),
   
-  // People/Companies
-  seller: z.string().optional(),
-  sellerAgent: z.string().optional(),
-  buyerAgent: z.string().optional(),
-  titleCompany: z.string().optional(),
+  // Valuation information
+  assessedValue: z.number().min(0).optional(),
+  assessmentNotes: z.string().optional(),
+  lastAssessmentDate: z.string().optional(),
+  marketValue: z.number().min(0).optional(),
   
-  // Legacy fields (keeping for backward compatibility)
+  // Property characteristics
   type: z.string().optional(),
   bedrooms: z.number().int().min(0).optional(),
   bathrooms: z.number().min(0).optional(),
@@ -75,10 +59,6 @@ export async function GET() {
         userId: session.user.id
       },
       include: {
-        sellerPerson: true,
-        sellerAgentPerson: true,
-        buyerAgentPerson: true,
-        titleCompanyPerson: true,
         place: {
           include: {
             county: {
@@ -88,6 +68,7 @@ export async function GET() {
             }
           }
         },
+        originalDeal: true,
       },
       orderBy: {
         createdAt: 'desc'
@@ -103,34 +84,6 @@ export async function GET() {
   }
 }
 
-
-// Helper function to find or create a person
-async function findOrCreatePerson(name: string, role: string, userId: string) {
-  if (!name || name.trim() === '') return null
-  
-  const trimmedName = name.trim()
-  
-  // Try to find existing person
-  let person = await prisma.person.findFirst({
-    where: {
-      name: trimmedName,
-      userId: userId
-    }
-  })
-  
-  // If not found, create new person
-  if (!person) {
-    person = await prisma.person.create({
-      data: {
-        name: trimmedName,
-        role: role,
-        userId: userId
-      }
-    })
-  }
-  
-  return person
-}
 
 // Helper function to find or create hierarchical places
 async function findOrCreateHierarchicalPlace(
@@ -238,7 +191,7 @@ async function findOrCreateHierarchicalPlace(
   return place
 }
 
-// POST - Create new property with automatic people and place creation
+// POST - Create new property (properties should be created from deals)
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
@@ -253,54 +206,31 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const validatedData = createPropertySchema.parse(body)
 
-    // Create people and place in parallel
-    const [sellerPerson, sellerAgentPerson, buyerAgentPerson, titleCompanyPerson, place] = await Promise.all([
-      validatedData.seller ? findOrCreatePerson(validatedData.seller, "Seller", session.user.id) : null,
-      validatedData.sellerAgent ? findOrCreatePerson(validatedData.sellerAgent, "Seller Agent", session.user.id) : null,
-      validatedData.buyerAgent ? findOrCreatePerson(validatedData.buyerAgent, "Buyer Agent", session.user.id) : null,
-      validatedData.titleCompany ? findOrCreatePerson(validatedData.titleCompany, "Title Company", session.user.id) : null,
-      validatedData.city ? findOrCreateHierarchicalPlace(
-        validatedData.city, 
-        validatedData.state || null, 
-        validatedData.county || null, 
-        validatedData.placeType || null, 
-        session.user.id
-      ) : null
-    ])
+    // Create place if address is provided
+    const place = validatedData.city ? await findOrCreateHierarchicalPlace(
+      validatedData.city, 
+      validatedData.state || null, 
+      validatedData.county || null, 
+      validatedData.placeType || null, 
+      session.user.id
+    ) : null
 
     // Filter out hierarchical fields that don't belong on the Property model
     const { county, placeType, ...propertyData } = validatedData
 
-    // Log the data being used for property creation
-    console.log("Creating property with data:", {
-      ...propertyData,
-      userId: session.user.id,
-      sellerId: sellerPerson?.id,
-      sellerAgentId: sellerAgentPerson?.id,
-      buyerAgentId: buyerAgentPerson?.id,
-      titleCompanyId: titleCompanyPerson?.id,
-      placeId: place?.id,
-    })
-
-    // Create property with all relationships
+    // Create property (focused on ongoing management, not transactions)
     const property = await prisma.property.create({
       data: {
         ...propertyData,
         userId: session.user.id,
-        // Link to created people
-        sellerId: sellerPerson?.id,
-        sellerAgentId: sellerAgentPerson?.id,
-        buyerAgentId: buyerAgentPerson?.id,
-        titleCompanyId: titleCompanyPerson?.id,
-        // Link to created place
         placeId: place?.id,
+        // Convert date fields
+        balloonDueDate: validatedData.balloonDueDate ? new Date(validatedData.balloonDueDate) : null,
+        lastAssessmentDate: validatedData.lastAssessmentDate ? new Date(validatedData.lastAssessmentDate) : null,
       },
       include: {
-        sellerPerson: true,
-        sellerAgentPerson: true,
-        buyerAgentPerson: true,
-        titleCompanyPerson: true,
         place: true,
+        originalDeal: true,
       }
     })
 
@@ -314,7 +244,7 @@ export async function POST(req: NextRequest) {
       )
     }
     return NextResponse.json(
-      { error: "Internal server error", details: error instanceof Error ? error.message : "Unknown error" },
+      { error: "Failed to create property" },
       { status: 500 }
     )
   }
