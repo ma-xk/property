@@ -984,24 +984,49 @@ export function UnifiedMap({
     // Get the wetland classification code and properties
     const attribute = feature.properties.ATTRIBUTE || feature.properties['Wetlands.ATTRIBUTE'] || ''
     const system = feature.properties.SYSTEM || feature.properties['Wetlands.SYSTEM'] || ''
+    const subsystem = feature.properties.SUBSYSTEM || feature.properties['Wetlands.SUBSYSTEM'] || ''
     const subclass = feature.properties.SUBCLASS || feature.properties['Wetlands.SUBCLASS'] || ''
     const wetlandType = feature.properties.WETLAND_TYPE || feature.properties['Wetlands.WETLAND_TYPE'] || ''
     
     console.log('Wetland feature properties:', {
       attribute,
       system,
+      subsystem,
       subclass,
       wetlandType,
       allProps: Object.keys(feature.properties)
     })
     
-    // Enhanced color coding based on wetland classification
+    // Enhanced color coding based on wetland classification with subsystem differentiation
     // Primary classification by ATTRIBUTE code (most specific)
     if (attribute) {
       const attrUpper = attribute.toUpperCase()
       
-      // Palustrine Emergent Wetlands (PEM)
+      // Palustrine Emergent Wetlands (PEM) - Different colors for different subsystems
       if (attrUpper.startsWith('PEM')) {
+        // PEM1 = Palustrine Emergent Persistent
+        if (attrUpper.includes('1')) {
+          return {
+            fillColor: "#90EE90", // Light Green
+            weight: 2,
+            opacity: 1,
+            color: "#228B22", // Forest Green
+            fillOpacity: 0.8,
+            dashArray: "0"
+          }
+        }
+        // PEM2 = Palustrine Emergent Non-persistent
+        if (attrUpper.includes('2')) {
+          return {
+            fillColor: "#98FB98", // Pale Green
+            weight: 2,
+            opacity: 1,
+            color: "#32CD32", // Lime Green
+            fillOpacity: 0.8,
+            dashArray: "0"
+          }
+        }
+        // Default PEM
         return {
           fillColor: "#90EE90", // Light Green
           weight: 2,
@@ -1012,8 +1037,42 @@ export function UnifiedMap({
         }
       }
       
-      // Palustrine Forested Wetlands (PFO)
+      // Palustrine Forested Wetlands (PFO) - Different colors for different subsystems
       if (attrUpper.startsWith('PFO')) {
+        // PFO1 = Palustrine Forested Deciduous
+        if (attrUpper.includes('1')) {
+          return {
+            fillColor: "#228B22", // Forest Green
+            weight: 2,
+            opacity: 1,
+            color: "#006400", // Dark Green
+            fillOpacity: 0.8,
+            dashArray: "0"
+          }
+        }
+        // PFO2 = Palustrine Forested Evergreen
+        if (attrUpper.includes('2')) {
+          return {
+            fillColor: "#32CD32", // Lime Green
+            weight: 2,
+            opacity: 1,
+            color: "#228B22", // Forest Green
+            fillOpacity: 0.8,
+            dashArray: "0"
+          }
+        }
+        // PFO3 = Palustrine Forested Mixed
+        if (attrUpper.includes('3')) {
+          return {
+            fillColor: "#2E8B57", // Sea Green
+            weight: 2,
+            opacity: 1,
+            color: "#006400", // Dark Green
+            fillOpacity: 0.8,
+            dashArray: "0"
+          }
+        }
+        // Default PFO
         return {
           fillColor: "#32CD32", // Lime Green
           weight: 2,
@@ -1024,8 +1083,31 @@ export function UnifiedMap({
         }
       }
       
-      // Palustrine Scrub-Shrub Wetlands (PSS)
+      // Palustrine Scrub-Shrub Wetlands (PSS) - Different colors for different subsystems
       if (attrUpper.startsWith('PSS')) {
+        // PSS1 = Palustrine Scrub-Shrub Deciduous
+        if (attrUpper.includes('1')) {
+          return {
+            fillColor: "#98FB98", // Pale Green
+            weight: 2,
+            opacity: 1,
+            color: "#32CD32", // Lime Green
+            fillOpacity: 0.8,
+            dashArray: "0"
+          }
+        }
+        // PSS2 = Palustrine Scrub-Shrub Evergreen
+        if (attrUpper.includes('2')) {
+          return {
+            fillColor: "#9ACD32", // Yellow Green
+            weight: 2,
+            opacity: 1,
+            color: "#228B22", // Forest Green
+            fillOpacity: 0.8,
+            dashArray: "0"
+          }
+        }
+        // Default PSS
         return {
           fillColor: "#98FB98", // Pale Green
           weight: 2,
@@ -1036,8 +1118,31 @@ export function UnifiedMap({
         }
       }
       
-      // Palustrine Unconsolidated Bottom (PUB)
+      // Palustrine Unconsolidated Bottom (PUB) - Different colors for different subsystems
       if (attrUpper.startsWith('PUB')) {
+        // PUB1 = Palustrine Unconsolidated Bottom Mud
+        if (attrUpper.includes('1')) {
+          return {
+            fillColor: "#8B7355", // Dark Khaki
+            weight: 2,
+            opacity: 1,
+            color: "#654321", // Dark Brown
+            fillOpacity: 0.8,
+            dashArray: "0"
+          }
+        }
+        // PUB2 = Palustrine Unconsolidated Bottom Sand
+        if (attrUpper.includes('2')) {
+          return {
+            fillColor: "#F4A460", // Sandy Brown
+            weight: 2,
+            opacity: 1,
+            color: "#CD853F", // Peru
+            fillOpacity: 0.8,
+            dashArray: "0"
+          }
+        }
+        // Default PUB
         return {
           fillColor: "#20B2AA", // Light Sea Green
           weight: 2,
@@ -1048,8 +1153,31 @@ export function UnifiedMap({
         }
       }
       
-      // Palustrine Unconsolidated Shore (PUS)
+      // Palustrine Unconsolidated Shore (PUS) - Different colors for different subsystems
       if (attrUpper.startsWith('PUS')) {
+        // PUS1 = Palustrine Unconsolidated Shore Mud
+        if (attrUpper.includes('1')) {
+          return {
+            fillColor: "#8B7355", // Dark Khaki
+            weight: 2,
+            opacity: 1,
+            color: "#654321", // Dark Brown
+            fillOpacity: 0.8,
+            dashArray: "0"
+          }
+        }
+        // PUS2 = Palustrine Unconsolidated Shore Sand
+        if (attrUpper.includes('2')) {
+          return {
+            fillColor: "#F4A460", // Sandy Brown
+            weight: 2,
+            opacity: 1,
+            color: "#CD853F", // Peru
+            fillOpacity: 0.8,
+            dashArray: "0"
+          }
+        }
+        // Default PUS
         return {
           fillColor: "#40E0D0", // Turquoise
           weight: 2,
@@ -1060,8 +1188,31 @@ export function UnifiedMap({
         }
       }
       
-      // Estuarine Wetlands (E)
+      // Estuarine Wetlands (E) - Different colors for different subsystems
       if (attrUpper.startsWith('E')) {
+        // E1 = Estuarine Subtidal
+        if (attrUpper.includes('1')) {
+          return {
+            fillColor: "#4169E1", // Royal Blue
+            weight: 2,
+            opacity: 1,
+            color: "#0000CD", // Medium Blue
+            fillOpacity: 0.8,
+            dashArray: "0"
+          }
+        }
+        // E2 = Estuarine Intertidal
+        if (attrUpper.includes('2')) {
+          return {
+            fillColor: "#87CEEB", // Sky Blue
+            weight: 2,
+            opacity: 1,
+            color: "#4682B4", // Steel Blue
+            fillOpacity: 0.8,
+            dashArray: "0"
+          }
+        }
+        // Default E
         return {
           fillColor: "#87CEEB", // Sky Blue
           weight: 2,
@@ -1072,8 +1223,31 @@ export function UnifiedMap({
         }
       }
       
-      // Marine Wetlands (M)
+      // Marine Wetlands (M) - Different colors for different subsystems
       if (attrUpper.startsWith('M')) {
+        // M1 = Marine Subtidal
+        if (attrUpper.includes('1')) {
+          return {
+            fillColor: "#000080", // Navy
+            weight: 2,
+            opacity: 1,
+            color: "#0000CD", // Medium Blue
+            fillOpacity: 0.8,
+            dashArray: "0"
+          }
+        }
+        // M2 = Marine Intertidal
+        if (attrUpper.includes('2')) {
+          return {
+            fillColor: "#4169E1", // Royal Blue
+            weight: 2,
+            opacity: 1,
+            color: "#0000CD", // Medium Blue
+            fillOpacity: 0.8,
+            dashArray: "0"
+          }
+        }
+        // Default M
         return {
           fillColor: "#4169E1", // Royal Blue
           weight: 2,
@@ -1084,8 +1258,42 @@ export function UnifiedMap({
         }
       }
       
-      // Riverine Wetlands (R)
+      // Riverine Wetlands (R) - Different colors for different subsystems
       if (attrUpper.startsWith('R')) {
+        // R1 = Riverine Lower Perennial
+        if (attrUpper.includes('1')) {
+          return {
+            fillColor: "#1E90FF", // Dodger Blue
+            weight: 2,
+            opacity: 1,
+            color: "#0000FF", // Blue
+            fillOpacity: 0.8,
+            dashArray: "0"
+          }
+        }
+        // R2 = Riverine Upper Perennial
+        if (attrUpper.includes('2')) {
+          return {
+            fillColor: "#87CEFA", // Light Sky Blue
+            weight: 2,
+            opacity: 1,
+            color: "#1E90FF", // Dodger Blue
+            fillOpacity: 0.8,
+            dashArray: "0"
+          }
+        }
+        // R3/R4/R5 = Riverine Intermittent
+        if (attrUpper.includes('3') || attrUpper.includes('4') || attrUpper.includes('5')) {
+          return {
+            fillColor: "#ADD8E6", // Light Blue
+            weight: 2,
+            opacity: 1,
+            color: "#87CEEB", // Sky Blue
+            fillOpacity: 0.8,
+            dashArray: "5, 5" // Dashed for intermittent
+          }
+        }
+        // Default R
         return {
           fillColor: "#ADD8E6", // Light Blue
           weight: 2,
@@ -1210,13 +1418,24 @@ export function UnifiedMap({
     } else if (props.source === "NWI") {
       // Enhanced wetlands popup with better classification display
       const getWetlandDescription = (attribute: string) => {
-        // Comprehensive wetland type descriptions
+        // Comprehensive wetland type descriptions with subsystem details
         const descriptions: { [key: string]: string } = {
           'PEM': 'Palustrine Emergent Wetland',
-          'PFO': 'Palustrine Forested Wetland', 
+          'PEM1': 'Palustrine Emergent Persistent Wetland',
+          'PEM2': 'Palustrine Emergent Non-persistent Wetland',
+          'PFO': 'Palustrine Forested Wetland',
+          'PFO1': 'Palustrine Forested Deciduous Wetland',
+          'PFO2': 'Palustrine Forested Evergreen Wetland',
+          'PFO3': 'Palustrine Forested Mixed Wetland',
           'PSS': 'Palustrine Scrub-Shrub Wetland',
+          'PSS1': 'Palustrine Scrub-Shrub Deciduous Wetland',
+          'PSS2': 'Palustrine Scrub-Shrub Evergreen Wetland',
           'PUB': 'Palustrine Unconsolidated Bottom',
+          'PUB1': 'Palustrine Unconsolidated Bottom Mud',
+          'PUB2': 'Palustrine Unconsolidated Bottom Sand',
           'PUS': 'Palustrine Unconsolidated Shore',
+          'PUS1': 'Palustrine Unconsolidated Shore Mud',
+          'PUS2': 'Palustrine Unconsolidated Shore Sand',
           'E1': 'Estuarine Subtidal',
           'E2': 'Estuarine Intertidal',
           'M1': 'Marine Subtidal',
@@ -1228,9 +1447,27 @@ export function UnifiedMap({
           'R5': 'Riverine Intermittent'
         }
         
+        // Try exact match first, then fall back to main code
+        if (descriptions[attribute]) {
+          return descriptions[attribute]
+        }
+        
         // Extract the main code (first 3 characters)
         const mainCode = attribute.substring(0, 3)
         return descriptions[mainCode] || 'Wetland'
+      }
+      
+      const getSubsystemDescription = (attribute: string) => {
+        const subsystemDescriptions: { [key: string]: string } = {
+          '1': 'Persistent/Deciduous/Lower Perennial/Subtidal/Mud',
+          '2': 'Non-persistent/Evergreen/Upper Perennial/Intertidal/Sand',
+          '3': 'Mixed/Intermittent',
+          '4': 'Intermittent',
+          '5': 'Intermittent'
+        }
+        
+        const subsystemCode = attribute.charAt(3)
+        return subsystemDescriptions[subsystemCode] || ''
       }
       
       const getWetlandColor = (attribute: string) => {
@@ -1256,7 +1493,7 @@ export function UnifiedMap({
       const acres = props.ACRES || props['Wetlands.ACRES'] || 0
       
       layer.bindPopup(`
-        <div class="p-3 min-w-[320px]">
+        <div class="p-3 min-w-[360px]">
           <h4 class="font-semibold text-green-600 mb-3 flex items-center gap-2">
             <span class="w-3 h-3 rounded-full ${getWetlandColor(attribute).split(' ')[0]}"></span>
             Wetland Information
@@ -1266,6 +1503,11 @@ export function UnifiedMap({
               <div class="font-semibold mb-1">Classification Code</div>
               <div class="font-mono text-lg">${attribute}</div>
               <div class="font-medium mt-1">${getWetlandDescription(attribute)}</div>
+              ${attribute.length > 3 ? `
+                <div class="text-xs mt-1 text-gray-600">
+                  Subsystem: ${getSubsystemDescription(attribute)}
+                </div>
+              ` : ''}
             </div>
             
             ${wetlandType ? `
@@ -1275,23 +1517,67 @@ export function UnifiedMap({
               </div>
             ` : ''}
             
-            <div class="grid grid-cols-2 gap-2 text-xs">
-              ${system ? `<div><strong>System:</strong> ${system}</div>` : ''}
-              ${subsystem ? `<div><strong>Subsystem:</strong> ${subsystem}</div>` : ''}
-              ${wetlandClass ? `<div><strong>Class:</strong> ${wetlandClass}</div>` : ''}
-              ${subclass ? `<div><strong>Subclass:</strong> ${subclass}</div>` : ''}
-              ${subtype ? `<div><strong>Subtype:</strong> ${subtype}</div>` : ''}
-              ${acres > 0 ? `<div><strong>Area:</strong> ${acres.toFixed(2)} acres</div>` : ''}
+            <div class="bg-gray-50 p-3 rounded">
+              <div class="font-semibold mb-2 text-gray-800">Classification Hierarchy</div>
+              <div class="space-y-1 text-xs">
+                ${system ? `<div><strong>System:</strong> ${system}</div>` : ''}
+                ${subsystem ? `<div><strong>Subsystem:</strong> ${subsystem}</div>` : ''}
+                ${wetlandClass ? `<div><strong>Class:</strong> ${wetlandClass}</div>` : ''}
+                ${subclass ? `<div><strong>Subclass:</strong> ${subclass}</div>` : ''}
+                ${subtype ? `<div><strong>Subtype:</strong> ${subtype}</div>` : ''}
+              </div>
             </div>
             
             ${acres > 0 ? `
-              <div class="bg-gray-50 p-2 rounded text-xs">
-                <div class="font-medium text-gray-700">Area Conversion</div>
-                <div class="text-gray-600">
-                  ${acres.toFixed(2)} acres = ${(acres * 0.404686).toFixed(2)} hectares = ${(acres * 43560).toFixed(0)} sq ft
+              <div class="bg-blue-50 p-2 rounded text-xs">
+                <div class="font-medium text-blue-800">Area Information</div>
+                <div class="text-blue-700">
+                  <div><strong>Area:</strong> ${acres.toFixed(2)} acres</div>
+                  <div><strong>Hectares:</strong> ${(acres * 0.404686).toFixed(2)} ha</div>
+                  <div><strong>Square Feet:</strong> ${(acres * 43560).toFixed(0)} sq ft</div>
                 </div>
               </div>
             ` : ''}
+            
+            <div class="bg-yellow-50 p-2 rounded text-xs">
+              <div class="font-medium text-yellow-800 mb-1">Subsystem Characteristics</div>
+              <div class="text-yellow-700">
+                ${attribute.startsWith('PEM') ? `
+                  <div><strong>PEM1:</strong> Persistent emergent vegetation (cattails, bulrush)</div>
+                  <div><strong>PEM2:</strong> Non-persistent emergent vegetation (wild rice, arrowhead)</div>
+                ` : ''}
+                ${attribute.startsWith('PFO') ? `
+                  <div><strong>PFO1:</strong> Deciduous forested wetland (red maple, black ash)</div>
+                  <div><strong>PFO2:</strong> Evergreen forested wetland (black spruce, tamarack)</div>
+                  <div><strong>PFO3:</strong> Mixed forested wetland (deciduous and evergreen)</div>
+                ` : ''}
+                ${attribute.startsWith('PSS') ? `
+                  <div><strong>PSS1:</strong> Deciduous scrub-shrub wetland (willow, alder)</div>
+                  <div><strong>PSS2:</strong> Evergreen scrub-shrub wetland (cedar, hemlock)</div>
+                ` : ''}
+                ${attribute.startsWith('PUB') ? `
+                  <div><strong>PUB1:</strong> Mud bottom wetland</div>
+                  <div><strong>PUB2:</strong> Sand bottom wetland</div>
+                ` : ''}
+                ${attribute.startsWith('PUS') ? `
+                  <div><strong>PUS1:</strong> Mud shore wetland</div>
+                  <div><strong>PUS2:</strong> Sand shore wetland</div>
+                ` : ''}
+                ${attribute.startsWith('E') ? `
+                  <div><strong>E1:</strong> Subtidal estuarine wetland (always underwater)</div>
+                  <div><strong>E2:</strong> Intertidal estuarine wetland (exposed at low tide)</div>
+                ` : ''}
+                ${attribute.startsWith('M') ? `
+                  <div><strong>M1:</strong> Subtidal marine wetland (always underwater)</div>
+                  <div><strong>M2:</strong> Intertidal marine wetland (exposed at low tide)</div>
+                ` : ''}
+                ${attribute.startsWith('R') ? `
+                  <div><strong>R1:</strong> Lower perennial riverine wetland</div>
+                  <div><strong>R2:</strong> Upper perennial riverine wetland</div>
+                  <div><strong>R3/R4/R5:</strong> Intermittent riverine wetland</div>
+                ` : ''}
+              </div>
+            </div>
           </div>
           
           <div class="mt-3 text-xs text-gray-500 border-t pt-2 space-y-1">
@@ -1537,38 +1823,107 @@ export function UnifiedMap({
                     {layers.wetlands ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                   </Button>
                 </label>
-                {/* Wetlands Legend */}
+                {/* Enhanced Wetlands Legend */}
                 {layers.wetlands && wetlandsData && wetlandsData.features.length > 0 && (
                   <div className="border-t pt-2 mt-2">
-                    <p className="text-xs text-muted-foreground mb-2">Wetland Types</p>
-                    <div className="space-y-1 text-xs">
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded" style={{backgroundColor: "#90EE90"}}></div>
-                        <span>Emergent (PEM)</span>
+                    <p className="text-xs text-muted-foreground mb-2">Wetland Subsystem Classifications</p>
+                    <div className="space-y-2 text-xs">
+                      {/* Palustrine Emergent */}
+                      <div>
+                        <div className="font-medium text-green-700 mb-1">Palustrine Emergent (PEM)</div>
+                        <div className="ml-2 space-y-1">
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded" style={{backgroundColor: "#90EE90"}}></div>
+                            <span>PEM1 - Persistent</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded" style={{backgroundColor: "#98FB98"}}></div>
+                            <span>PEM2 - Non-persistent</span>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded" style={{backgroundColor: "#32CD32"}}></div>
-                        <span>Forested (PFO)</span>
+                      
+                      {/* Palustrine Forested */}
+                      <div>
+                        <div className="font-medium text-green-700 mb-1">Palustrine Forested (PFO)</div>
+                        <div className="ml-2 space-y-1">
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded" style={{backgroundColor: "#228B22"}}></div>
+                            <span>PFO1 - Deciduous</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded" style={{backgroundColor: "#32CD32"}}></div>
+                            <span>PFO2 - Evergreen</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded" style={{backgroundColor: "#2E8B57"}}></div>
+                            <span>PFO3 - Mixed</span>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded" style={{backgroundColor: "#98FB98"}}></div>
-                        <span>Scrub-Shrub (PSS)</span>
+                      
+                      {/* Palustrine Scrub-Shrub */}
+                      <div>
+                        <div className="font-medium text-green-700 mb-1">Palustrine Scrub-Shrub (PSS)</div>
+                        <div className="ml-2 space-y-1">
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded" style={{backgroundColor: "#98FB98"}}></div>
+                            <span>PSS1 - Deciduous</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded" style={{backgroundColor: "#9ACD32"}}></div>
+                            <span>PSS2 - Evergreen</span>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded" style={{backgroundColor: "#20B2AA"}}></div>
-                        <span>Unconsolidated Bottom (PUB)</span>
+                      
+                      {/* Estuarine */}
+                      <div>
+                        <div className="font-medium text-blue-700 mb-1">Estuarine (E)</div>
+                        <div className="ml-2 space-y-1">
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded" style={{backgroundColor: "#4169E1"}}></div>
+                            <span>E1 - Subtidal</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded" style={{backgroundColor: "#87CEEB"}}></div>
+                            <span>E2 - Intertidal</span>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded" style={{backgroundColor: "#87CEEB"}}></div>
-                        <span>Estuarine (E)</span>
+                      
+                      {/* Marine */}
+                      <div>
+                        <div className="font-medium text-blue-700 mb-1">Marine (M)</div>
+                        <div className="ml-2 space-y-1">
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded" style={{backgroundColor: "#000080"}}></div>
+                            <span>M1 - Subtidal</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded" style={{backgroundColor: "#4169E1"}}></div>
+                            <span>M2 - Intertidal</span>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded" style={{backgroundColor: "#4169E1"}}></div>
-                        <span>Marine (M)</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded" style={{backgroundColor: "#ADD8E6"}}></div>
-                        <span>Riverine (R)</span>
+                      
+                      {/* Riverine */}
+                      <div>
+                        <div className="font-medium text-blue-700 mb-1">Riverine (R)</div>
+                        <div className="ml-2 space-y-1">
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded" style={{backgroundColor: "#1E90FF"}}></div>
+                            <span>R1 - Lower Perennial</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded" style={{backgroundColor: "#87CEFA"}}></div>
+                            <span>R2 - Upper Perennial</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded border-2 border-dashed border-blue-400" style={{backgroundColor: "#ADD8E6"}}></div>
+                            <span>R3/R4/R5 - Intermittent</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
